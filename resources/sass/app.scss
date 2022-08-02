@@ -1,0 +1,12 @@
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Nunito');
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+[class*="sidebar-dark-"] .nav-sidebar .nav-item.has-treeview .nav-treeview {
+    background-color: rgba(0,0,0,0.2);
+}
