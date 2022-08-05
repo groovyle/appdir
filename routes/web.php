@@ -30,8 +30,10 @@ Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
     Route::resource('apps', 'AppController');
     Route::get('apps/{app}/verifications', 'AppController@verifications')->name('apps.verifications');
     Route::get('apps/{app}/changes', 'AppController@changes')->name('apps.changes');
-    Route::get('apps/{app}/changes/visuals/{version?}', 'AppController@snippetVisualsComparison')->name('apps.changes.visuals');
-    Route::get('apps/{app}/changes/details/{version?}', 'AppController@snippetVersionDetail')->name('apps.changes.details');
+    Route::get('apps/changes/visuals/{app?}/{version?}', 'AppController@snippetVisualsComparison')->name('apps.changes.visuals');
+    Route::get('apps/changes/details/{app?}/{version?}', 'AppController@snippetVersionDetail')->name('apps.changes.details');
+    Route::get('apps/changes/pending/{app?}/{version?}', 'AppController@snippetPendingChanges')->name('apps.changes.pending');
+    Route::get('apps/changes/pending_versions/{app?}', 'AppController@jsonPendingVersions')->name('apps.changes.pending_versions');
 
     Route::get('apps/{app}/visuals', 'AppController@visuals')->name('apps.visuals');
     Route::post('apps/{app}/visuals', 'AppController@updateVisuals')->name('apps.visuals.save');

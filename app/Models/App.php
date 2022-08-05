@@ -174,16 +174,7 @@ class App extends Model
 	}
 
 	public function getVersionNumberAttribute() {
-		return $this->version()->exists() ? $this->version->version : NULL;
-	}
-
-	public function getFullDirectoryAttribute() {
-		// TODO: DUMMY
-		return $this->owner->home_directory . $this->directory;
-	}
-
-	public function getFullUrlAttribute() {
-		return url_auto_scheme($this->url);
+		return optional($this->version)->version;
 	}
 
 	public function getVerificationStatusAttribute() {
@@ -192,5 +183,30 @@ class App extends Model
 		} else {
 			return VerificationStatus::getDefault();
 		}
+	}
+
+	public function getHasHistoryAttribute() {
+		return $this->changelogs()->count() > 1;
+	}
+
+	protected function getPendingChangesQuery() {
+		$query = $this->changelogs()->where('is_verified', 0);
+		if($this->version) {
+			$query->where('created_at', '>=', (string) $this->version->created_at)
+				->where('id', '<>', $this->version->id)
+			;
+		}
+		return $query;
+	}
+
+	public function getPendingChangesAttribute() {
+		$query = $this->getPendingChangesQuery();
+		$query->orderBy('created_at');
+		$query->orderBy('version');
+		return $query->get();
+	}
+
+	public function getHasPendingChangesAttribute() {
+		return count($this->pending_changes) > 0;
 	}
 }

@@ -1,1 +1,1 @@
-<a href="#" class="d-inline-block ml-2 init-popover" data-toggle="popover" data-content="{{ $slot }}" data-trigger="focus"><span class="far fa-question-circle text-muted"></span></a>
+<a href="#" class="d-inline-block ml-2 init-popover" data-toggle="popover" data-content="{!! $slot !!}" data-trigger="focus" data-html="true"><span class="far fa-question-circle text-muted"></span></a>

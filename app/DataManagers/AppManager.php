@@ -253,17 +253,17 @@ class AppManager {
 		];
 
 		$diffs = static::generateDiffs($model);
+		if(!$is_edit) {
+			$diffs['is_new'] = true;
+		}
 		$return['changes'] = $diffs;
 		if(empty($diffs)) {
 			return $return;
 		}
 
 		$next_version = $model->nextVersionNumber();
-		if(!$comment) {
-			if(!$is_edit) {
-				$comment = 'new';
-				$diffs['is_new'] = true;
-			}
+		if(!$comment && !$is_edit) {
+			$comment = 'new';
 		}
 
 		$changelog = new AppChangelog([
@@ -276,14 +276,69 @@ class AppManager {
 		}
 		if($save) {
 			$model->changelogs()->save($changelog);
-			if(!$is_edit) {
-				$model->version()->associate($changelog);
-			}
 		}
 
 		$return['model'] = $changelog;
 
 		return $return;
+	}
+
+	public static function diffSave(App $model, $comment = null)
+	{
+		$result = static::makeVersionDiff($model, true, $comment);
+		$result['saved'] = false;
+		$result['diff_status'] = $result['status'];
+		$result['status'] = false;
+
+		if(!$result['diff_status'])
+			return $result;
+
+		$is_edit = $model->exists && !$model->wasRecentlyCreated;
+		$verf_add = settings('app.creation_needs_verification', false);
+		$verf_edit = settings('app.modification_needs_verification', false);
+
+		$needs_verf = (!$is_edit && $verf_add) || ($is_edit && $verf_edit);
+		if(!$needs_verf) {
+			// Set to published
+			$model->is_verified = 1;
+		}
+
+		if(!$is_edit) {
+			// New item, just save
+			// We don't really need to do this actually, the item should exist already
+			static::applyDiff($model, $result['changes'], false);
+			$result['saved'] = true;
+			$model->version()->associate($result['model']);
+			if(!$verf_add) {
+				$result['model']->is_verified = 1;
+			}
+			$result['model']->save();
+		} else {
+			// Edit
+			if($verf_edit) {
+				// Pending updates, save nothing to the main item, the diff
+				// had been saved earlier by makeVersionDiff
+			} else {
+				// Apply changes immediately
+				// NOTE: do not use $result['changes'], because we're saving all pending
+				// updates
+
+				// Reset item before saving because we might be using a pending
+				// item right now, so that current relations deletion
+				// can be done accurately
+				$to_save = $model->find($model->getKey());
+
+				$result['saved'] = static::applyVersionsChanges($to_save, 'void', null, function($query) {
+					$query->where('is_verified', 0);
+				});
+			}
+		}
+
+		$result['status'] = $result['diff_status'];
+
+		// TODO: verification stuff
+
+		return $result;
 	}
 
 	public static function transformDiffsForDisplay($diffs)
@@ -379,17 +434,17 @@ class AppManager {
 	}
 
 	// Call this function only in a db transaction
-	public static function applyVersionDiff(App $app, $data = [], $mock = false)
+	public static function applyDiff(App $app, $changes, $mock)
 	{
 		if(DB::transactionLevel() == 0 && !$mock) {
-			throw new \RuntimeException('Applying version diff is only available inside a database transaction.');
+			throw new \RuntimeException('Applying version diff is only available inside a changesbase transaction.');
 		}
 
 		if(!$mock && !$app->exists) {
 			return false;
 		}
 
-		$new_attributes = $data['attributes']['new'] ?? $data['attributes'] ?? [];
+		$new_attributes = $changes['attributes']['new'] ?? $changes['attributes'] ?? [];
 		foreach($new_attributes as $key => $value) {
 			if(!in_array($key, static::DIFF_UNCHECKED_ATTRIBUTES) && !method_exists($app, $key)) {
 				// Normal attribute
@@ -398,8 +453,8 @@ class AppManager {
 			}
 		}
 
-		if(isset($data['relations'])) {
-			$relations = $data['relations'];
+		if(isset($changes['relations'])) {
+			$relations = $changes['relations'];
 
 			if(isset($relations['visuals'])) {
 				$new_visuals = collect($relations['visuals']['new'] ?? $relations['visuals'])->keyBy('id');
@@ -425,7 +480,7 @@ class AppManager {
 					// It is assumed the new ones were soft deleted (i.e not permanent delete).
 					// Don't use a mass query and instead fetch invididual models
 					// so that events are handled properly
-					$to_restore = $app->visuals()->withTrashed()->whereKey($to_restore)->get();
+					$to_restore = $app->visuals()->withTrashed()->whereKey($ids_to_restore)->get();
 					foreach($to_restore as $vis) {
 						$vis->dontLog();
 						$vis->restore();
@@ -438,7 +493,6 @@ class AppManager {
 					$app->load(['visuals' => function($query) use($new_visuals_ids) {
 						$query->withTrashed()->whereKey($new_visuals_ids);
 					}]);
-					$visuals = $app->visuals()->withTrashed()->whereKey($new_visuals_ids)->get();
 				}
 
 				// Modify existing ones
@@ -451,13 +505,23 @@ class AppManager {
 						}
 					}
 				}
+				$app->setRelation('visuals', $app->visuals->sortBy('order'));
 			}
 
 			if(isset($relations['logo'])) {
-				$new_rels = $relations['logo']['new'] ?? $relations['logo'];
+				// Can't use isset() because the value could be null
+				$new_rels = $relations['logo'];
+				if(array_key_exists('new', $new_rels))
+					$new_rels = $new_rels['new'];
 
 				if(!$mock) {
-					$app->logo()->sync($new_rels);
+					$old_logo = $app->logo;
+					if($old_logo)
+						$old_logo->dontLog()->delete();
+
+					$logo = $app->logo()->withTrashed()->whereKey($new_rels)->first();
+					if($logo)
+						$logo->dontLog()->restore();
 
 					// Reload this relationship
 					$app->load('logo');
@@ -523,28 +587,35 @@ class AppManager {
 
 	public static function goToVersion(App $app, $version)
 	{
-		$changes = static::getVersionsChanges($app, $version);
+		$changes = static::getVersionsChanges($app, $version)['changes'];
 
 		// We don't really need to return the app since it gets modified
-		return static::applyVersionDiff($app, $changes, false);
+		return static::applyDiff($app, $changes, false);
 	}
 
 	public static function getMockItem($app_id, $version)
 	{
 		$app = App::findOrFail($app_id);
-		$changes = static::getVersionsChanges($app, $version, 'void');
+		$compiled = static::getVersionsChanges($app, $version, 'void');
 
 		$mock = new App;
 		$mock->id = $app_id;
-		return static::applyVersionDiff($mock, $changes, true);
+		$mock->setRelation('version', $compiled['versions']->last());
+		return static::applyDiff($mock, $compiled['changes'], true);
 	}
 
-	protected static function getVersionsChanges(App $model, $to_version, $from_version = NULL)
+	public static function getVersionsChanges(App $model, $to_version, $from_version = NULL, $query_callback = NULL)
 	{
 		$changes = [];
 		$from_void = false;
 		$to_void = false;
 		$version_check = $to_version;
+
+		$return = [
+			'changes'		=> [],
+			'versions'		=> elocollect(),
+			'final_version'	=> null,
+		];
 
 		if($to_version === 'void') {
 			// Target version is the latest
@@ -557,7 +628,7 @@ class AppManager {
 		}
 
 		if(!$model->exists/* || $model->version_number == $version_check*/) {
-			return $changes;
+			return $return;
 		}
 
 		// Determine direction, newer or older?
@@ -604,26 +675,73 @@ class AppManager {
 			}
 		}
 		// Query
+		// TODO: include/exclude rejected changes based on destination version
 		$query = $model->changelogs()->withoutGlobalScope('_order')
 					->whereBetween('created_at', [$start_time, $end_time])
 					->orderBy('created_at', $direction)
 		;
+		if(is_callable($query_callback)) {
+			$query_callback($query);
+		}
 		$versions = $query->get();
 
-		$all_diffs = [];
+		if(count($versions) > 0) {
+			if($direction == 'asc') {
+				// Skip the starting (assumed current) version
+				/**
+				 * Updating works by applying the next version, example:
+				 * If updating from 1.1 to 1.7, then get changes from 1.2 to 1.7,
+				 * then apply 1.2 and so on up to applying 1.7. After applying 1.7 then
+				 * the version would be 1.7.
+				 * Skipping does not apply when building an item from the ground up
+				 */
+				if($versions[0]->id == $from->id && (!$from_void || $versions[0]->version != '1')) {
+					$versions->shift();
+				}
+				$compiled = static::compileVersionsChanges($versions, 'asc');
+				$changes = $compiled;
+			} else {
+				// Skip the target version
+				/**
+				 * Regression works by undoing the current version, example:
+				 * If regressing from 1.9 to 1.5, then get changes from 1.9 to 1.6,
+				 * then undo 1.9 and so on up to undoing 1.6. After undoing 1.6 then
+				 * the version would be 1.5.
+				 * A corner case would be if the diffs array only contain 'new' changes
+				 * with no references to the 'old' or original data, in which case
+				 * regression attempt cannot be done. If this happens, then fallback to
+				 * building the item from the ground up, i.e from absolute zero up until
+				 * the target version.
+				 */
+				$versions->pop();
+				$compiled = static::compileVersionsChanges($versions, 'desc');
+				// If format is invalid, i.e *any* old values are missing,
+				// then regress to zero build
+				if($compiled === false) {
+					// Regress
+					$changes = static::getVersionsChanges($model, $to_version, 'void', $query_callback)['changes'];
+				} else {
+					$changes = $compiled;
+				}
+			}
+		}
+
+		$return['changes'] = $changes;
+		$return['versions'] = $versions;
+		$return['final_version'] = optional($versions->last())->version;
+		$return['final_version_id'] = optional($versions->last())->id;
+
+		return $return;
+	}
+
+	public static function compileVersionsChanges($versions, $direction = 'asc')
+	{
+		$changes = [];
+		if(count($versions) == 0) {
+			return $changes;
+		}
 
 		if($direction == 'asc') {
-			// Skip the starting (assumed current) version
-			/**
-			 * Updating works by applying the next version, example:
-			 * If updating from 1.1 to 1.7, then get changes from 1.2 to 1.7,
-			 * then apply 1.2 and so on up to applying 1.7. After applying 1.7 then
-			 * the version would be 1.7.
-			 * Skipping does not apply when building an item from the ground up
-			 */
-			if(!$from_void) {
-				$versions->shift();
-			}
 			foreach($versions as $v) {
 				// Take special care of relations
 				// Don't use recursive merge on the relations because we always want to
@@ -634,42 +752,28 @@ class AppManager {
 					$attrs = $diffs->pull('attributes');
 					// Merge attributes
 					$new_attributes = $attrs['new'] ?? $attrs ?? [];
-					$all_diffs['attributes']['new'] = array_merge($all_diffs['attributes']['new'] ?? [], $new_attributes);
+					$changes['attributes']['new'] = array_merge($changes['attributes']['new'] ?? [], $new_attributes);
 					// Only set old values if not yet set
 					$old_attributes = $attrs['old'] ?? [];
-					$all_diffs['attributes']['old'] = array_merge($old_attributes, $all_diffs['attributes']['old'] ?? []);
+					$changes['attributes']['old'] = array_merge($old_attributes, $changes['attributes']['old'] ?? []);
 				}
 
 				if(isset($diffs['relations'])) {
 					$rels = $diffs->pull('relations');
 					foreach($rels as $key => $rel) {
-						// $all_diffs['relations'][$key]['new'] = array_merge($all_diffs['relations'][$key]['new'] ?? [], $rel['new'] ?? $rel);
+						// $changes['relations'][$key]['new'] = array_merge($changes['relations'][$key]['new'] ?? [], $rel['new'] ?? $rel);
 						// // Only set old values if not yet set
-						// $all_diffs['relations'][$key]['old'] = array_merge($rel['old'] ?? [], $all_diffs['relations'][$key]['old'] ?? []);
+						// $changes['relations'][$key]['old'] = array_merge($rel['old'] ?? [], $changes['relations'][$key]['old'] ?? []);
 						if(isset($rel['new']))
-							$all_diffs['relations'][$key]['new'] = $rel['new'];
+							$changes['relations'][$key]['new'] = $rel['new'];
 						if(isset($rel['old']))
-							$all_diffs['relations'][$key]['old'] = $rel['old'];
+							$changes['relations'][$key]['old'] = $rel['old'];
 					}
 				}
 			}
 		} else {
-			// Skip the target version
-			/**
-			 * Regression works by undoing the current version, example:
-			 * If regressing from 1.9 to 1.5, then get changes from 1.9 to 1.6,
-			 * then undo 1.9 and so on up to undoing 1.6. After undoing 1.6 then
-			 * the version would be 1.5.
-			 * A corner case would be if the diffs array only contain 'new' changes
-			 * with no references to the 'old' or original data, in which case
-			 * regression attempt cannot be done. If this happens, then fallback to
-			 * building the item from the ground up, i.e from absolute zero up until
-			 * the target version.
-			 */
-			$versions->pop();
 			// Try to flip new and old values
-			// If *any* old values are missing, then regress to zero build
-			$format_valid = true;
+			// Some formats are invalid, so return false
 			foreach($versions as $v) {
 				// Take special care of relations
 				// Don't use recursive merge on the relations because we always want to
@@ -679,41 +783,63 @@ class AppManager {
 				if(isset($diffs['attributes'])) {
 					$attrs = $diffs->pull('attributes');
 					if(!isset($attrs['old']) || !isset($attrs['new'])) {
-						$format_valid = false;
-						break;
+						return false;
 					}
 					// Merge attributes from old diffs
 					$new_attributes = $attrs['old'];
-					$all_diffs['attributes']['new'] = array_merge($all_diffs['attributes']['new'] ?? [], $new_attributes);
+					$changes['attributes']['new'] = array_merge($changes['attributes']['new'] ?? [], $new_attributes);
 					// Set old values from new diffs
 					$old_attributes = $attrs['new'];
-					$all_diffs['attributes']['old'] = array_merge($old_attributes, $all_diffs['attributes']['old'] ?? []);
+					$changes['attributes']['old'] = array_merge($old_attributes, $changes['attributes']['old'] ?? []);
 				}
 
 				if(isset($diffs['relations'])) {
 					$rels = $diffs->pull('relations');
 					foreach($rels as $key => $rel) {
 						if(!isset($rel['old']) || !isset($rel['new'])) {
-							$format_valid = false;
-							break 2;
+							return false;
 						}
-						// $all_diffs['relations'][$key]['new'] = array_merge($all_diffs['relations'][$key]['new'] ?? [], $rel['old']);
+						// $changes['relations'][$key]['new'] = array_merge($changes['relations'][$key]['new'] ?? [], $rel['old']);
 						// // Set old values from new diffs
-						// $all_diffs['relations'][$key]['old'] = array_merge($rel['new'], $all_diffs['relations'][$key]['old'] ?? []);
+						// $changes['relations'][$key]['old'] = array_merge($rel['new'], $changes['relations'][$key]['old'] ?? []);
 						if(isset($rel['new']))
-							$all_diffs['relations'][$key]['old'] = $rel['new'];
+							$changes['relations'][$key]['old'] = $rel['new'];
 						if(isset($rel['old']))
-							$all_diffs['relations'][$key]['new'] = $rel['old'];
+							$changes['relations'][$key]['new'] = $rel['old'];
 					}
 				}
 			}
-			if(!$format_valid) {
-				// Regress
-				$all_diffs = static::getVersionsChanges($model, $to_version, 'void');
+		}
+
+		return $changes;
+	}
+
+	public static function applyVersionsChanges(App $model, $to_version, $from_version = NULL, $query_callback = NULL)
+	{
+		$compiled = static::getVersionsChanges($model, $to_version, $from_version, $query_callback);
+		static::applyDiff($model, $compiled['changes'], false);
+
+		if($compiled['versions']) {
+			$model->version()->associate($compiled['final_version_id'])->save();
+			foreach($compiled['versions'] as $v) {
+				$v->is_verified = 1;
+				if(!$v->save())
+					return false;
 			}
 		}
 
-		return $all_diffs;
+		return true;
+	}
+
+	public static function getPendingVersion(App $model)
+	{
+		$changes = AppManager::compileVersionsChanges($model->pending_changes);
+
+		// Mock
+		$pending = App::find($model->id);
+		AppManager::applyDiff($pending, $changes, true);
+
+		return [$model, $pending];
 	}
 
 }

@@ -236,10 +236,7 @@ textarea.auto-height-init-bypass {
 }
 .changes-item .changes-relations > .item .comparison.logo {
 	padding-top: 0.5rem;
-	align-items: start;
-}
-.changes-item .changes-relations > .item .comparison.logo .arrow {
-	align-self: center;
+	align-items: center;
 }
 .changes-item .changes-relations > .item .comparison.visuals {
 	align-items: center;
@@ -388,7 +385,7 @@ textarea.auto-height-init-bypass {
 	margin-top: auto;
 	padding-top: 0.1rem;
 	border-top: 1px dotted #999;
-	font-size: 0.85em;
+	font-size: 0.8em;
 	color: #666;
 }
 .visuals-list > .visuals-item .visuals-body > .visuals-content + .visuals-meta {

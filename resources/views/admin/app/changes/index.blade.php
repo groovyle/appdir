@@ -6,7 +6,7 @@ $append_breadcrumb = [
     'active'  => false,
   ],
   [
-    'text'    => __('admin.app.page_title.changes.index'),
+    'text'    => __('admin/apps.page_title.changes'),
   ]
 ];
 ?>
@@ -14,10 +14,10 @@ $append_breadcrumb = [
 @extends('admin.layouts.main')
 
 @section('title')
-{{ __('admin.app.changes.tab_title') }} - @parent
+{{ __('admin/apps.changes.tab_title') }} - @parent
 @endsection
 
-@section('page-title', __('admin.app.page_title.changes.index'))
+@section('page-title', __('admin/apps.page_title.changes'))
 
 @section('content')
 <div class="mb-2">
@@ -30,9 +30,15 @@ $append_breadcrumb = [
 </div>
 @endif
 
-@foreach($changelogs as $cl)
-@include('admin.app.changes.list-item', compact('cl', 'app'))
-@endforeach
+<div class="row">
+  <div class="col-12">
+    @forelse($changelogs as $cl)
+    @include('admin.app.changes.list-item', compact('cl', 'app'))
+    @empty
+    <h4>@lang('admin/apps.changes.there_are_no_changes_yet')</h4>
+    @endforelse
+  </div>
+</div>
 
 <div class="mt-3">
 {{ $changelogs->links() }}
@@ -41,35 +47,14 @@ $append_breadcrumb = [
 @endsection
 
 @include('libraries.splide')
+@include('admin.app.changes.btn-view-version')
 
 @push('scripts')
-<div class="modal fade" id="versionModal" tabindex="-1" aria-labelledby="versionModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="versionModalLabel">@lang('admin/app.changes.version_preview')</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="@lang('common.close')"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body">
-        <div class="placeholder-content">
-          <h4 class="my-5">loading...</h4>
-        </div>
-        <div class="error-message alert alert-danger d-none">
-          <h5 class="my-5">@lang('admin/app.changes.cannot_load_version_preview')</h5>
-        </div>
-      </div>
-      <div class="modal-footer text-right">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.close')</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="modal fade" id="changesVisualsModal" tabindex="-1" aria-labelledby="changesVisualsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="changesVisualsModalLabel">@lang('admin/app.changes.visuals_comparison')</h5>
+        <h5 class="modal-title" id="changesVisualsModalLabel">@lang('admin/apps.changes.visuals_comparison')</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="@lang('common.close')"><span aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body">
@@ -77,7 +62,7 @@ $append_breadcrumb = [
           <h4 class="my-5">loading...</h4>
         </div>
         <div class="error-message alert alert-danger d-none">
-          <h5 class="my-5">@lang('admin/app.changes.cannot_load_visuals_comparison')</h5>
+          <h5 class="my-5">@lang('admin/apps.changes.cannot_load_visuals_comparison')</h5>
         </div>
       </div>
       <div class="modal-footer text-right">
@@ -89,64 +74,6 @@ $append_breadcrumb = [
 
 <script>
 jQuery(document).ready(function($) {
-
-  var versionView = function() {
-    var $modal = $("#versionModal"),
-      $modalTitle = $modal.find(".modal-title"),
-      $modalBody = $modal.find(".modal-body"),
-      $placeholderContent = $modalBody.find(".placeholder-content").remove(),
-      $error = $modalBody.find(".error-message").remove().removeClass("d-none");
-
-    function modalTitle(version) {
-      $modalTitle.html( @json(__('admin/app.changes.version_preview')) +': '+ version );
-    }
-
-    function modalContent(content) {
-      $modalBody.empty().append(content);
-    }
-
-    function modalShow(version) {
-      if(!version) {
-        modalContent($error);
-        return;
-      }
-
-      modalTitle(version);
-      modalContent($placeholderContent);
-      $modal.modal("show");
-
-      $.ajax({
-        url: @json( route('admin.apps.changes.details', ['app' => $cl->app_id]) ),
-        method: "GET",
-        cache: true,
-        data: {
-          version: version,
-        },
-        dataType: "html",
-        success: function(response, status, xhr) {
-          modalContent(response);
-        },
-        error: function(xhr, status, message) {
-          console.error("Error occurred while trying to load content. "+ status +": "+ message);
-          modalContent($error);
-        },
-      });
-    }
-
-    $(document).on("click", ".changes-item .btn-view-version", function(e) {
-      e.preventDefault();
-
-      // Show modal containing the item
-      var $btn = $(this);
-      var $item = $btn.closest(".changes-item");
-      var version = $item.data("version");
-
-      modalShow(version);
-    });
-  }
-  versionView();
-
-
   var changesVisuals = function() {
     var $modal = $("#changesVisualsModal"),
       $modalBody = $modal.find(".modal-body"),
@@ -170,7 +97,7 @@ jQuery(document).ready(function($) {
       $modal.modal("show");
 
       $.ajax({
-        url: @json( route('admin.apps.changes.visuals', ['app' => $cl->app_id]) ),
+        url: @json( route('admin.apps.changes.visuals', ['app' => $app->id]) ),
         method: "GET",
         cache: true,
         data: {

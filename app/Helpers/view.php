@@ -142,16 +142,23 @@ function value_or_none($value, $replacement = null) {
 }
 
 // Alias to value_or_empty()
-function voe($value) {
+function voe($value = null) {
 	$args = array_slice(func_get_args(), 1);
 	return call_user_func_array('value_or_empty', array_merge([$value, null], $args));
 }
 // Alias to value_or_none()
-function von($value) {
+function von($value = null) {
 	$args = array_slice(func_get_args(), 1);
 	return call_user_func_array('value_or_none', array_merge([$value, null], $args));
 }
 // Alias to value_or_empty(), with dash as replacement instead of text
-function vo_($value) {
+function vo_($value = null) {
 	return call_user_func_array('value_or_empty', [$value, '<span>&ndash;</span>']);
+}
+
+function html_attributes($attributes, $escape = false) {
+	$result = implode(' ', array_map(function($k, $v) use ($escape) {
+		return sprintf('%s="%s"', $k, $escape ? e($v) : $v);
+	}, array_keys($attributes), $attributes));
+	return $result;
 }

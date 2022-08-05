@@ -26,8 +26,9 @@ if(!isset($paths)) {
 
         $cumulative_path .= '.'.$part;
 
+        $page_title = __($route[0].'/'.$parts[0].'.page_title.'.($i == 0 ? 'index' : $part));
         $path = array(
-          'text'    => __($cumulative_path.'.page-title'),
+          'text'    => $page_title,
           'url'   => FALSE,
           'active'  => FALSE,
         );

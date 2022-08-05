@@ -3,6 +3,8 @@
 
 @stack('head-additional')
 
-@yield('content')
+@section('content')
+  @yield('detail-content')
+@show
 
 @stack('scripts')

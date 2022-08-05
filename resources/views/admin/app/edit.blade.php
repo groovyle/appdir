@@ -1,23 +1,52 @@
+<?php
+$use_mock = isset($ori);
+$titler = $use_mock ? $ori : $app;
+if(!$is_edit) {
+  $append_breadcrumb = [
+    [
+      'text'    => __('common.add'),
+    ]
+  ];
+} else {
+  $append_breadcrumb = [
+    [
+      'text'    => text_truncate($titler->name, 50),
+      'url'     => route('admin.apps.show', ['app' => $app->id]),
+      'active'  => false,
+    ],
+    [
+      'text'    => __('common.edit'),
+    ]
+  ];
+}
+?>
+
 @extends('admin.layouts.main')
 
 @section('title')
-{{ __('admin.app.tab_title') }} - @parent
+{{ __('admin/apps.tab_title') }} - @parent
 @endsection
 
-@section('page-title', __('admin.app.page_title.'. ($is_edit ? 'edit' : 'add')) )
+@section('page-title', __('admin/apps.page_title.'. ($is_edit ? 'edit' : 'add')) )
 
 @section('content')
+
+<div class="mb-2">
+  <a href="{{ route('admin.apps.show', ['app' => $app->id]) }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back') }}</a>
+</div>
 
 <form method="POST" action="{{ $action }}" enctype="multipart/form-data" id="formInputApp">
   @csrf
   @method($method)
 
+  {{--
   @if($is_edit && $app->is_verified)
   <div class="alert alert-warning">
     <h5>{{ __('common.attention') }}</h5>
-    <p class="mb-0">{{ __('admin.app.message.verification_status_will_revert_if_edited') }}</p>
+    <p class="mb-0">{{ __('admin/apps.message.verification_status_will_revert_if_edited') }}</p>
   </div>
   @endif
+  --}}
   @if($errors->any())
   <div class="alert alert-danger">
     <ul>
@@ -28,38 +57,51 @@
   </div>
   @endif
 
+  @if($use_mock)
+  <div class="alert alert-info">
+    <p class="mb-0">
+      @lang('admin/apps.message.form_showing_pending_changes') (<strong>@lang('admin/apps.changes.version_x', ['x' => $app->version_number])</strong>).
+      <br>
+      <a href="#" class="text-reset btn-view-version" data-app-id="{{ $ori->id }}" data-version="{{ $ori->version_number }}">
+        @lang('admin/apps.changes.show_current_version') (@lang('admin/apps.changes.version_x', ['x' => $ori->version_number]))
+        <span class="fas fa-search ml-1"></span>
+      </a>
+    </p>
+  </div>
+  @endif
+
   <!-- Card -->
   <div class="card">
     <ul class="list-group list-group-flush">
       <li class="list-group-item">
-        <h4>{{ __('admin.app.title.app_info') }}</h4>
+        <h4>{{ __('admin/apps.title.app_info') }}</h4>
         <div class="row gutter-lg">
           <div class="col-12 col-md-8 col-xl-6">
             <div class="form-group">
-              <label for="inputAppName">{{ __('admin.app.field.name') }}</label>
-              <input type="text" name="app_name" class="form-control" id="inputAppName" placeholder="{{ __('admin.app.field.name_placeholder') }}" value="{{ old('app_name', $app->name) }}" maxlength="100">
+              <label for="inputAppName">{{ __('admin/apps.field.name') }}</label>
+              <input type="text" name="app_name" class="form-control" id="inputAppName" placeholder="{{ __('admin/apps.field.name_placeholder') }}" value="{{ old('app_name', $app->name) }}" maxlength="100">
             </div>
 
             <div class="form-group mt-n3 ml-1">
               <div class="form-check">
                 <input type="checkbox" name="app_has_short_name" class="form-check-input" id="hasShortName" value="1" {{ old_checked('app_has_short_name', !empty($app->short_name)) }} >
-                <label class="form-check-label text-sm" for="hasShortName">{{ __('admin.app.field.has_short_name?') }}</label>
+                <label class="form-check-label text-sm" for="hasShortName">{{ __('admin/apps.field.has_short_name?') }}</label>
               </div>
               <div class="mt-0 ml-4 d-none" id="wrapperShortName">
-                <input type="text" name="app_short_name" class="form-control form-control-sm maxw-100" id="inputAppShortName" placeholder="{{ __('admin.app.field.short_name_placeholder') }}" value="{{ old('app_short_name', $app->short_name) }}" maxlength="20" style="width: 40ch;">
+                <input type="text" name="app_short_name" class="form-control form-control-sm maxw-100" id="inputAppShortName" placeholder="{{ __('admin/apps.field.short_name_placeholder') }}" value="{{ old('app_short_name', $app->short_name) }}" maxlength="20" style="width: 40ch;">
               </div>
             </div>
 
             <div class="form-group">
-              <label for="inputAppDescription">{{ __('admin.app.field.description') }}</label>
-              <textarea name="app_description" class="form-control" id="inputAppDescription" placeholder="{{ __('admin.app.field.description_placeholder') }}" rows="3" maxlength="{{ settings('app.description_limit', 500) }}" style="max-height: 300px;">{{ old('app_description', $app->description) }}</textarea>
+              <label for="inputAppDescription">{{ __('admin/apps.field.description') }}</label>
+              <textarea name="app_description" class="form-control" id="inputAppDescription" placeholder="{{ __('admin/apps.field.description_placeholder') }}" rows="3" maxlength="{{ settings('app.description_limit', 500) }}" style="max-height: 300px;">{{ old('app_description', $app->description) }}</textarea>
             </div>
 
             {{--
             <div class="form-group">
-              <label for="inputAppType">{{ __('admin.app.field.type') }}</label>
+              <label for="inputAppType">{{ __('admin/apps.field.type') }}</label>
               <select name="type" class="custom-select d-block w-auto" id="inputAppType" style="min-width: 100px;">
-                <option value="">&ndash; {{ __('admin.app.field.type_placeholder') }} &ndash;</option>
+                <option value="">&ndash; {{ __('admin/apps.field.type_placeholder') }} &ndash;</option>
                 @if (!empty($types))
                 {!! generate_options($types, old('type', $app->type_id)) !!}
                 @endif
@@ -70,9 +112,9 @@
 
           <div class="col-12 col-md-4 col-xl-6">
             <div class="form-group">
-              <label for="inputAppCategories">{{ __('admin.app.field.categories') }}</label>
+              <label for="inputAppCategories">{{ __('admin/apps.field.categories') }}</label>
               <div class="select2-dark">
-                <select name="categories[]" class="form-control" id="inputAppCategories" multiple="multiple" data-placeholder="&ndash; {{ __('admin.app.field.categories_placeholder') }} &ndash;" data-dropdown-css-class="select2-dark" style="width: 100%;">
+                <select name="categories[]" class="form-control" id="inputAppCategories" multiple="multiple" data-placeholder="&ndash; {{ __('admin/apps.field.categories_placeholder') }} &ndash;" data-dropdown-css-class="select2-dark" style="width: 100%;">
                   @if (!empty($categories))
                   {!! generate_options($categories, old('categories', $app->categories->pluck('id')->toArray() )) !!}
                   @endif
@@ -81,12 +123,12 @@
             </div>
 
             <div class="form-group">
-              <label for="inputAppTags">{{ __('admin.app.field.tags') }}</label>
-              <a href="#" class="d-inline-block ml-2" data-toggle="popover" data-content="{{ __('admin.app.field.tags_hint') }}" data-trigger="focus">
+              <label for="inputAppTags">{{ __('admin/apps.field.tags') }}</label>
+              <a href="#" class="d-inline-block ml-2" data-toggle="popover" data-content="{{ __('admin/apps.field.tags_hint') }}" data-trigger="focus">
                 <span class="far fa-question-circle text-muted"></span>
               </a>
               <div class="select2-light">
-                <select name="tags[]" class="form-control w-100" id="inputAppTags" multiple="multiple" data-placeholder="&ndash; {{ __('admin.app.field.tags_placeholder') }} &ndash;" data-dropdown-css-class="select2-light">
+                <select name="tags[]" class="form-control w-100" id="inputAppTags" multiple="multiple" data-placeholder="&ndash; {{ __('admin/apps.field.tags_placeholder') }} &ndash;" data-dropdown-css-class="select2-light">
                   @if (!empty($tags))
                   {!! generate_options($tags, old('tags', $app->tags->pluck('name')->toArray()), 'name', 'name') !!}
                   @endif
@@ -95,30 +137,32 @@
             </div>
           </div>
 
-          <div class="col-12">
+          <div class="col-6">
             <div class="form-group">
-              <label>{{ __('admin.app.field.logo') }}</label>
-              <a href="#" class="d-inline-block ml-2" data-toggle="popover" data-content="{{ __('admin.app.field.logo_hint') }} Rekomendasi logo: <br>Tipe JPG, Ukuran kotak 1:1, 300x300" data-html="true" data-trigger="click">
+              <label>{{ __('admin/apps.field.logo') }}</label>
+              <a href="#" class="d-inline-block ml-2" data-toggle="popover" data-content="{{ __('admin/apps.field.logo_hint') }}" data-html="true" data-trigger="click">
                 <span class="far fa-question-circle text-muted"></span>
               </a>
               @if($is_edit && $app->logo)
               <div class="mb-2">
-                <div class="text-bold">@lang('admin/app.field.current_logo')</div>
+                <div class="text-bold">@lang('admin/apps.field.current_logo')</div>
                 <div>
                   <a href="{{ $app->logo->url }}" target="_blank"><img rel="logo" src="{{ $app->logo->url }}" class="img-responsive" style="max-width: 100px; max-height: 100px;"></a>
                 </div>
                 <div class="form-check">
                   <input type="checkbox" name="app_logo_delete" class="form-check-input" id="logoDelete" value="1" {{ old_checked('app_logo_delete') }} >
-                  <label class="form-check-label" for="logoDelete">{{ __('admin/app.field.remove_logo?') }}</label>
+                  <label class="form-check-label" for="logoDelete">{{ __('admin/apps.field.remove_logo?') }}</label>
                 </div>
               </div>
-              <label for="inputAppLogo">@lang('admin/app.field.change_logo'):</label>
+              <label for="inputAppLogo">@lang('admin/apps.field.change_logo'):</label>
               @endif
-              <div class="app-upload-wrapper">
-                <input type="file" name="app_logo" class="form-control-file w-auto d-inline-block" id="inputAppLogo" style="border: 1px solid #bbb;">
-                <button type="button" class="btn-cancel-logo close float-none text-danger ml-1" aria-label="Cancel" title="@lang('admin/app.remove_file')" data-toggle="tooltip">
+              <div class="app-upload-wrapper" style="max-width: 400px;">
+                <input type="file" name="app_logo" class="" id="inputAppLogo">
+                {{--
+                <button type="button" class="btn-cancel-logo close float-none text-danger ml-1" aria-label="Cancel" title="@lang('admin/apps.remove_file')" data-toggle="tooltip">
                   <span aria-hidden="true">&times;</span>
                 </button>
+                --}}
               </div>
             </div>
           </div>
@@ -126,8 +170,8 @@
         {{--
         <div class="form-group">
           <label>
-            {{ __('admin.app.field.visuals') }}
-            <a href="#" class="d-inline-block ml-2" data-toggle="popover" data-content="{{ __('admin.app.field.visuals_hint') }}" data-trigger="focus">
+            {{ __('admin/apps.field.visuals') }}
+            <a href="#" class="d-inline-block ml-2" data-toggle="popover" data-content="{{ __('admin/apps.field.visuals_hint') }}" data-trigger="focus">
               <span class="far fa-question-circle text-muted"></span>
             </a>
           </label>
@@ -154,19 +198,19 @@
             @endforeach
           </div>
           @endif
-          <input type="file" multiple="multiple" name="visuals[]" class="form-control" placeholder="{{ __('admin.app.field.visuals_placeholder') }}" accept="image/*">
+          <input type="file" multiple="multiple" name="visuals[]" class="form-control" placeholder="{{ __('admin/apps.field.visuals_placeholder') }}" accept="image/*">
         </div>
         --}}
       </li>
       {{--
       <li class="list-group-item">
-        <h4>{{ __('admin.app.title.hosting') }}</h4>
+        <h4>{{ __('admin/apps.title.hosting') }}</h4>
         <div class="row">
           <div class="col-12 col-md-8 col-xl-6">
             <div class="form-group">
               <label for="inputAppDirectory">
-                {{ __('admin.app.field.directory') }}
-                <a href="#" class="d-inline-block ml-2" data-toggle="popover" data-content="{{ __('admin.app.field.directory_hint') }}" data-trigger="focus">
+                {{ __('admin/apps.field.directory') }}
+                <a href="#" class="d-inline-block ml-2" data-toggle="popover" data-content="{{ __('admin/apps.field.directory_hint') }}" data-trigger="focus">
                   <span class="far fa-question-circle text-muted"></span>
                 </a>
               </label>
@@ -174,14 +218,14 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text">~/</span>
                 </div>
-                <input type="text" name="directory" class="form-control" id="inputAppDirectory" placeholder="{{ __('admin.app.field.directory_placeholder') }}" value="{{ old('directory', $app->directory) }}">
+                <input type="text" name="directory" class="form-control" id="inputAppDirectory" placeholder="{{ __('admin/apps.field.directory_placeholder') }}" value="{{ old('directory', $app->directory) }}">
               </div>
             </div>
 
             <div class="form-group">
-              <label for="inputAppDomain">{{ __('admin.app.field.domain') }}</label>
+              <label for="inputAppDomain">{{ __('admin/apps.field.domain') }}</label>
               <select name="domain" class="custom-select d-block w-auto" id="inputAppDomain" style="min-width: 100px;">
-                <option value="">&ndash; {{ __('admin.app.field.domain_placeholder') }} &ndash;</option>
+                <option value="">&ndash; {{ __('admin/apps.field.domain_placeholder') }} &ndash;</option>
                 @if (!empty($domains))
                 {!! generate_options($domains, old('domain', $app->domain)) !!}
                 @endif
@@ -190,25 +234,26 @@
 
             <div class="form-group">
               <label for="inputAppUrl">
-                {{ __('admin.app.field.url') }}
-                <a href="#" class="d-inline-block ml-2" data-toggle="popover" data-content="{{ __('admin.app.field.url_hint') }}" data-trigger="focus">
+                {{ __('admin/apps.field.url') }}
+                <a href="#" class="d-inline-block ml-2" data-toggle="popover" data-content="{{ __('admin/apps.field.url_hint') }}" data-trigger="focus">
                   <span class="far fa-question-circle text-muted"></span>
                 </a>
               </label>
-              <input type="text" name="url" class="form-control" id="inputAppUrl" placeholder="{{ __('admin.app.field.url_placeholder') }}" value="{{ old('url', $app->url) }}">
+              <input type="text" name="url" class="form-control" id="inputAppUrl" placeholder="{{ __('admin/apps.field.url_placeholder') }}" value="{{ old('url', $app->url) }}">
             </div>
           </div>
         </div>
       </li>
       --}}
       <li class="list-group-item">
-        <div>
+        <div class="text-center">
           @if ($is_edit)
-          <button type="submit" class="btn btn-warning">{{ __('admin.app.resubmit_app') }}</button>
+          <button type="submit" class="btn btn-primary btn-min-100">{{ __('common.save') }}</button>
           @else
-          <button type="submit" class="btn btn-primary">{{ __('admin.app.submit_app') }}</button>
+          <button type="submit" class="btn btn-primary btn-min-100">{{ __('admin/apps.submit_app') }}</button>
           @endif
-          <a href="{{ url()->previous() }}" class="btn btn-default">{{ __('common.back') }}</a>
+          <br>
+          <a href="{{ url()->previous() }}" class="btn btn-default btn-sm mt-2">{{ __('common.cancel') }}</a>
         </div>
       </li>
     </ul>
@@ -218,6 +263,8 @@
 @endsection
 
 @include('admin.libraries.select2')
+@include('admin.libraries.filepond')
+@include('admin.app.changes.btn-view-version')
 
 @push('scripts')
 
@@ -248,22 +295,21 @@ jQuery(document).ready(function($) {
   var $inputCategories = $("#inputAppCategories");
   $inputCategories.select2({
     closeOnSelect: false,
-    placeholder: @json(__('admin.app.field.categories_placeholder')),
+    placeholder: @json(__('admin/apps.field.categories_placeholder')),
     maximumSelectionLength: 5,
   });
 
   var $inputTags = $("#inputAppTags");
   $inputTags.select2({
     closeOnSelect: false,
-    placeholder: @json(__('admin.app.field.tags_placeholder')),
+    placeholder: @json(__('admin/apps.field.tags_placeholder')),
     maximumSelectionLength: 10,
     tags: true,
     tokenSeparators: [',', ' ']
   });
 
-  $("#inputAppLogo").on("change", function(e) {
-    var isEmpty = this.files.length == 0;
-
+  var $logoFile = $("#inputAppLogo");
+  var logoFileOnChange = Helpers.debounce(function(isEmpty) {
     var $logoDelete = $("#logoDelete"),
         $btnCancel = $(".btn-cancel-logo")
     ;
@@ -284,10 +330,50 @@ jQuery(document).ready(function($) {
       }
     }
     $logoDelete.prop("checked", delstate).prop("disabled", !isEmpty);
+  }, 10, false);
+  $logoFile.filepond({
+    //
+    dropOnPage: true,
+    dropOnElement: false,
+    allowImagePreview: true,
+    imagePreviewMaxHeight: 160,
+    imagePreviewMaxInstantPreviewFileSize: 300 * 300,
+    dropValidation: false,
+    allowFileTypeValidation: true,
+    acceptedFileTypes: ['image/*'],
+    fileValidateTypeLabelExpectedTypes: 'Expects {allTypes}',
+    fileValidateTypeLabelExpectedTypesMap: {'image/*': 'images'},
+    allowFileSizeValidation: true,
+    maxFileSize: '2MB',
+    files: [
+      {{--
+      Only use validation returns as old files instead of all files the user ever uploaded
+      @foreach($user->fileponds as $fp)
+      {
+        source: @json(Crypt::encrypt(['id' => $fp->id])),
+        options: { type: 'limbo' },
+      },
+      @endforeach
+      --}}
+      @foreach($old_uploads as $filehash)
+      {
+        source: @json($filehash),
+        options: { type: 'limbo' },
+      },
+      @endforeach
+    ],
+    onupdatefiles: Helpers.debounce(function(files) {
+      logoFileOnChange(files.length == 0);
+    }, 10, false),
+  });
+
+  $logoFile.on("change", function(e) {
+    logoFileOnChange(this.files);
   }).trigger("change");
+
   $(".btn-cancel-logo").on("click", function(e) {
     e.preventDefault();
-    $("#inputAppLogo").val(null).trigger("change");
+    $logoFile.val(null).trigger("change");
     $(this).tooltip("hide");
   });
 
@@ -309,6 +395,7 @@ jQuery(document).ready(function($) {
     container: "body",
   });
 
+  $("#formInputApp").noEnterSubmit();
   inited = true;
 });
 </script>

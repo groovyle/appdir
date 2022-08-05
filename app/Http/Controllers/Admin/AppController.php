@@ -86,7 +86,6 @@ class AppController extends Controller
 
 		//
 		$app = new App;
-		$app->domain = $data['domains'][0];
 
 		$data['app'] = $app;
 		$data['is_edit'] = FALSE;
@@ -102,74 +101,63 @@ class AppController extends Controller
 		$is_edit = $app instanceof App;
 		if(!$is_edit) {
 			$app = new App;
+		} elseif($app->has_pending_changes) {
+			list($ori, $app) = AppManager::getPendingVersion($app);
 		}
 
 		$user = $request->user();
 		$user_id = $user->id;
-		$domain = $request->input('domain', '');
 
+		$logo_input_hash = $request->input('app_logo');
 		$delete_files = array();
 		$uploaded_files = array();
 
+		$verf_add = settings('app.creation_needs_verification', false);
+		$verf_edit = settings('app.modification_needs_verification', false);
 
+
+		// Validation rules
 		$rules = [
 			'app_name'			=> ['required', 'max:100'],
 			'app_short_name'	=> ['nullable', 'max:20'],
 			'app_description'	=> ['nullable'],
-			'app_logo'			=> ['file', 'image', 'max:2048'],
-			/*
-			'type'				=> ['required', 'integer', new ModelExists(AppType::class)],
-			'subdomain'			=> ['required_if:type,1', 'string', 'max:100', new FQDN([ 'suffix' => $domain ]) ],
-			'subdirectory'		=> ['required_if:type,2', 'string', 'max:250', new DirectoryPath(FALSE), new AppDirectory],
-			*/
-			/* TODO: hosting-related app details
-			'directory'			=> ['required', 'string', 'max:250', new DirectoryPath(FALSE)],
-			'domain'			=> ['required', 'string', new FQDN],
-			'url'				=> ['required', 'string', new AppUrl],
-			*/
+			// 'app_logo'			=> ['file', 'image', 'max:2048'], // NOTE: using filepond validation instead
 			'categories'		=> ['required', 'array'],
 			'categories.*'		=> [/*'required', */'integer', new ModelExists(AppCategory::class)],
 			'tags'				=> [/*'required', */'array'],
 			'tags.*'			=> [/*'required', */'string', 'alpha_dash'],
-			'visuals'		=> ['array', 'max:'.ini_max_file_uploads()],
-			'visuals.*'		=> ['file', 'image', 'max:2048'],
+			'visuals'			=> ['array', 'max:'.ini_max_file_uploads()],
+			'visuals.*'			=> ['file', 'image', 'max:2048'],
 		];
 
+		// Settings-based rules
 		if($desc_limit = settings('app.description_limit'))
 			$rules['app_description'][] = 'max:'.$desc_limit;
 
 		list($cat_min, $cat_max) = settings('app.categories.range');
-		if($cat_min)
-			$rules['categories'][] = 'min:'.$cat_min;
-		if($cat_max)
-			$rules['categories'][] = 'max:'.$cat_max;
+		if($cat_min) $rules['categories'][] = 'min:'.$cat_min;
+		if($cat_max) $rules['categories'][] = 'max:'.$cat_max;
 
 		list($tags_min, $tags_max) = settings('app.tags.range');
-		if($tags_min)
-			$rules['tags'][] = 'min:'.$tags_min;
-		if($tags_max)
-			$rules['tags'][] = 'max:'.$tags_max;
+		if($tags_min) $rules['tags'][] = 'min:'.$tags_min;
+		if($tags_max) $rules['tags'][] = 'max:'.$tags_max;
 
 		if($vis_max_size = settings('app.visuals.max_size'))
 			$rules['visuals.*'][] = 'max:'.$vis_max_size;
 
-		/* TODO: hosting-related app details
-		if($is_edit) {
-			$rules['directory'][] = new AppDirectory(NULL, $app->id);
-		} else {
-			$rules['directory'][] = new AppDirectory;
-		}
-		*/
+		// END Settings-based rules
 
 		$validData = $request->validate($rules);
+
+		// Validate files
+		$validFiles = Filepond::field($logo_input_hash)->validate([
+			'app_logo'	=> ['nullable', 'file', 'image', 'max:2048'], // TODO: settings on max image size
+		]);
 
 		AppManager::prepareForVersionDiff($app);
 
 		if(!$is_edit) {
 			$app->owner_id		= $user_id;
-			$app->is_verified	= 0;
-
-			$app->type_id		= NULL; // DUMMY
 		} else {
 			// App has to be owned by user to edit.
 			// TODO: also allow superadmins and others to edit.
@@ -188,92 +176,11 @@ class AppController extends Controller
 		$app->short_name	= $request->has('app_has_short_name') ? $request->app_short_name : null;
 		$app->description	= $request->app_description;
 
-		/* TODO: hosting-related app details
-		$app->directory		= trim($request->directory, '/').'/';
-		$app->domain		= trim($request->domain, '/');
-		*/
-
-		// For URLs that don't start with a scheme, automatically add one.
-		/* TODO: hosting-related app details
-		$url = url_auto_scheme($request->url);
-		$app->url			= trim($url, '/').'/';
-		*/
-
 		$result = TRUE;
 		$messages = [];
 
 		// Begin storing entries
 		try {
-			// Logo
-			// New logo and/or delete previous logo
-			$new_logo = $request->has('app_logo');
-			$delete_logo = $request->input('app_logo_delete', 0) == 1;
-			if($is_edit && ($new_logo || $delete_logo) && $app->logo) {
-				// TODO: delete current logo
-				$app->logo->delete();
-			}
-			// Process logo
-			if($new_logo) {
-				$logo_rel_path = 'apps/'.$app->id.'/';
-				$logo_path = Storage::disk('public')->path($logo_rel_path);
-				$logo_file = $request->file('app_logo');
-				// Try to process the image anyway to potentially remove malicious codes
-				// inside the file.
-				// TODO: settings on logo dimension limit
-				$logo_maxw = 300;
-				$logo_maxh = 300;
-
-				// Random filename
-				$filename = 'logo-'.$logo_file->hashName();
-				$finfo = pathinfo($filename);
-				$extension = strtolower($finfo['extension']);
-				$barename = $finfo['filename'];
-				if(!in_array($extension, ['jpg', 'jpeg'])) {
-					// Convert to JPG if it's non standard
-					$extension = 'jpg';
-					$logo_fname = $barename.'.'.$extension;
-				} else {
-					$logo_fname = $filename;
-				}
-
-				try {
-					$img = new ImageResize($logo_file->getPathname());
-					// Store rescaled version
-					if($img->getSourceWidth() <= $logo_maxw && $img->getSourceHeight() <= $logo_maxh) {
-						// Already good
-						$img->scale(100)->save($logo_path.$logo_fname, IMAGETYPE_JPEG);
-					} else {
-						// Scale down
-						$img->resizeToBestFit($logo_maxw, $logo_maxh)->save($logo_path.$logo_fname, IMAGETYPE_JPEG);
-					}
-					$uploaded_files[] = $logo_path.$logo_fname;
-
-					$logo_upl = new File($logo_path.$logo_fname);
-				} catch(\Exception $e) {
-					$result = false;
-					$messages[] = 'Gagal memproses gambar unggahan: '. $logo_file->getClientOriginalName(); // TODO: fix message
-				}
-
-				if($result) {
-					// Gather image meta, store as json string
-					$meta = [
-						'dimensions'	=> $img->getDestWidth() .'x'. $img->getDestHeight(),
-						'size'			=> bytes_to_text($logo_upl->getSize()),
-						'extension'		=> strtoupper($extension),
-					];
-
-					// Save the logo model
-					$logo = new AppLogo;
-					$logo->media_name = $logo_fname;
-					$logo->media_path = $logo_rel_path.$logo_fname;
-					$logo->meta = $meta;
-
-					$result = $result && $app->logo()->save($logo);
-
-					$app->setRelation('logo', $logo);
-				}
-			}
-
 			// Tags
 			// Insert the tags first if they don't exist yet
 			$tags = $request->input('tags', []);
@@ -290,21 +197,25 @@ class AppController extends Controller
 
 			if(!$is_edit) {
 				// The app
+				// Save the app regardless of verification settings, because
+				// we need the entity to exist
 				$result = $result && $app->save();
 				$app->categories()->attach($categories);
 				$app->tags()->attach($tags);
 			} else {
+				// TODO: if verification is used, attach/detach relationships later
+
 				// Categories
 				// Detach all then attach
 				// TODO: why not use sync(), is there a specific reason?
-				$app->categories()->detach();
-				$app->categories()->attach($categories);
+				/*$app->categories()->detach();
+				$app->categories()->attach($categories);*/
 				// $app->categories()->sync($categories);
 
 				// Tags
 				// Detach all then attach
-				$app->tags()->detach();
-				$app->tags()->attach($tags);
+				/*$app->tags()->detach();
+				$app->tags()->attach($tags);*/
 				// $app->tags()->sync($tags);
 			}
 
@@ -313,6 +224,97 @@ class AppController extends Controller
 
 			$rel_tags = AppTag::findMany($tags);
 			$app->setRelation('tags', $rel_tags);
+
+			// Make sure storage dir exists
+			$storage = Storage::disk('public');
+			$storage_rel_path = 'apps/'.$app->id.'/';
+			$storage_path = $storage->path($storage_rel_path);
+			if(!$storage->has($storage_rel_path)) {
+				$storage->createDir($storage_rel_path);
+			}
+
+			// Logo
+			// New logo and/or delete previous logo
+			$new_logo = $request->has('app_logo');
+			$delete_logo = $request->input('app_logo_delete', 0) == 1;
+			if($is_edit && ($new_logo || $delete_logo) && $app->logo) {
+				// Delete current logo
+				// $app->logo->delete();
+
+				// NOTE: respect verf settings, don't delete here
+				$app->setRelation('logo', null);
+			}
+			// Process logo
+			// $logo_file = $request->file('app_logo');
+			$logo_result = true;
+			$logo_file = Filepond::field($logo_input_hash)->getFile();
+			if($new_logo && $logo_file) {
+				// Try to process the image anyway to potentially remove malicious codes
+				// inside the file.
+				$logo_resize = settings('app.logo_resize');
+				list($logo_maxw, $logo_maxh) = $logo_resize;
+				$logo_resize = $logo_maxw && $logo_maxh;
+
+				// Random filename
+				$filename = 'logo-'.$logo_file->hashName();
+				$finfo = pathinfo($filename);
+				$extension = strtolower($finfo['extension']);
+				$barename = $finfo['filename'];
+				if(!in_array($extension, ['jpg', 'jpeg'])) {
+					// Convert to JPG if it's non standard
+					$extension = 'jpg';
+					$logo_fname = $barename.'.'.$extension;
+				} else {
+					$logo_fname = $filename;
+				}
+
+				try {
+					$img = new ImageResize($logo_file->getPathname());
+					$fpath = $storage_path.$logo_fname;
+					// Check rescaling criteria
+					if(!$logo_resize
+						|| ($img->getSourceWidth() <= $logo_maxw
+							&& $img->getSourceHeight() <= $logo_maxh)
+					) {
+						// Store original
+						$img->scale(100)->save($fpath, IMAGETYPE_JPEG);
+					} else {
+						// Scale down
+						$img->resizeToBestFit($logo_maxw, $logo_maxh)->save($fpath, IMAGETYPE_JPEG);
+					}
+					$uploaded_files[] = $fpath;
+
+					$logo_upl = new File($fpath);
+				} catch(\Exception $e) {
+					$logo_result = false;
+					$messages[] = 'Gagal memproses logo unggahan: '. $logo_file->getClientOriginalName(); // TODO: fix message
+				}
+
+				if($result) {
+					// Gather image meta, store as json string
+					$meta = [
+						'dimensions'	=> $img->getDestWidth() .'x'. $img->getDestHeight(),
+						'size'			=> bytes_to_text($logo_upl->getSize()),
+						'extension'		=> strtoupper($extension),
+					];
+
+					// Save the logo model
+					$logo = new AppLogo;
+					$logo->app_id = $app->id;
+					$logo->media_name = $logo_fname;
+					$logo->media_path = $storage_rel_path.$logo_fname;
+					$logo->meta = $meta;
+					if($is_edit) {
+						// NOTE: Respect verf settings if edit, undelete later
+						$logo->deleted_at = $logo->freshTimestampString();
+					}
+
+					$logo_result = $logo_result && $logo->save();
+					$app->setRelation('logo', $logo);
+				}
+			}
+			$result = $result && $logo_result;
+
 
 			// Visuals
 			if($is_edit && $result && $vis_del = $request->input('visual_delete')) {
@@ -324,6 +326,7 @@ class AppController extends Controller
 						if(!$is_edit) {
 							// No need to delete on edit because we make our own
 							// collection anyway below
+							// TODO: but deletion only exists in an edit lol
 							$vis->delete();
 						}
 					}
@@ -341,6 +344,7 @@ class AppController extends Controller
 						$vis->caption = NULL; // DUMMY
 						$vis->media_name = $fname;
 						$vis->media_path = $fpath;
+						$vis->app_id = $app->id;
 
 						if($is_edit) {
 							// Default trashed, will need to apply diff to be up
@@ -353,7 +357,6 @@ class AppController extends Controller
 							//  (instead of saving it because the differ does not
 							//  load a fresh relation, but just uses any existing ones)
 							$vis->deleted_at = $vis->freshTimestampString();
-							$vis->app_id = $app->id;
 						} else {
 							// Need the item to exist first on addition
 							$result = $result && $app->visuals()->save($vis);
@@ -378,7 +381,7 @@ class AppController extends Controller
 
 			// Generate app diff
 			if($result) {
-				$changes = AppManager::makeVersionDiff($app);
+				$changes = AppManager::diffSave($app);
 				$result = $changes['status'];
 			}
 
@@ -386,6 +389,11 @@ class AppController extends Controller
 				// Save edit only after diffing
 				// TODO: what about staging?
 				// $result = $result && $app->save();
+			}
+
+			// Delete temp files
+			if($result && $logo_result) {
+				Filepond::field($logo_input_hash)->delete();
 			}
 
 			// TODO: check config whether verification is used at all
@@ -476,6 +484,7 @@ class AppController extends Controller
 			return $store;
 		}
 
+		$verf_add = settings('app.creation_needs_verification', false);
 		$result = $store['result'];
 		if(!$result) {
 			DB::rollback();
@@ -525,11 +534,21 @@ class AppController extends Controller
 	{
 		$data = $this->_getFormPreps();
 
+		// Show the latest edits if there are any pending changes
+		if($app->has_pending_changes) {
+			list($ori, $app) = AppManager::getPendingVersion($app);
+			$app->setRelation('version', $ori->pending_changes->last());
+			$data['ori'] = $ori;
+		}
+
 		$data['app'] = $app;
 		$data['is_edit'] = TRUE;
 
 		$data['action'] = route('admin.apps.update', ['app' => $app->id]);
 		$data['method'] = 'PATCH';
+
+		$data['user'] = Auth::user();
+		$data['old_uploads'] = old('app_logo', []);
 
 		return view('admin/app/edit', $data);
 	}
@@ -684,8 +703,14 @@ class AppController extends Controller
 		$data = [];
 
 		$app->load('visuals');
+		// Show the latest edits if there are any pending changes
+		if($app->has_pending_changes) {
+			list($ori, $app) = AppManager::getPendingVersion($app);
+			$app->setRelation('version', $ori->pending_changes->last());
+			$data['ori'] = $ori;
+		}
+
 		$data['app'] = $app;
-		$data['user'] = Auth::user();
 		$data['max_visuals'] = Settings::get('app.visuals.max_amount');
 
 		// Get the errors bag
@@ -723,6 +748,10 @@ class AppController extends Controller
 
 		$data['viso_payload'] = $viso_payload;
 		$data['cerrors'] = $cerrors;
+
+		$data['user'] = Auth::user();
+		$data['old_uploads'] = old('new_images', []);
+
 		$data['caption_limit'] = settings('app.visuals.caption_limit', 300);
 
 		return view('admin/app/visuals', $data);
@@ -731,6 +760,9 @@ class AppController extends Controller
 	public function updateVisuals(Request $request, App $app)
 	{
 		//
+		if($app->has_pending_changes) {
+			list($ori, $app) = AppManager::getPendingVersion($app);
+		}
 
 		$rules = [
 			'visuals_count'		=> ['required'], // dummy field for validation
@@ -772,7 +804,7 @@ class AppController extends Controller
 			}
 		}
 
-		$input_visuals = $request->input('visuals');
+		$input_visuals = $request->input('visuals', []);
 		$new_images_hash = $request->input('new_images', []);
 		$input_viso = $request->input('viso', []);
 		$viso_not_empty = collect($input_viso)->filter(function($item) {
@@ -820,36 +852,49 @@ class AppController extends Controller
 		DB::beginTransaction();
 		try {
 			// Reorder items
+			$rel_visuals = $app->visuals->keyBy('id');
 
 			// Delete items first
 			foreach($deleted as $vdel) {
 				$vis = $visuals_by_id[$vdel['id']];
 				$vis->order = 99;
-				$result = $result && $vis->delete(); // make sure is soft-delete
+
+				// TODO: Respect verf settings
+				// $result = $result && $vis->delete(); // make sure is soft-delete
+				$vis->deleted_at = $vis->freshTimestampString();
+				unset($rel_visuals[$vis->id]);
 			}
 
 			// Normalize order so that it's always sequential
 			$ordered = $not_deleted->keyBy('id')->sortBy('order');
 			$visorder = 0;
 			foreach($ordered as $ivis) {
-				$vis = AppVisualMedia::find($ivis['id']);
+				$vis = $visuals_by_id[$ivis['id']];
 				$vis->order = ++$visorder; // instead of the order input, because deleted files are not counted
 				$vis->caption = $ivis['caption'];
-				$result = $result && $vis->save();
+
+				// TODO: Respect verf settings
+				// $result = $result && $vis->save();
 			}
 
 
+			// Make sure storage dir exists
+			$storage = Storage::disk('public');
+			$storage_rel_path = 'apps/'.$app->id.'/';
+			$storage_path = $storage->path($storage_rel_path);
+			if(!$storage->has($storage_rel_path)) {
+				$storage->createDir($storage_rel_path);
+			}
+
 			// Process the new images
-			$visuals_rel_path = 'apps/'.$app->id.'/';
-			$visuals_path = Storage::disk('public')->path($visuals_rel_path);
 			$new_images_result = true;
 			$new_images_files = Filepond::field($new_images_hash)->getFile();
 			if($new_images_files) {
 				// Resize images and convert to jpeg, to standardize and
 				// (possibly) to reduce bandwidth consumption
-				// TODO: settings on the small version dimension limit
-				$small_maxw = 750; // 1366 * 0.5;
-				$small_maxh = 400; // 768 * 0.5; // common fullscreen size, downscaled and rounded
+				$small_resize = settings('app.visuals.image_small_size');
+				list($small_maxw, $small_maxh) = $small_resize;
+				$small_resize = $small_maxw && $small_maxh;
 				foreach($new_images_files as $imgfile) {
 					// Try to process the image anyway to potentially remove malicious codes
 					// inside the file.
@@ -872,18 +917,23 @@ class AppController extends Controller
 
 					try {
 						// The original media
-						$img->scale(100)->save($visuals_path.$fname, $convert ? IMAGETYPE_JPEG : null);
-						$uploaded_files[] = $visuals_path.$fname;
+						$fpath = $storage_path.$fname;
+						$img->scale(100)->save($fpath, $convert ? IMAGETYPE_JPEG : null);
+						$uploaded_files[] = $fpath;
 
 						// Only store rescaled version if not small
-						if($img->getSourceWidth() <= $small_maxw && $img->getSourceHeight() <= $small_maxh) {
+						if(!$small_resize
+							|| ($img->getSourceWidth() <= $small_maxw
+								&& $img->getSourceHeight() <= $small_maxh)
+						) {
 							// Small = original
 							$small_fname = $fname;
 						} else {
 							// The scaled down media to save bandwidth
 							$small_fname = $barename.'-sm.'.$extension;
-							$img->resizeToBestFit($small_maxw, $small_maxh)->save($visuals_path.$small_fname, IMAGETYPE_JPEG);
-							$uploaded_files[] = $visuals_path.$small_fname;
+							$small_fpath = $storage_path.$small_fname;
+							$img->resizeToBestFit($small_maxw, $small_maxh)->save($small_fpath, IMAGETYPE_JPEG);
+							$uploaded_files[] = $small_fpath;
 						}
 					} catch(\Exception $e) {
 						$new_images_result = false;
@@ -900,14 +950,18 @@ class AppController extends Controller
 
 					// Save the model
 					$vis = new AppVisualMedia;
+					$vis->app_id = $app->id;
 					$vis->order = ++$visorder;
 					$vis->type = AppVisualMedia::TYPE_IMAGE;
 					$vis->media_name = $fname;
-					$vis->media_path = $visuals_rel_path.$fname;
+					$vis->media_path = $storage_rel_path.$fname;
 					$vis->media_small_name = $small_fname;
 					$vis->meta = $meta;
+					// NOTE: Respect verf settings, undelete later
+					$vis->deleted_at = $vis->freshTimestampString();
 
-					$new_images_result = $new_images_result && $app->visuals()->save($vis);
+					$new_images_result = $new_images_result && $vis->save();
+					$rel_visuals[$vis->id] = $vis;
 				}
 			}
 
@@ -917,6 +971,7 @@ class AppController extends Controller
 			// Insert non images
 			foreach($viso_not_empty as $viso) {
 				$vis = new AppVisualMedia;
+				$vis->app_id = $app->id;
 				$vis->order = ++$visorder;
 				$type = explode('.', $viso['type']);
 				$vis->type = $type[0];
@@ -936,13 +991,17 @@ class AppController extends Controller
 				$vis->media_name = $value;
 				$vis->media_path = $viso['value'];
 
-				$result = $result && $app->visuals()->save($vis);
+				// NOTE: Respect verf settings, undelete later
+				$vis->deleted_at = $vis->freshTimestampString();
+
+				$result = $result && $vis->save();
+				$rel_visuals[$vis->id] = $vis;
 			}
 
+			$app->setRelation('visuals', elocollect($rel_visuals->values()->all()));
+
 			if($result) {
-				// TODO: reload relationship after changes
-				$app->unsetRelation('visuals')->load('visuals');
-				$changes = AppManager::makeVersionDiff($app);
+				$changes = AppManager::diffSave($app);
 				$result = $changes['status'];
 			}
 
@@ -990,8 +1049,13 @@ class AppController extends Controller
 		}
 	}
 
-	public function snippetVisualsComparison(Request $request, App $app, $version = null)
+	public function snippetVisualsComparison(Request $request, $app = null, $version = null)
 	{
+		if(!$app && $request->has('app_id')) {
+			$app = $request->input('app_id');
+		}
+		$app = App::findOrFail($app);
+
 		if($version === null && $request->has('version'))
 			$version = $request->input('version');
 
@@ -1052,8 +1116,13 @@ class AppController extends Controller
 		]);
 	}
 
-	public function snippetVersionDetail(Request $request, App $app, $version = null)
+	public function snippetVersionDetail(Request $request, $app = null, $version = null)
 	{
+		if(!$app && $request->has('app_id')) {
+			$app = $request->input('app_id');
+		}
+		$app = App::findOrFail($app);
+
 		if($version === null)
 			$version = $request->input('version');
 
@@ -1065,5 +1134,21 @@ class AppController extends Controller
 		$data = [];
 		$data['app'] = $app;
 		return view('admin/app/detail-snippet', $data);
+	}
+
+	public function jsonPendingVersions(Request $request, $app = null)
+	{
+		if(!$app && $request->has('app_id')) {
+			$app = $request->input('app_id');
+		}
+		$app = App::findOrFail($app);
+
+		// Ajax
+
+		$versions = $app->pending_changes;
+		$versions = $versions->map(function($v, $k) {
+			return $v->only('id', 'version');
+		})->reverse()->values();
+		return response()->json($versions->all());
 	}
 }

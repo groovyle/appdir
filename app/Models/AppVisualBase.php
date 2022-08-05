@@ -59,17 +59,17 @@ class AppVisualBase extends Model
 	}
 
 	public function getTypeTextAttribute() {
-		return __('admin.app.visuals.type.'.str_replace('.', '_', $this->complete_type));
+		return __('admin/apps.visuals.types.'.str_replace('.', '_', $this->complete_type));
 	}
 
 	public function getMetaTextAttribute() {
 		$texts = [];
 		if(!empty($this->meta)) {
 			foreach($this->meta as $key => $value) {
-				/*if(filter_var($value, FILTER_VALIDATE_URL)) {
+				if(filter_var($value, FILTER_VALIDATE_URL)) {
 					$value = sprintf('<a href="%s" target="_blank">%s</a>', $value, $value);
-				}*/
-				$texts[] = __('admin.app.visuals.meta.'.$key).': '.$value;
+				}
+				$texts[] = __('admin/apps.visuals.meta.'.$key).': '.$value;
 			}
 		} else {
 			// $texts[] = '-';

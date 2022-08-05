@@ -12,77 +12,52 @@ if(!isset($is_snippet))
 </style>
 @endpush
 
-@section('content')
-  @if(!$is_snippet)
-  <div class="mb-2 d-flex">
-    <div class="details-nav-left mr-auto">
-      <a href="{{ route('admin.apps.index') }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
-      <a href="{{ route('admin.apps.edit', ['app' => $app->id]) }}" class="btn btn-sm btn-primary">
-        <span class="fas fa-edit"></span>
-        {{ __('common.edit') }}
-      </a>
-      <a href="{{ route('admin.apps.visuals', ['app' => $app->id]) }}" class="btn btn-sm btn-default">
-        <span class="fas fa-photo-video"></span>
-        {{ __('admin.app.edit_visuals') }}
-      </a>
-    </div>
-    <div class="details-nav-right ml-auto">
-      <a href="{{ route('admin.apps.changes', ['app' => $app->id, 'current' => '']) }}" class="btn btn-sm btn-secondary">
-        <span class="fas fa-tasks"></span>
-        {{ __('admin.app.changelog') }}
-      </a>
-    </div>
-  </div>
-  @endif
-  <!-- Card -->
-  <div class="card">
-    <div class="card-body">
+@section('detail-content')
       <dl class="row">
-        <dt class="col-sm-3 col-xl-2">{{ __('admin/app.field.name') }}</dt>
-        <dd class="col-sm-9 col-xl-10">{{ $app->name }}</dd>
+        <dt class="col-12 col-sm-3 col-xl-2">{{ __('admin/apps.field.name') }}</dt>
+        <dd class="col-12 col-sm-9 col-xl-10">{{ $app->name }}</dd>
 
-        <dt class="col-sm-3 col-xl-2">{{ __('admin/app.field.short_name') }}</dt>
-        <dd class="col-sm-9 col-xl-10">@von($app->short_name)</dd>
+        <dt class="col-12 col-sm-3 col-xl-2">{{ __('admin/apps.field.short_name') }}</dt>
+        <dd class="col-12 col-sm-9 col-xl-10">@von($app->short_name)</dd>
 
-        <dt class="col-sm-3 col-xl-2">{{ __('admin/app.field.logo') }}</dt>
-        <dd class="col-sm-9 col-xl-10">
-          @if($app->logo)
-          <a href="{{ $app->logo->url }}" target="_blank"><img rel="logo" src="{{ $app->logo->url }}" class="img-responsive" style="max-width: 150px; max-height: 150px;"></a>
-          @else
-          @von($app->logo)
-          @endif
+        <dt class="col-12 col-sm-3 col-xl-2">{{ __('admin/apps.field.logo') }}</dt>
+        <dd class="col-12 col-sm-9 col-xl-10">
+          @include('components.app-logo', ['logo' => $app->logo, 'size' => '150x150'])
         </dd>
 
-        <dt class="col-md-3 col-xl-2">{{ __('admin/app.field.description') }}</dt>
-        <dd class="col-md-9 col-xl-10 text-pre-wrap">@von($app->description)</dd>
+        <dt class="col-12 col-md-3 col-xl-2">{{ __('admin/apps.field.description') }}</dt>
+        <dd class="col-12 col-md-9 col-xl-10 text-pre-wrap">@von($app->description)</dd>
 
-        <dt class="col-sm-3 col-xl-2">
-          {{ __('admin/app.field.categories') }}
+        <dt class="col-12 col-sm-3 col-xl-2">
+          {{ __('admin/apps.field.categories') }}
           ({{ $app->categories->count() }})
         </dt>
-        <dd class="col-sm-9 col-xl-10">
+        <dd class="col-12 col-sm-9 col-xl-10">
           @if($app->categories->isNotEmpty())
           @each('components.app-category', $app->categories, 'category')
           @else
-          &ndash;
+          @voe()
           @endif
         </dd>
 
-        <dt class="col-sm-3 col-xl-2">
-          {{ __('admin/app.field.tags') }}
+        <dt class="col-12 col-sm-3 col-xl-2">
+          {{ __('admin/apps.field.tags') }}
           ({{ $app->tags->count() }})
         </dt>
-        <dd class="col-sm-9 col-xl-10">
+        <dd class="col-12 col-sm-9 col-xl-10">
           @if($app->tags->isNotEmpty())
           @each('components.app-tag', $app->tags, 'tag')
           @else
-          &ndash;
+          @voe()
           @endif
         </dd>
 
         <dt class="col-12">
-          {{ __('admin/app.field.visuals') }}
+          {{ __('admin/apps.field.visuals') }}
           ({{ $app->visuals->count() }})
+          @if(!$is_snippet)
+          <a href="{{ route('admin.apps.visuals', ['app' => $app->id]) }}" class="text-info ml-2" title="@lang('admin/apps.edit_visuals')" data-toggle="tooltip"><span class="fas fa-edit"></span></a>
+          @endif
         </dt>
         <dd class="col-12">
           <div class="thumb-cards d-flex flex-row flex-nowrap justify-content-start align-items-start mb-2 ofx-auto">
@@ -95,9 +70,9 @@ if(!isset($is_snippet))
               <a class="card-img-top" href="{{ $visual->url }}" target="_blank">
                 <img src="{{ $visual->thumbnail_url }}" alt="{{ __('common.visual').' '.$i }}">
               </a>
-              <div class="card-body p-1">
+              <div class="card-body py-1 px-2">
                 <p class="card-text text-center text-secondary mb-1">
-                  <a href="#" class="cursor-pointer text-reset" role="button" tabindex="0" title="{{ __('admin/app.field.caption') }}" data-content="@voe($visual->caption, false)" data-toggle="popover" data-trigger="focus" data-placement="right">({{ $i }})</a>
+                  <a href="#" class="cursor-pointer text-reset" role="button" tabindex="0" title="{{ __('admin/apps.field.caption') }}" data-content="@voe($visual->caption, false)" data-toggle="popover" data-trigger="hover focus" data-placement="right">({{ $i }})</a>
                   @if($visual->type == 'image')
                   @elseif($visual->complete_type == 'video.youtube')
                   &nbsp;<a href="{{ $visual->url }}" target="_blank">{{ $visual->url }}</a>
@@ -110,15 +85,9 @@ if(!isset($is_snippet))
           </div>
         </dd>
 
-        <dt class="col-sm-3 col-xl-2">{{ __('admin/app.field.status') }}</dt>
+        <dt class="col-sm-3 col-xl-2">{{ __('admin/apps.field.status') }}</dt>
         <dd class="col-sm-9 col-xl-10">@include('components.app-verification-status', ['app' => $app])</dd>
-
-        <h3>TODO: show pending changes</h3>
       </dl>
-    </div>
-    <!-- /.card-body -->
-  </div>
-  <!-- /.card -->
 @endsection
 
 @push('scripts')

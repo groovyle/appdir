@@ -99,12 +99,6 @@ jQuery(document).ready(function($) {
 		});
 	}
 
-	var splideNew = new Splide(@json('#'.$rand.'-new'), splideOptions);
-	var splideOld = new Splide(@json('#'.$rand.'-old'), splideOptions);
-
-	splideNew.mount( window.splide.Extensions );
-	splideOld.mount( window.splide.Extensions );
-
 	var autoplayWithVideo = function(splide) {
 		var Autoplay = splide.Components.Autoplay;
 		var pauseTimer;
@@ -139,8 +133,17 @@ jQuery(document).ready(function($) {
 		});
 	}
 
+	@if(count($items['new']) > 0)
+	var splideNew = new Splide(@json('#'.$rand.'-new'), splideOptions);
+	splideNew.mount( window.splide.Extensions );
 	autoplayWithVideo(splideNew);
+	@endif
+
+	@if(count($items['old']) > 0)
+	var splideOld = new Splide(@json('#'.$rand.'-old'), splideOptions);
+	splideOld.mount( window.splide.Extensions );
 	autoplayWithVideo(splideOld);
+	@endif
 
 });
 </script>

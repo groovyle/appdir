@@ -1,12 +1,14 @@
 <?php
+$use_mock = isset($ori);
+$titler = $use_mock ? $ori : $app;
 $append_breadcrumb = [
   [
-    'text'    => text_truncate($app->name, 50),
+    'text'    => text_truncate($titler->name, 50),
     'url'     => route('admin.apps.show', ['app' => $app->id]),
     'active'  => false,
   ],
   [
-    'text'    => __('admin.app.page_title.visuals'),
+    'text'    => __('admin/apps.page_title.visuals'),
   ]
 ];
 ?>
@@ -17,12 +19,26 @@ $append_breadcrumb = [
 {{ __('admin.app.tab_title') }} - @parent
 @endsection
 
-@section('page-title', __('admin.app.page_title.visuals'))
+@section('page-title', __('admin/apps.page_title.visuals'))
 
 @section('content')
 <div class="mb-2">
   <a href="{{ route('admin.apps.show', ['app' => $app->id]) }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back') }}</a>
 </div>
+
+@if($use_mock)
+<div class="alert alert-info">
+  <p class="mb-0">
+    @lang('admin/apps.message.form_showing_pending_changes') (<strong>@lang('admin/apps.changes.version_x', ['x' => $app->version_number])</strong>).
+    <br>
+    <a href="#" class="text-reset btn-view-version" data-app-id="{{ $ori->id }}" data-version="{{ $ori->version_number }}">
+      @lang('admin/apps.changes.show_current_version') (@lang('admin/apps.changes.version_x', ['x' => $ori->version_number]))
+      <span class="fas fa-search ml-1"></span>
+    </a>
+  </p>
+</div>
+@endif
+
 <form id="visuals-form" class="visuals-form" action="{{ route('admin.apps.visuals.save', ['app' => $app->id]) }}" method="POST" enctype="multipart/form-data">
   @csrf
   @method('POST')
@@ -34,23 +50,23 @@ $append_breadcrumb = [
   <div class="card">
     <div class="card-body">
       <h4 class="mb-3">
+        @lang('admin/apps.field.visuals')
         <span class="text-primary">{{ $app->name }} </span>
-        @lang('admin.app.field.visuals')
       </h4>
       <p class="mt-n2 mb-3">
-        <span class="fas fa-info-circle ml-1 mr-2"></span> @lang('admin.app.max_visuals'): {{ $max_visuals }}
+        <span class="fas fa-info-circle ml-1 mr-2"></span> @lang('admin/apps.max_visuals'): {{ $max_visuals }}
       </p>
 
       @include('components.alert-box', ['show_errors' => true, 'errors' => $cerrors])
 
       <div class="row">
-      <div class="col-lg-6 col-md-7 col-12">
+      <div class="col-lg-6 col-md-6 col-12">
         @if($app->visuals->count() > 0)
         <ul class="list-unstyled visuals-list">
           @foreach($app->visuals as $i => $vis)
           <li class="media visuals-item visuals-item-{{ $vis->id }}" data-visuals-id="{{ $vis->id }}">
             <div class="visuals-nav">
-              <div class="visuals-handle" tabindex="0" title="@lang('admin.app.visuals_handle_hint')">
+              <div class="visuals-handle" tabindex="0" title="@lang('admin/apps.visuals_handle_hint')">
                 <span class="fas fa-sort handle-icon"></span>
               </div>
               <div class="visuals-head">
@@ -62,21 +78,21 @@ $append_breadcrumb = [
                 <div class="visuals-nav-additional">
                   <div class="visuals-delete form-check text-danger">
                     <input type="checkbox" class="form-check-input input-delete" name="visuals[{{ $vis->id }}][delete]" value="1" id="inputVisualDelete{{ $vis->id }}" {{ old_checked('visuals.'.$vis->id.'.delete') }}>
-                    <label class="form-check-label" for="inputVisualDelete{{ $vis->id }}">@lang('common.delete')?</label>
+                    <label class="form-check-label" for="inputVisualDelete{{ $vis->id }}">@lang('common.remove')?</label>
                   </div>
                 </div>
               </div>
             </div>
             <div class="media-body visuals-body">
               <div class="visuals-title">
-                @lang('admin.app.order'):
+                @lang('admin/apps.field.order'):
                 <input type="text" name="visuals[{{ $vis->id }}][order]" class="form-control input-order" value="{{ old('visuals.'.$vis->id.'.order', $vis->order ?: ($i + 1)) }}" maxlength="3">
                 <input type="hidden" name="visuals[{{ $vis->id }}][id]" value="{{ $vis->id }}" >
               </div>
               <div class="visuals-content">
-                <small class="text-muted">@lang('admin.app.field.caption'):</small>
+                <small class="text-muted">@lang('admin/apps.field.caption'):</small>
                 <div class="textarea-length-container textarea-length-top-right">
-                  <textarea class="form-control form-control-sm input-caption" name="visuals[{{ $vis->id }}][caption]" placeholder="@lang('admin.app.field.caption_placeholder')" rows="1" maxlength="{{ $caption_limit }}">{{ old('visuals.'.$vis->id.'.caption', $vis->caption) }}</textarea>
+                  <textarea class="form-control form-control-sm input-caption" name="visuals[{{ $vis->id }}][caption]" placeholder="@lang('admin/apps.field.caption_placeholder')" rows="1" maxlength="{{ $caption_limit }}">{{ old('visuals.'.$vis->id.'.caption', $vis->caption) }}</textarea>
                 </div>
                 @include('components.input-feedback', ['name' => 'visuals.'.$vis->id.'.caption'])
               </div>
@@ -89,22 +105,22 @@ $append_breadcrumb = [
           @empty_text
         @endif
       </div>
-      <div class="col-lg-5 offset-lg-1 col-md-4 offset-md-1 col-12 offset-0">
+      <div class="col-lg-5 offset-lg-1 col-md-5 offset-md-1 col-12 offset-0 mt-4 mt-md-0">
         <h5 class="mb-3">
-          @lang('admin.app.add_more_visuals')
+          @lang('admin/apps.add_more_visuals')
         </h5>
         <div class="form-group">
           <label for="input-file-visuals">
-            @lang('admin.app.field.upload_image')
+            @lang('admin/apps.field.upload_image')
             @component('admin.slots.label-hint')
-            @lang('admin.app.field.upload_image_hint')
+            @lang('admin/apps.field.upload_image_hint')
             @endcomponent
           </label>
           <input type="file" name="new_images[]" class="visuals-filepond" id="input-file-visuals" multiple>
         </div>
         <div class="form-group">
           <label>
-            @lang('admin.app.field.or_add_other_visual_types')
+            @lang('admin/apps.field.or_add_other_visual_types')
             <a href="#" class="d-inline-block ml-2 btn-viso-add" title="@lang('common.add')" data-toggle="tooltip" data-trigger="hover focus">
               <span class="fas fa-plus"></span>
             </a>
@@ -115,17 +131,17 @@ $append_breadcrumb = [
               <div class="d-flex flex-row align-items-start">
                 <div class="flex-grow-1 flex-shrink-0 ml-2">
                   <select name="viso[__I__][type]" id="input-viso-__I__-type" class="custom-select custom-select-sm d-inline-block mb-1 viso-data-value" data-field="type">
-                    <option value=""></option>
-                    <optgroup label="@lang('admin.app.visual_type.video')">
-                      <option value="video.youtube">@lang('admin.app.visual_type.video_youtube')</option>
+                    <option value="" class="text-muted">&mdash; @lang('admin/apps.field.choose_other_visuals_type') &mdash;</option>
+                    <optgroup label="@lang('admin/apps.visuals.types.video')">
+                      <option value="video.youtube">@lang('admin/apps.visuals.types.video_youtube')</option>
                     </optgroup>
                   </select>
                   <br>
-                  <input type="text" name="viso[__I__][value]" id="input-viso-__I__-type" class="form-control form-control-sm d-inline-block viso-data-value" placeholder="@lang('admin.app.field.visuals_other_value_placeholder')" data-field="value">
+                  <input type="text" name="viso[__I__][value]" id="input-viso-__I__-type" class="form-control form-control-sm d-inline-block viso-data-value" placeholder="@lang('admin/apps.field.visuals_other_value_placeholder')" data-field="value">
                   <div class="invalid-feedback viso-data-html" data-field="message"></div>
                 </div>
                 <div class="flex-shrink-1 ml-2">
-                  <a href="#" class="text-danger ml-2 align-top btn-viso-delete" title="@lang('common.delete')" data-toggle="tooltip"><span class="fas fa-trash"></span></a>
+                  <a href="#" class="text-danger ml-2 align-top btn-viso-delete" title="@lang('common.remove')" data-toggle="tooltip"><span class="fas fa-trash"></span></a>
                 </div>
               </div>
             </li>
@@ -151,6 +167,7 @@ $append_breadcrumb = [
 
 @include('admin.libraries.jquery-ui-sortable')
 @include('admin.libraries.filepond')
+@include('admin.app.changes.btn-view-version')
 
 @push('scripts')
 
@@ -291,10 +308,26 @@ jQuery(document).ready(function($) {
     imagePreviewMaxHeight: 160,
     imagePreviewMaxInstantPreviewFileSize: 1024 * 1024,
     maxFiles: @json($max_visuals),
+    dropValidation: false,
+    allowFileTypeValidation: true,
+    acceptedFileTypes: ['image/*'],
+    fileValidateTypeLabelExpectedTypes: 'Expects {allTypes}',
+    fileValidateTypeLabelExpectedTypesMap: {'image/*': 'images'},
+    allowFileSizeValidation: true,
+    maxFileSize: '2MB',
     files: [
+      {{--
+      Only use validation returns as old files instead of all files the user ever uploaded
       @foreach($user->fileponds as $fp)
       {
         source: @json(Crypt::encrypt(['id' => $fp->id])),
+        options: { type: 'limbo' },
+      },
+      @endforeach
+      --}}
+      @foreach($old_uploads as $filehash)
+      {
+        source: @json($filehash),
         options: { type: 'limbo' },
       },
       @endforeach

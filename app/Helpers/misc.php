@@ -67,6 +67,11 @@ function settings_set() {
 }
 
 
+function model_uses_soft_deletes($model) {
+	return in_array(Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive($model));
+}
+
+
 // NOTE: per the docs, a value of 0 means unlimited
 function ini_max_post_size() {
 	static $max_post_size = NULL;

@@ -10,6 +10,8 @@ class ModelExists implements Rule
 
 	protected $model;
 	protected $key_name;
+	protected $model_uses_soft_deletes;
+	protected $with_trashed;
 	protected $value;
 
 	/**
@@ -17,11 +19,14 @@ class ModelExists implements Rule
 	 *
 	 * @return void
 	 */
-	public function __construct(string $model, string $key_name = NULL)
+	public function __construct(string $model, string $key_name = NULL, $with_trashed = true)
 	{
 		//
 		$this->model = $model;
 		$this->key_name = $key_name;
+		$this->with_trashed = $with_trashed;
+
+		$this->model_uses_soft_deletes = model_uses_soft_deletes($model);
 	}
 
 	/**
@@ -42,10 +47,14 @@ class ModelExists implements Rule
 
 		if(class_exists($this->model)) {
 			if($this->key_name === NULL) {
-				$passes = $this->model::whereKey($value)->exists();
+				$query = $this->model::whereKey($value);
 			} else {
-				$passes = $this->model::where($this->key_name, $value)->exists();
+				$query = $this->model::where($this->key_name, $value);
 			}
+			if($this->with_trashed && $this->model_uses_soft_deletes) {
+				$query->withTrashed();
+			}
+			$passes = $query->exists();
 		}
 
 		return $passes;
@@ -61,6 +70,6 @@ class ModelExists implements Rule
 		return trans('validation.model_exists', [
 			'attribute' => trans('validation.attributes.'.$this->attribute),
 			'model'     => $this->model
-		]).' | '.implode(', ', [$this->key_name, $this->attribute, $this->value]); // DUMMY
+		]).' | '.implode(', ', [$this->key_name, $this->attribute, $this->value]); // TODO: fix message
 	}
 }
