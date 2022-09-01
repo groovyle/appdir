@@ -5,18 +5,21 @@ return [
 'tab_title'		=> 'Apps',
 
 'page_title'	=> [
-	'index'		=> 'App List',
-	'detail'	=> 'Detailed View',
-	'add'		=> 'Add a New App',
-	'edit'		=> 'Edit App',
-	'visuals'	=> 'Visual Media',
-	'changes'	=> 'App Changes History',
+	'index'				=> 'App List',
+	'detail'			=> 'Detailed View',
+	'add'				=> 'Add a New App',
+	'edit'				=> 'Edit App',
+	'visuals'			=> 'Visual Media',
+	'changes'			=> 'App Changes History',
+	'verifications'		=> 'App Verifications History',
 ],
 
-'title'			=> [
+'titles'		=> [
 	'app_info'		=> 'App Info',
 ],
 
+'verified_apps'			=> 'Verified Apps',
+'app_submissions'		=> 'App Submissions',
 'submit_an_app'			=> 'Add a product',
 'submit_app'			=> 'Submit app',
 'resubmit_app'			=> 'Resubmit app',
@@ -24,11 +27,24 @@ return [
 'edit_visuals'			=> 'Edit visual media',
 'show_pending_changes'	=> 'Show pending changes',
 'changelog'				=> 'View item history',
+'history'				=> 'History',
+'view_changes_history'	=> 'Changes history',
+'view_verifications'	=> 'View verifications',
 'max_visuals'			=> 'Maximum number of visual media',
 'add_more_visuals'		=> 'Add more visual media',
-'submission_status'		=> 'Submission Status',
+'view_public_page'		=> 'View app public page',
+'verification'			=> 'Verification',
+'verifications'			=> 'Verifications',
+'app_had_been_verified'	=> 'This app had been verified and is publicly listed',
+'app_has_pending_changes'	=> 'This app has pending changes waiting to be reviewed',
+'app_is_public'				=> 'App is public',
+'app_is_not_public'			=> 'App is not public',
+'your_app\'s_edits_version_x_has_been_approved'	=> 'Your app\'s edits (up to Version :x) has been approved! <br>You can now publish your edits.',
+'publish_edits'			=> 'Publish edits now',
+'compare'				=> 'Compare',
+'view_your_app'			=> 'View your app',
 
-'field'		=> [
+'fields'	=> [
 	'name'						=> 'Name',
 	'name_placeholder'			=> 'App name',
 	'short_name'				=> 'Short Name',
@@ -36,6 +52,9 @@ return [
 	'has_short_name?'			=> 'Has a short name?',
 	'description'				=> 'Description',
 	'description_placeholder'	=> 'Extensive description of the app',
+	'url'						=> 'URL',
+	'url_placeholder'			=> 'https://.....',
+	'url_hint'					=> 'Link to the app\'s website or social media, or etc.',
 	'logo'						=> 'Logo',
 	'logo_hint'					=> 'Logo recommendations: <br>JPG type, aspect ratio of 1:1, 300x300 <br>Max file size of 2MB',
 	'current_logo'				=> 'Current Logo',
@@ -56,6 +75,7 @@ return [
 	'or_add_other_visual_types'	=> '...or add other visual media types',
 	'choose_other_visuals_type'			=> 'Choose type',
 	'visuals_other_value_placeholder'	=> 'Visual media',
+	'submission_status'			=> 'Submission Status',
 ],
 
 'changes'	=> [
@@ -63,6 +83,7 @@ return [
 	'version'						=> 'Version',
 	'version_x'						=> 'Version :x',
 	'x_changes_in_this_version'		=> 'There are :x change(s) in this version',
+	'there_are_x_changes'			=> ':x thing(s) were changed',
 	'new_item'						=> 'Item creation',
 	'visuals_comparison'			=> 'Visuals comparison',
 	'cannot_load_visuals_comparison'	=> 'A problem occurred while loading visuals comparison',
@@ -72,11 +93,29 @@ return [
 	'new_logo'						=> 'new logo',
 	'is_current_version'			=> 'This is the current version',
 	'pending'						=> 'pending changes',
-	'pending_changes'				=> 'List of pending changes',
+	'pending_changes'				=> 'Pending changes',
+	'list_of_pending_changes'		=> 'List of pending changes',
+	'_compared_to_current_version_x'	=> 'compared to the current version (:x)',
 	'no_pending_changes'			=> 'No pending changes',
+	'no_versions_found'				=> 'No versions found',
 	'view_this_version'				=> 'Full view of this version',
 	'version_preview'				=> 'App Version Preview',
+	'pending_changes_view'			=> 'App Pending Changes View',
 	'show_current_version'			=> 'Look at the app\'s current version',
+	'based_on'						=> 'Based on',
+	'this_version_is_based_on'		=> 'This version is based on',
+	'summary_of_changes'			=> 'Summary of changes',
+	'detailed_information_on_the_changes'	=> 'Detailed information on the changes',
+	'version_status'				=> 'Version status',
+	'version_x_status'				=> 'Version :x status',
+	'publish_changes_now'			=> 'Publish changes now',
+
+	'statuses'	=> [
+		'pending'	=> 'Pending',
+		'rejected'	=> 'Rejected',
+		'approved'	=> 'Approved',
+		'committed'	=> 'Applied',
+	],
 ],
 
 'visuals'	=> [
@@ -93,12 +132,25 @@ return [
 		'youtube_id'	=> 'YouTube ID',
 		'url'			=> 'URL',
 	],
+	'new_visuals'				=> 'New visuals',
+	'old_visuals'				=> 'Old visuals',
 	'visual_comparison_detail'	=> 'Visual media comparison',
 	'no_visuals'				=> 'No visual media',
 ],
 
-'message'	=> [
+'messages'	=> [
 	'form_showing_pending_changes'			=> 'This form shows your pending changes',
+	'new_items_will_be_staged'				=> 'Apps will not become public immediately, and has to go through verification first',
+	'edits_will_be_staged'					=> 'Any edits will be staged for verification and won\'t take immediate effect',
+
+	'last_verification_revision-needed'		=> 'Your pending changes need some adjustments to be approved.',
+	'last_verification_rejected'			=> 'The pending changes you requested were rejected.',
+	'last_verification_approved'			=> "Your pending changes had been approved! \nYou can finalize the edits and make it public now.",
+	'check_verification_details'			=> 'Check verification details',
+	'the_changelogs_data_are_corrupted'		=> "The changes cannot be published because the data were corrupted. \nPlease contact the administrator to sort this problem out.",
+
+	'congrats!'								=> 'Congrats!',
+	'your_changes_have_been_published!'		=> 'Your changes have been published!',
 ],
 
 ];

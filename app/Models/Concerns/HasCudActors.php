@@ -129,7 +129,7 @@ trait HasCudActors {
 		$user_id = $model->getCudActorId();
 		$createdByColumn = $model->getCreatedByColumn();
 
-		if (! is_null($createdByColumn) ) {
+		if (! $this->exists && ! is_null($createdByColumn) && ! $this->isDirty($createdByColumn)) {
 			$model->setCreatedBy($user_id);
 		}
 	}
@@ -151,9 +151,9 @@ trait HasCudActors {
 	protected function _updaterPreSave($model)
 	{
 		$user_id = $model->getCudActorId();
-		$updatedByColumn = $model->getCreatedByColumn();
+		$updatedByColumn = $model->getUpdatedByColumn();
 
-		if (! is_null($updatedByColumn) ) {
+		if (! is_null($updatedByColumn) && ! $this->isDirty($updatedByColumn)) {
 			$model->setUpdatedBy($user_id);
 		}
 	}
@@ -164,7 +164,7 @@ trait HasCudActors {
 		// is also updated, and vice versa.
 		if($model->updatersTracked() && $model->isDirty()) {
 			$model->_updaterPreSave($model);
-			$model->_creatorPreSave($model);
+			// $model->_creatorPreSave($model);
 		}
 	}
 
@@ -203,7 +203,7 @@ trait HasCudActors {
 	}
 
 	/**
-	 * Set the value of the "created at" attribute.
+	 * Set the value of the "created by" attribute.
 	 *
 	 * @param  mixed  $value
 	 * @return $this
@@ -216,7 +216,7 @@ trait HasCudActors {
 	}
 
 	/**
-	 * Set the value of the "updated at" attribute.
+	 * Set the value of the "updated by" attribute.
 	 *
 	 * @param  mixed  $value
 	 * @return $this
@@ -229,7 +229,7 @@ trait HasCudActors {
 	}
 
 	/**
-	 * Set the value of the "deleted at" attribute.
+	 * Set the value of the "deleted by" attribute.
 	 *
 	 * @param  mixed  $value
 	 * @return $this

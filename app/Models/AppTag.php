@@ -38,4 +38,8 @@ class AppTag extends Model
 		// Whether the tag was made by a user, i.e a custom tag
 		return $this->has('creator');
 	}
+
+	public function __toString() {
+		return $this->name;
+	}
 }

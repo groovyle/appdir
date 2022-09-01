@@ -1,11 +1,11 @@
-
 @includeWhen(isset($load_library) && $load_library, 'libraries.splide')
 
 @stack('load-styles')
 @stack('load-scripts')
 
 <?php
-$rand = random_string(5, array_merge(range('A', 'Z'), range('a', 'z')) );
+$simple = !!($simple ?? false);
+$rand = random_alpha(5);
 ?>
 <div class="visuals-comparison-wrapper" id="{{ $rand }}-wrapper">
 	<div class="new-visuals">
@@ -19,6 +19,7 @@ $rand = random_string(5, array_merge(range('A', 'Z'), range('a', 'z')) );
 	</div>
 </div>
 
+@if(!$simple)
 <style>
 .visuals-comparison-wrapper .splide__list {
 	height: auto;
@@ -147,3 +148,4 @@ jQuery(document).ready(function($) {
 
 });
 </script>
+@endif

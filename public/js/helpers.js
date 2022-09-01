@@ -142,6 +142,29 @@ if(jQuery) {
 			};
 		};
 
+		/* Find closest scroll parent/box */
+		// https://stackoverflow.com/a/42543908
+		function getScrollParent(element, includeHidden) {
+			var style = getComputedStyle(element);
+			var excludeStaticParent = style.position === "absolute";
+			var overflowRegex = includeHidden ? /(auto|scroll|hidden)/ : /(auto|scroll)/;
+
+			// NOTE: return body or document?
+			// var defaultParent = document.body;
+			var defaultParent = document;
+
+			if (style.position === "fixed") return defaultParent;
+			for (var parent = element; (parent = parent.parentElement);) {
+				style = getComputedStyle(parent);
+				if (excludeStaticParent && style.position === "static") {
+					continue;
+				}
+				if (overflowRegex.test(style.overflow + style.overflowY + style.overflowX)) return parent;
+			}
+
+			return defaultParent;
+		}
+
 		var scrollToDefaultOptions = {
 			offset: 10,
 			animate: false,
@@ -158,14 +181,23 @@ if(jQuery) {
 			var $navbar = $("#top-navbar, .navbar").first();
 
 			var scrollTo = $element.offset().top - $navbar.outerHeight() - offset;
+			var progressEvent = function() {
+				$element.trigger("scrolling.scrollto");
+			}
+			var postEvent = function() {
+				$element.trigger("scrolled.scrollto");
+			}
 
+			progressEvent();
 			if(options.animate) {
 				var animateOptions = $.extend({ duration: options.duration }, options.animateOptions);
 				$("html, body").animate({
 					scrollTop: scrollTo
 				}, animateOptions);
+				setTimeout(postEvent, options.duration);
 			} else {
 				$("html, body").scrollTop(scrollTo);
+				postEvent();
 			}
 		};
 
@@ -179,31 +211,57 @@ if(jQuery) {
 
 			var offset = 0 + options.offset;
 			var $element = $(element),
-				$parent;
+				$parent,
+				isRoot = false;
+
+			if($element.length == 0) {
+				// Element does not exist
+				return;
+			}
+
+			var progressEvent = function() {
+				$element.trigger("scrolling.parentscrollto");
+			}
+			var postEvent = function() {
+				$element.trigger("scrolled.parentscrollto");
+			}
 
 			if($parentContext instanceof jQuery)
 				$parent = $parentContext;
 			else if($parentContext instanceof Element || typeof $parentContext === "string")
 				$parent = $($parentContext);
 			else
-				$parent = $element.parent();
+				$parent = $(getScrollParent($element[0]));
 
-			var scrollTo = $parent.scrollTop() + ($element.offset().top - $parent.offset().top) - offset;
+			if($parent.is(document)) {
+				$parent = $("html, body");
+			}
+			if($parent.is("html, body")) {
+				isRoot = true;
+			}
+			var parentOffset = $parent.offset().top;
+			var scrollTo = ($element.offset().top - parentOffset) - offset;
+			if(!isRoot) {
+				scrollTo = $parent.scrollTop() + scrollTo;
+			}
 
 			if(options.percentageOffset) {
 				var percentOffset = options.percentageOffset;
 				if(typeof percentOffset == "string")
-					percentOffset = parseFloat(percentOffset) / 100; // ignore the percent sign
-				scrollTo -= $parent.height() * percentOffset;
+					percentOffset = parseFloat(percentOffset); // ignore the percent sign
+				scrollTo -= $parent.height() * percentOffset / 100;
 			}
 
+			progressEvent();
 			if(options.animate) {
 				var animateOptions = $.extend({ duration: options.duration }, options.animateOptions);
 				$parent.animate({
 					scrollTop: scrollTo
 				}, animateOptions);
+				setTimeout(postEvent, options.duration);
 			} else {
 				$parent.scrollTop(scrollTo);
+				postEvent();
 			}
 		};
 
@@ -217,14 +275,23 @@ if(jQuery) {
 				sidebarWidth = $sidebar.is(".visible") ? $sidebar.outerWidth() : 0;
 
 			var scrollTo = $element.offset().left - sidebarWidth - offset;
+			var progressEvent = function() {
+				$element.trigger("scrolling.hscrollto");
+			}
+			var postEvent = function() {
+				$element.trigger("scrolled.hscrollto");
+			}
 
+			progressEvent();
 			if(options.animate) {
 				var animateOptions = $.extend({ duration: options.duration }, options.animateOptions);
 				$("html, body").animate({
 					scrollTop: scrollTo
 				}, animateOptions);
+				setTimeout(postEvent, options.duration);
 			} else {
 				$("html, body").scrollTop(scrollTo);
+				postEvent();
 			}
 		};
 
@@ -238,16 +305,39 @@ if(jQuery) {
 
 			var offset = 0 + options.offset;
 			var $element = $(element),
-				$parent;
+				$parent,
+				isRoot = false;
+
+			if($element.length == 0) {
+				// Element does not exist
+				return;
+			}
+
+			var progressEvent = function() {
+				$element.trigger("scrolling.parenthscrollto");
+			}
+			var postEvent = function() {
+				$element.trigger("scrolled.parenthscrollto");
+			}
 
 			if($parentContext instanceof jQuery)
 				$parent = $parentContext;
 			else if($parentContext instanceof Element || typeof $parentContext === "string")
 				$parent = $($parentContext);
 			else
-				$parent = $element.parent();
+				$parent = $(getScrollParent($element[0]));
 
-			var scrollTo = $parent.scrollLeft() + ($element.offset().left - $parent.offset().left) - offset;
+			if($parent.is(document)) {
+				$parent = $("html, body");
+			}
+			if($parent.is("html, body")) {
+				isRoot = true;
+			}
+			var parentOffset = $parent.offset().left;
+			var scrollTo = $parent.scrollLeft() + ($element.offset().left - parentOffset) - offset;
+			if(!isRoot) {
+				scrollTo = $parent.scrollLeft() + scrollTo;
+			}
 
 			if(options.percentageOffset) {
 				var percentOffset = options.percentageOffset;
@@ -256,21 +346,26 @@ if(jQuery) {
 				scrollTo -= $parent.height() * percentOffset;
 			}
 
+			progressEvent();
 			if(options.animate) {
 				var animateOptions = $.extend({ duration: options.duration }, options.animateOptions);
 				$parent.animate({
 					scrollLeft: scrollTo
 				}, animateOptions);
+				setTimeout(postEvent, options.duration);
 			} else {
 				$parent.scrollLeft(scrollTo);
+				postEvent();
 			}
 		};
 
 		var flashElement = function(element) {
 			var $elm = $(element);
 			$elm.removeClass("flash-element").addClass("flash-element");
+			$elm.trigger("flashing.flashelement");
 			setTimeout(function() {
 				$elm.removeClass("flash-element");
+				$elm.trigger("flashed.flashelement");
 			}, 3000);
 		};
 
@@ -524,6 +619,7 @@ if(jQuery) {
 			randomString,
 			escapeRegex,
 			debounce,
+			getScrollParent,
 			scrollTo,
 			parentScrollTo,
 			hScrollTo,
@@ -610,9 +706,8 @@ if(jQuery) {
 		// ... with some customizations
 		textareaAutoHeight: function (options) {
 			var defaultOptions = {
-				delegate: false,
 				bypassHeight: true,
-				delegateTo: "textarea.auto-height",
+				selector: null, // "textarea.auto-height"
 				extraSpaceCounteraction: 0.5,
 			}
 			options = $.extend(defaultOptions, options);
@@ -624,6 +719,7 @@ if(jQuery) {
 				}
 
 				var $element = $(element),
+					curHeight = $element.height(),
 					boxSizing = $element.css("boxSizing"),
 					fontSize = $element.css("fontSize"),
 					lineHeight = $element.css("lineHeight"),
@@ -659,7 +755,9 @@ if(jQuery) {
 				}*/
 
 				$element.height(targetHeight);
-				$element.trigger("autoheight");
+				if(targetHeight != curHeight) {
+					$element.trigger("autoheight");
+				}
 
 				return $element;
 			}
@@ -668,15 +766,44 @@ if(jQuery) {
 			function autoHeightHandler(event) {
 				return _autoHeight(event.target || this);
 			}
+			function handleAutoHeightParents(elm) {
+				var $elm = $(elm),
+					$target = $elm.closest(".tab-pane, .modal-dialog");
 
-			if(options.delegate) {
-				this.off("input", options.delegateTo, autoHeightHandler);
-				this.find(options.delegateTo).each(function() {
+				var handler = function(e) {
+					$elm.trigger("input");
+				}
+
+				// If inside a tab pane, find the toggle first
+				var id = $target.prop("id");
+				if($target.is(".tab-pane") && id) {
+					$target = $('.nav-link[href="#'+id+'"], .nav-link[data-target="#'+id+'"]');
+				}
+
+				if($target.length > 0) {
+					// Using 'shown' events instead of 'show' because when 'show'
+					// is triggered, the element is not visible yet, thus height
+					// calculation will still miss. May be weird because 'shown'
+					// waits for the transition to complete and the layout might
+					// jerk out a bit, but that's just how it is
+					$target.off("shown.bs.tab shown.bs.modal", handler)
+							.on("shown.bs.tab shown.bs.modal", handler)
+					;
+				}
+			}
+
+			if(options.selector) {
+				// Delegate to elements specified by the selector
+				this.off("input", options.selector, autoHeightHandler);
+				this.find(options.selector).each(function() {
+					handleAutoHeightParents(this);
 					_autoHeight(this);
 				});
-				return this.on("input", options.delegateTo, autoHeightHandler);
+				return this.on("input", options.selector, autoHeightHandler);
 			} else {
+				// Attach to currently selected elements
 				return this.each(function() {
+					handleAutoHeightParents(this);
 					_autoHeight(this).off("input", autoHeightHandler).on("input", autoHeightHandler);
 				});
 			}

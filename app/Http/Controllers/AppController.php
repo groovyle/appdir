@@ -18,7 +18,10 @@ class AppController extends Controller
 	}
 
 	public function page(string $slug) {
-		$app = App::frontendItem($slug);
+		// TODO: if user is admin/verifier/owner, allow viewing an unpublished app
+		// as a preview
+
+		$app = App::getFrontendItem($slug);
 
 		$data = [];
 		$data['app'] = $app;
@@ -27,7 +30,7 @@ class AppController extends Controller
 	}
 
 	public function preview(string $slug) {
-		$app = App::frontendItem($slug);
+		$app = App::getFrontendItem($slug);
 
 		$data = [];
 		$data['app'] = $app;

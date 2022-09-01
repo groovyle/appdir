@@ -1,20 +1,20 @@
 @extends('admin.layouts.main')
 
 @section('title')
-{{ __('admin.app_verification.tab_title') }} - @parent
+{{ __('admin/app_verifications.tab_title') }} - @parent
 @endsection
 
-@section('page-title', __('admin.app_verification.page-title'))
+@section('page-title', __('admin/app_verifications.page_title.index'))
 
 @section('content')
   <!-- Card -->
   <div class="card">
     <div class="card-header">
-      <h3 class="card-title">{{ __('admin.app.submissions') }}</h3>
+      <h3 class="card-title">{{ __('admin/app_verifications.submissions') }}</h3>
     </div>
     @if (empty($unverified))
     <div class="card-body">
-      <h4 class="text-left">{{ __('admin.app.no_app_submissions_yet') }}</h4>
+      <h4 class="text-left">{{ __('admin/app_verifications.no_app_submissions_yet') }}</h4>
     </div>
     @else
     <div class="card-body p-0">
@@ -23,11 +23,9 @@
           <thead>
             <tr>
               <th style="width: 50px;">{{ __('common.#') }}</th>
-              <th>{{ __('common.title') }}</th>
-              <th>{{ __('admin.app.path') }}</th>
-              <th>{{ __('admin.app.preview_url') }}</th>
-              <th>{{ __('admin.app.submission_status') }}</th>
-              <th>{{ __('common.action') }}</th>
+              <th>{{ __('admin/apps.fields.name') }}</th>
+              <th>{{ __('admin/apps.fields.submission_status') }}</th>
+              <th style="width: 1%;">{{ __('common.actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -35,20 +33,13 @@
             <tr>
               <td class="text-right">{{ $loop->iteration }}</td>
               <td>{{ $app->name }}</td>
-              <td>{{ $app->full_directory }}</td>
-              <td>
-                <a href="{{ $app->full_url }}" target="_blank" class="text-primary">
-                  {{ $app->full_url }}
-                  <span class="fas fa-xs fa-external-link-alt"></span>
-                </a>
-              </td>
               <td>
                 @include('components.app-verification-status', ['app' => $app])
               </td>
-              <td>
-                <a href="{{ route('admin.app_verifications.review', ['app' => $app->id]) }}" class="btn btn-success btn-sm">
+              <td class="text-nowrap">
+                <a href="{{ route('admin.app_verifications.review', ['app' => $app->id]) }}" class="btn btn-primary btn-sm">
                   <span class="fas fa-clipboard-check mr-1"></span>
-                  {{ __('admin.app_verification.verify') }}
+                  {{ __('admin/app_verifications.verify') }}
                 </a>
               </td>
             </tr>

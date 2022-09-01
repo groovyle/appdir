@@ -67,7 +67,7 @@ function generate_ancestors($str, $delimiter = '.', $trailing_delimiter = FALSE)
 function status_badge($text, $style, $attrs = '') {
 	if($attrs)
 		$attrs = ' '.$attrs;
-	return sprintf('<span class="badge badge-%s"%s>%s</span>', $style, $attrs, $text);
+	return sprintf('<span class="badge cursor-default badge-%s"%s>%s</span>', $style, $attrs, $text);
 }
 
 function description_text($text) {
@@ -107,7 +107,7 @@ function muted_text($text, $with_markup = true, $with_class = true) {
 	$markup = '<em $classes>%s</em>';
 	if(is_string($with_markup))
 		$markup = $with_markup;
-	$class = ' class="text-muted"';
+	$class = ' class="text-muted cursor-default"';
 	if(is_string($with_class))
 		$class = $with_class;
 
@@ -125,20 +125,24 @@ function none_text() {
 	return call_user_func_array('muted_text', array_merge(['('.__('common.none').')'], func_get_args()));
 }
 
-function value_or_empty($value, $replacement = null) {
-	$additional_args = array_slice(func_get_args(), 2);
+function value_or_empty($value, $replacement = null, $escape = true) {
+	$additional_args = array_slice(func_get_args(), 3);
+	if(is_string($value))
+		$value = trim($value);
 	if($replacement === null) {
 		$replacement = call_user_func_array('empty_text', $additional_args);
 	}
-	return !!$value || in_array($value, [0, '0'], true) ? e($value) : $replacement;
+	return !!$value || in_array($value, [0, '0'], true) ? ( $escape ? e($value) : $value ) : $replacement;
 }
 
-function value_or_none($value, $replacement = null) {
-	$additional_args = array_slice(func_get_args(), 2);
+function value_or_none($value, $replacement = null, $escape = true) {
+	$additional_args = array_slice(func_get_args(), 3);
+	if(is_string($value))
+		$value = trim($value);
 	if($replacement === null) {
 		$replacement = call_user_func_array('none_text', $additional_args);
 	}
-	return !!$value || in_array($value, [0, '0'], true) ? e($value) : $replacement;
+	return !!$value || in_array($value, [0, '0'], true) ? ( $escape ? e($value) : $value ) : $replacement;
 }
 
 // Alias to value_or_empty()
@@ -153,7 +157,8 @@ function von($value = null) {
 }
 // Alias to value_or_empty(), with dash as replacement instead of text
 function vo_($value = null) {
-	return call_user_func_array('value_or_empty', [$value, '<span>&ndash;</span>']);
+	$args = array_slice(func_get_args(), 1);
+	return call_user_func_array('value_or_empty', array_merge([$value, '<span>&ndash;</span>'], $args));
 }
 
 function html_attributes($attributes, $escape = false) {
@@ -161,4 +166,30 @@ function html_attributes($attributes, $escape = false) {
 		return sprintf('%s="%s"', $k, $escape ? e($v) : $v);
 	}, array_keys($attributes), $attributes));
 	return $result;
+}
+
+function pretty_username($user, $is_an_owner = false) {
+	$atts = [];
+	$atts['class'] = ['username'];
+	if($is_an_owner) {
+		$atts['class'][] = 'is-owner';
+	}
+
+	$color = null;
+	if( !($user instanceof \App\User) ) {
+		$name = $user;
+	} else {
+		$name = $user->name;
+		if($user->is_system) {
+			$color = 'text-purple';
+		}
+	}
+
+	if($color) {
+		$atts['class'][] = $color;
+	}
+
+	$atts['class'] = implode(' ', $atts['class']);
+	$text = sprintf('<span %s>%s</span>', html_attributes($atts), $user);
+	return $text;
 }

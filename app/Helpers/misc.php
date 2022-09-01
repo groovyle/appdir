@@ -8,6 +8,21 @@ function elocollect() {
 	return new \Illuminate\Database\Eloquent\Collection(...func_get_args());
 }
 
+// Checks whether an old input exists (e.g after validation fails).
+// Only works if the submitted input has a csrf_field()
+function old_input_exists() {
+	return old('_token') !== NULL;
+}
+
+// Simplifies both integer parameters so that it returns:
+// * -1 if $a < $b;
+// * 0 if $a == $b;
+// * 1 if $a > $b;
+// Primarily used for array custom sort functions
+function simplecmp($a, $b) {
+	return $a < $b ? -1 : ($a > $b ? 1 : 0);
+}
+
 function dump_db($die = TRUE) {
 	$fn = $die ? 'dd' : 'dump';
 	$fn(DB::getQueryLog());

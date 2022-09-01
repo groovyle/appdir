@@ -25,4 +25,8 @@ class AppCategory extends Model
 		});
 	}
 
+	public function __toString() {
+		return $this->name;
+	}
+
 }

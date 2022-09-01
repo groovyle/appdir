@@ -2,8 +2,7 @@
 if(!isset($is_snippet))
   $is_snippet = false;
 
-$view_only = !!($view_only ?? false);
-$hide_changes = $view_only || !!($hide_changes ?? false);
+$hide_changes = !!($hide_changes ?? false);
 if($hide_changes) {
   $old_attributes = optional();
   $diff_relations = optional();
@@ -13,15 +12,20 @@ if($hide_changes) {
 }
 
 $comments = optional($verif->details ?? null);
-$hide_status = $view_only || !!($hide_status ?? true);
-
-$section = 'detail-content';
-if(isset($section_id))
-  $section = $section.'-'.$section_id;
 
 $rand = random_alpha(5);
 ?>
-@section($section)
+
+@push('head-additional')
+<style>
+  .table-horizontal th,
+  .table-horizontal td {
+    vertical-align: top;
+  }
+</style>
+@endpush
+
+@section('detail-content')
       <dl class="row">
         <dt class="col-12 col-sm-3 col-xl-2">{{ __('admin/apps.fields.name') }}</dt>
         <dd class="col-12 col-sm-9 col-xl-10">
@@ -168,7 +172,7 @@ $rand = random_alpha(5);
           @endif
 
           @if(is_array($diff_relations['visuals']) && array_key_exists('old', $diff_relations['visuals']))
-            <a href="#visuals-old-{{ $rand }}" class="fas fa-history text-warning text-090 btn-collapse-scroll ml-2" title="@lang('admin/apps.visuals.visual_comparison_detail')" data-toggle="collapse" role="button"></a>
+            <a href="#visuals-old-{{ $rand }}" class="fas fa-history text-warning text-090 ml-2" title="@lang('admin/apps.visuals.visual_comparison_detail')" data-toggle="collapse" role="button"></a>
           @endisset
 
           @component('admin.app_verification.components.btn-pop-comment')
@@ -179,16 +183,11 @@ $rand = random_alpha(5);
           @include('admin.app.components.detail-visuals-list', ['visuals' => $app->visuals])
         </dd>
         @if(is_array($diff_relations['visuals']) && array_key_exists('old', $diff_relations['visuals']))
-        <dd class="col-12 collapse collapse-scrollto" id="visuals-old-{{ $rand }}">
+        <dd class="col-12 collapse" id="visuals-old-{{ $rand }}">
           <div class="text-090 text-bold">@lang('admin/apps.visuals.old_visuals') ({{ count($diff_relations['visuals']['old']) }})</div>
           @include('admin.app.components.detail-visuals-list', ['visuals' => $diff_relations['visuals']['old'], 'smaller' => true])
         </dd>
         @endisset
-
-        @if(!$hide_status)
-        <dt class="col-sm-3 col-xl-2">{{ __('admin/apps.fields.status') }}</dt>
-        <dd class="col-sm-9 col-xl-10">@include('components.app-verification-status', ['app' => $app])</dd>
-        @endif
       </dl>
 @endsection
 

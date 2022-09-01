@@ -18,7 +18,7 @@ if(isset($attributes)) {
 }
 ?>
 @if($logo)
-<a href="{{ $logo->url }}" target="_blank" {!! $attrs !!}><img rel="logo" src="{{ $logo->url }}" class="img-responsive" {!! $style !!}></a>
+<a href="{{ $logo->url }}" target="_blank" {!! $attrs !!}><img rel="logo" src="{{ $logo->url }}" class="maxw-100" {!! $style !!}></a>
 @elseif($none)
 <span {!! $attrs !!}>@von(null)</span>
 @endif

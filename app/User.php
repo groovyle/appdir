@@ -5,6 +5,7 @@ namespace App;
 use App\SystemDataProviders\SystemDataBroker;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Silber\Bouncer\Database\HasRolesAndAbilities;
@@ -17,6 +18,10 @@ class User extends Authenticatable
 	use HasRolesAndAbilities;
 	use SoftDeletes;
 	use HasFilepond;
+
+	protected $attributes = [
+		'entity' => 'user',
+	];
 
 	/**
 	 * The attributes that are mass assignable.
@@ -45,21 +50,34 @@ class User extends Authenticatable
 		'email_verified_at' => 'datetime',
 	];
 
-	public function getHomeDirectoryAttribute() {
-		// DUMMY
-		$home_directory = '/home/user123/';
-		return $home_directory;
+	public static function boot() {
+		parent::boot();
+
+		static::addGlobalScope('_with_trashed', function (Builder $builder) {
+			// Set to always able to select trashed items
+			$builder->withTrashed();
+		});
 	}
 
-	public function system_user() {
-		return $this->hasOne('App\Models\SystemUser');
+	public function getIsSystemAttribute() {
+		return $this->entity == 'system';
 	}
 
-	public function getSystemAttribute() {
-		return $this->system_user ? SystemDataBroker::getUser($this->system_user->domain, $this->system_user->username) : [];
+	public function getNameAttribute() {
+		$name = $this->attributes['name'];
+		if(!$this->is_system) {
+			return $name;
+		} else {
+			$key = 'users.'.$name;
+			return \Lang::has($key) ? \Lang::get($key) : $name;
+		}
 	}
 
 	public function apps() {
 		return $this->hasMany('App\Models\App', 'owner_id');
+	}
+
+	public function __toString() {
+		return (string) $this->name;
 	}
 }

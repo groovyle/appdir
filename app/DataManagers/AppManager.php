@@ -50,7 +50,7 @@ class AppManager {
 	// Call this on a fresh $model, i.e before doing anything at all
 	public static function prepareForVersionDiff(App $model)
 	{
-		$attributes = collect($model->getOriginal())->filter(function($value, $key) {
+		$attributes = collect($model->getAttributes())->filter(function($value, $key) {
 			return !in_array($key, static::DIFF_UNCHECKED_ATTRIBUTES);
 		})->all();
 
@@ -262,17 +262,15 @@ class AppManager {
 		}
 
 		$next_version = $model->nextVersionNumber();
-		if(!$comment && !$is_edit) {
-			$comment = 'new';
-		}
 
 		$changelog = new AppChangelog([
-			'version'	=> $next_version,
-			'diffs'		=> $diffs,
-			'comment'	=> $comment,
+			'version'		=> $next_version,
+			'diffs'			=> $diffs,
+			'comment'		=> $comment,
 		]);
 		if($model->exists) {
 			$changelog->app_id = $model->id;
+			$changelog->based_on_id = optional($model->floating_changes->last())->id ?? optional($model->version)->id ?? null;
 		}
 		if($save) {
 			$model->changelogs()->save($changelog);
@@ -328,9 +326,14 @@ class AppManager {
 				// can be done accurately
 				$to_save = $model->find($model->getKey());
 
-				$result['saved'] = static::applyVersionsChanges($to_save, 'void', null, function($query) {
-					$query->where('is_verified', 0);
+				$compiled = static::applyVersionsChanges($to_save, 'void', null, function($query) {
+					$query->where('status', AppChangelog::STATUS_PENDING);
 				});
+				foreach($compiled['versions'] as $v) {
+					$v->is_verified = 1;
+					$v->save();
+				}
+				$result['saved'] = true;
 			}
 		}
 
@@ -764,9 +767,11 @@ class AppManager {
 						// $changes['relations'][$key]['new'] = array_merge($changes['relations'][$key]['new'] ?? [], $rel['new'] ?? $rel);
 						// // Only set old values if not yet set
 						// $changes['relations'][$key]['old'] = array_merge($rel['old'] ?? [], $changes['relations'][$key]['old'] ?? []);
-						if(isset($rel['new']))
+						if(array_key_exists('new', $rel))
 							$changes['relations'][$key]['new'] = $rel['new'];
-						if(isset($rel['old']))
+						// Only set old values if not yet set
+						if(array_key_exists('old', $rel)
+							&& !array_key_exists('old', $changes['relations'][$key]))
 							$changes['relations'][$key]['old'] = $rel['old'];
 					}
 				}
@@ -816,30 +821,54 @@ class AppManager {
 
 	public static function applyVersionsChanges(App $model, $to_version, $from_version = NULL, $query_callback = NULL)
 	{
-		$compiled = static::getVersionsChanges($model, $to_version, $from_version, $query_callback);
-		static::applyDiff($model, $compiled['changes'], false);
-
-		if($compiled['versions']) {
-			$model->version()->associate($compiled['final_version_id'])->save();
-			foreach($compiled['versions'] as $v) {
-				$v->is_verified = 1;
-				if(!$v->save())
-					return false;
+		if(is_array($to_version) || $to_version instanceof \ArrayAccess) {
+			$versions = null;
+			if($to_version[0] instanceof AppChangelog) {
+				$versions = elocollect($to_version)->sortBy('id');
+			} else {
+				$versions = $model->changelogs()->findMany($to_version)->get()->reverse()->values();
 			}
+			$changes = static::compileVersionsChanges($versions);
+			$compiled = [
+				'changes'		=> $changes,
+				'versions'		=> $versions,
+				'final_version'		=> optional($versions->last())->version,
+				'final_version_id'	=> optional($versions->last())->id,
+			];
+		} else {
+			$compiled = static::getVersionsChanges($model, $to_version, $from_version, $query_callback);
+			$changes = $compiled['changes'];
 		}
 
-		return true;
+		static::applyDiff($model, $changes, false);
+
+		if($compiled['final_version_id']) {
+			$model->version()->associate($compiled['final_version_id'])->save();
+		}
+
+		return $compiled;
 	}
 
-	public static function getPendingVersion(App $model)
+	public static function getPendingVersion(App $model, $is_approved = false, $associate_version = true)
 	{
-		$changes = AppManager::compileVersionsChanges($model->pending_changes);
+		if(is_array($is_approved) || $is_approved instanceof \ArrayAccess) {
+			$pending_changes = $is_approved;
+		} else {
+			$pending_changes = !$is_approved ? $model->floating_changes : $model->approved_changes;
+		}
+		$compiled_changes = AppManager::compileVersionsChanges($pending_changes);
 
 		// Mock
 		$pending = App::find($model->id);
-		AppManager::applyDiff($pending, $changes, true);
+		AppManager::applyDiff($pending, $compiled_changes, true);
 
-		return [$model, $pending];
+		if($associate_version && count($pending_changes) > 0) {
+			$version = collect($pending_changes)->last();
+			$pending->setRelation('version', $version);
+			$pending->version_id = $version->id;
+		}
+
+		return [$model, $pending, $compiled_changes, $pending_changes];
 	}
 
 }

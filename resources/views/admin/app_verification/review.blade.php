@@ -1,200 +1,461 @@
+<?php
+
+$old_attributes = optional($version->display_diffs['attributes']['old'] ?? null);
+$diff_relations = optional($version->display_diffs['relations'] ?? null);
+
+$is_edit = !!$verif->id;
+
+$old_exists = old_input_exists();
+$goto_form = !!($goto_form ?? false);
+$goto_history = !!($goto_history ?? false);
+$post_verif_status = $post_verif_status ?? null;
+$post_edit = request()->has('post_edit');
+
+$tab_review_active = '';
+$tabpanel_review_active = '';
+$tab_history_active = '';
+$tabpanel_history_active = '';
+$review_form_show = '';
+
+if($goto_history
+  || (!$is_edit && !$goto_form && !$post_edit && !$ori->has_pending_changes && !$old_exists && !$post_verif_status)
+) {
+  $tab_history_active = 'active';
+  $tabpanel_history_active = 'active show';
+} else {
+  $tab_review_active = 'active';
+  $tabpanel_review_active = 'active show';
+}
+
+if($tab_review_active
+  && !$post_edit
+  && (!$post_verif_status || $post_verif_status == 'revision-needed')
+  && ($ori->has_pending_changes || $is_edit)) {
+  $review_form_show = 'show';
+}
+
+$lverif = $ori->last_verification;
+
+$rand = random_alpha(5);
+?>
+
 @extends('admin.layouts.main')
 
 @section('page-title', __('admin.app_verification.page-title'))
 
 @section('content')
-  <!-- Card -->
-  <div class="card">
-    <div class="card-body">
-      @if($errors->any())
-      <div class="alert alert-danger">
-        <ul>
-          @foreach($errors->all() as $errmsg)
-          <li>{{ $errmsg }}</li>
-          @endforeach
-        </ul>
+<div class="mb-2">
+  <a href="{{ route('admin.app_verifications.index') }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+</div>
+
+
+@if($app->is_unverified_new)
+<div class="alert alert-info">
+  <p class="mb-0">@lang('admin/app_verifications.messages.this_unverified_item_is_new').</p>
+</div>
+@endif
+
+@include('admin.app.detail-inner', ['app' => $ori, 'hide_changes' => true, 'is_snippet' => true])
+@include('admin.app.changes.pending')
+<div class="card collapsed-card">
+  <div class="card-header">
+    <div class="d-flex flex-wrap align-items-center">
+      <div class="mr-auto">
+        <h4 class="mb-0 text-primary d-inline-block">
+          {{ $ori->complete_name }}
+          <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="@lang('common.show/hide')"><i class="fas fa-search"></i></button>
+        </h4>
+        <br>
+        @if($app->is_verified)
+        <span class="badge badge-soft badge-success align-middle text-080">
+          <span class="fas fa-check-circle mr-1"></span>
+          @lang('admin/apps.app_is_public')
+        </span>
+        @else
+        <span class="badge badge-soft badge-warning align-middle text-080">
+          <span class="fas fa-exclamation-circle mr-1"></span>
+          @lang('admin/apps.app_is_not_public')
+        </span>
+        @endif
+        <a href="{{ $ori->get_public_url($app->id, ['version' => $app->version_number]) }}" class="btn btn-xs btn-secondary px-2" target="_blank">
+          @lang('admin/app_verifications.review_public_page')
+          <span class="fas fa-globe-americas ml-1"></span>
+        </a>
       </div>
-      @endif
-      <form method="POST" action="{{ route('admin.app_verifications.verify', ['app' => $app->id]) }}" enctype="multipart/form-data" id="formInputReview">
-        @csrf
-        @method('POST')
-
-        <div class="row">
-          <div class="col-12 col-md-8 col-xl-6">
-            <div class="form-group">
-              <div class="clearfix">
-                <label>{{ __('admin.app.field.name') }}</label>
-                <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin.app_verifications.comment_field.name') }}" data-target="#inputDetailsName">
-                  <span class="fas fa-comment"></span>
-                </a>
-              </div>
-              <p>{{ $app->name }}</p>
-              <input type="hidden" name="details[name]" id="inputDetailsName" value="{{ old('details.name') }}">
-            </div>
-
-            <div class="form-group">
-              <div class="clearfix">
-                <label>{{ __('admin.app.field.description') }}</label>
-                <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin.app_verifications.comment_field.description') }}" data-target="#inputDetailsDescription">
-                  <span class="fas fa-comment"></span>
-                </a>
-              </div>
-              <p>{!! description_text($app->description) !!}</p>
-              <input type="hidden" name="details[description]" id="inputDetailsDescription" value="{{ old('details.description') }}">
-            </div>
-
-            <div class="form-group">
-              <div class="clearfix">
-                <label>{{ __('admin.app.field.directory') }}</label>
-                <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin.app_verifications.comment_field.directory') }}" data-target="#inputDetailsDirectory">
-                  <span class="fas fa-comment"></span>
-                </a>
-              </div>
-              <p>{{ $app->full_directory }}</p>
-              <input type="hidden" name="details[directory]" id="inputDetailsDirectory" value="{{ old('details.directory') }}">
-            </div>
-
-            <div class="form-group">
-              <div class="clearfix">
-                <label>{{ __('admin.app.field.url') }}</label>
-                <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin.app_verifications.comment_field.url') }}" data-target="#inputDetailsUrl">
-                  <span class="fas fa-comment"></span>
-                </a>
-              </div>
-              <p>
-                <a href="{{ $app->full_url }}" target="_blank" class="text-primary">
-                  {{ $app->full_url }}
-                  <span class="fas fa-xs fa-external-link-alt"></span>
-                </a>
-              </p>
-              <input type="hidden" name="details[url]" id="inputDetailsUrl" value="{{ old('details.url') }}">
-            </div>
-
-            <div class="form-group">
-              <div class="clearfix">
-                <label>{{ __('admin.app.field.categories') }}</label>
-                <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin.app_verifications.comment_field.categories') }}" data-target="#inputDetailsCategories">
-                  <span class="fas fa-comment"></span>
-                </a>
-              </div>
-              @if (!empty($app->categories))
-              <ul class="pt-0 pb-1">
-              @foreach ($app->categories as $category)
-              <li>{{ $category->name }}</li>
-              @endforeach
-              </ul>
-              @else
-              &ndash;
-              @endif
-              <input type="hidden" name="details[categories]" id="inputDetailsCategories" value="{{ old('details.categories') }}">
-            </div>
-
-            <div class="form-group">
-              <div class="clearfix">
-                <label>{{ __('admin.app.field.tags') }}</label>
-                <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin.app_verifications.comment_field.tags') }}" data-target="#inputDetailsTags">
-                  <span class="fas fa-comment"></span>
-                </a>
-              </div>
-              <div>
-              @forelse ($app->tags as $tag)
-              <a href="#" class="btn btn-sm btn-default rounded-pill" data-toggle="popover" data-content="{{ $tag->name }}" data-trigger="focus" data-placement="top">{{ $tag->name }}</a>
-              @empty
-              &ndash;
-              @endforelse
-              </div>
-              <input type="hidden" name="details[tags]" id="inputDetailsTags" value="{{ old('details.tags') }}">
-            </div>
-
-            <div class="form-group">
-              <div class="clearfix">
-                <label>{{ __('admin.app.field.visuals') }}</label>
-                <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin.app_verifications.comment_field.visuals') }}" data-target="#inputDetailsThumbnails">
-                  <span class="fas fa-comment"></span>
-                </a>
-              </div>
-              <div class="thumb-cards d-flex justify-content-start align-items-start mb-2">
-              @foreach ($app->visuals as $visual)
-              @php
-              $i = $loop->iteration;
-              @endphp
-              <div class="thumb-item mr-2 mb-2">
-                <div class="card m-0">
-                  <div class="card-img-top">
-                    <img src="{{ $visual->url }}" alt="{{ __('common.visual').' '.$i }}">
-                  </div>
-                  <div class="card-body p-1">
-                    <p class="card-text text-secondary mb-1">{{ $visual->caption ? $visual->caption : __('common.visual').' '.$i }}</p>
-                  </div>
-                </div>
-              </div>
-              @endforeach
-              </div>
-              <input type="hidden" name="details[visuals]" id="inputDetailsThumbnails" value="{{ old('details.visuals') }}">
-            </div>
-
-            <hr>
-
-            <div class="form-group">
-              <label for="inputComment">{{ __('admin.app_verification.comment') }}</label>
-              <textarea name="comment" id="inputComment" class="form-control" placeholder="{{ __('admin.app_verification.hint.comment') }}" rows="2"></textarea>
-            </div>
-
-          </div>
-        </div>
-        <div class="my-2" data-toggle="buttons">
-          <div class="row mb-4">
-            <div class="col-12 col-sm-6 col-lg-4">
-              <label class="btn btn-outline-{{ $vstatus['revision-needed']->bg_style }} media media-btn pl-3 py-2">
-                <span class="media-icon mr-3 fa-fw {{ $vstatus['revision-needed']->icon }}"></span>
-                <div class="media-body">
-                  <p class="lead">{{ __($vstatus['revision-needed']->name) }}</p>
-                  <p>{{ __($vstatus['revision-needed']->description) }}</p>
-                  <input type="radio" name="status" value="{{ $vstatus['revision-needed']->code }}" class="vstatus-radio vstatus-radio-{{ $vstatus['revision-needed']->code }} d-none" {!! old_checked('status', NULL, $vstatus['revision-needed']->code) !!} >
-                </div>
-              </label>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-              <label class="btn btn-outline-{{ $vstatus['approved']->bg_style }} media media-btn pl-3 py-2">
-                <span class="media-icon mr-3 fa-fw {{ $vstatus['approved']->icon }}"></span>
-                <div class="media-body">
-                  <p class="lead">{{ __($vstatus['approved']->name) }}</p>
-                  <p>{{ __($vstatus['approved']->description) }}</p>
-                  <input type="radio" name="status" value="{{ $vstatus['approved']->code }}" class="vstatus-radio vstatus-radio-{{ $vstatus['approved']->code }} d-none" {!! old_checked('status', NULL, $vstatus['approved']->code) !!} >
-                </div>
-              </label>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-              <label class="btn btn-outline-{{ $vstatus['rejected']->bg_style }} media media-btn pl-3 py-2">
-                <span class="media-icon mr-3 fa-fw {{ $vstatus['rejected']->icon }}"></span>
-                <div class="media-body">
-                  <p class="lead">{{ __($vstatus['rejected']->name) }}</p>
-                  <p>{{ __($vstatus['rejected']->description) }}</p>
-                  <input type="radio" name="status" value="{{ $vstatus['rejected']->code }}" class="vstatus-radio vstatus-radio-{{ $vstatus['rejected']->code }} d-none" {!! old_checked('status', NULL, $vstatus['rejected']->code) !!} >
-                </div>
-              </label>
-            </div>
-          </div>
-        </div>
-        <div class="mt-2">
-          <button type="submit" class="btn btn-primary">{{ __('admin.app_verifications.verify') }}</button>
-          <a href="{{ url()->previous() }}" class="btn btn-default">{{ __('common.back') }}</a>
-        </div>
-        <div class="d-none" id="inputDetailsContent">
-          <div class="input-group">
-            <textarea class="form-control input-comment-text" rows="1" placeholder="{{ __('common.comment') }}" autocomplete="off"></textarea>
-          </div>
-        </div>
-      </form>
+      <div class="text-right ml-auto">
+        @if($ori->has_history)
+        <span class="text-bold">
+          @lang('admin/apps.changes.version_x', ['x' => $ori->version_number])
+        </span>
+        @endif
+        @if($ori->has_floating_changes)
+        <br>
+        <button class="btn btn-xs btn-warning btn-pending-changes-show" data-app-id="{{ $ori->id }}" data-current-version="{{ $ori->version_number }}" data-accumulate-changes="false">
+          <span class="fas fa-clock"></span>
+          @lang('admin/apps.show_pending_changes')
+        </button>
+        @endif
+      </div>
     </div>
-    <!-- /.card-body -->
   </div>
-  <!-- /.card -->
+  <div class="card-body">
+    @yield('detail-content')
+  </div>
+</div>
+
+<div class="card card-primary card-outline card-outline-tabs">
+  <div class="card-header p-0 border-bottom-0">
+    <ul class="nav nav-tabs" role="tablist" id="aver-tabs-tab">
+      <li class="nav-item">
+        <a class="nav-link {{ $tab_review_active }}" role="presentation" data-toggle="pill" href="#aver-tab-review">@lang('admin/app_verifications.review_app')</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {{ $tab_history_active }}" role="presentation" data-toggle="pill" href="#aver-tab-history">@lang('admin/app_verifications.verification_history') ({{ $app->verifications->count() }})</a>
+      </li>
+    </ul>
+  </div>
+  <div class="card-body p-0">
+    <div class="tab-content" id="aver-tabs-content">
+      <div id="aver-tab-review" class="tab-pane fade {{ $tabpanel_review_active }}" role="tabpanel">
+        <form method="POST" action="{{ route('admin.app_verifications.verify', ['app' => $app->id]) }}" id="formInputReview" class="app-verification-form">
+          <div class="list-group list-group-flush">
+            <div class="list-group-item border-bottom-0" id="reviewEmptyHeader">
+              @if($post_verif_status == 'approved')
+              <div class="alert alert-success">
+                @lang('admin/app_verifications.messages.app_verification_after_approved', ['base' => $lverif->base_changelog->version, 'final' => $app->version_number])
+              </div>
+              @elseif($post_verif_status == 'rejected')
+              <div class="alert alert-danger">
+                @lang('admin/app_verifications.messages.app_verification_after_rejected', ['base' => $lverif->base_changelog->version, 'final' => $app->version_number])
+              </div>
+              @elseif($post_verif_status == 'revision-needed')
+              <div class="alert alert-warning">
+                @lang('admin/app_verifications.messages.app_verification_after_revision-needed', ['base' => $lverif->base_changelog->version, 'final' => $app->version_number])
+              </div>
+              @endif
+
+              <div class="callout callout-info py-2">
+                <strong>@lang('admin/app_verifications.last_verification')</strong>
+                <div class="text-090">
+                  @include('admin.app_verification.components.verif-list-item', ['verif' => $lverif, 'hide_edit' => false, 'other_comments' => true])
+                </div>
+              </div>
+
+              @if(!$ori->has_pending_changes && !$is_edit)
+              <div class="callout callout-warning py-2 text-110">
+                @lang('admin/app_verifications.this_app_does_not_have_any_pending_changes_to_be_reviewed')
+                <br>
+                <button type="button" class="btn btn-warning" data-toggle="collapse" data-target="#reviewDetails">@lang('admin/app_verifications.review_anyway')</button>
+              </div>
+              @endif
+            </div>
+            <div id="reviewDetails" class="collapse {{ $review_form_show }}">
+              <div class="list-group-item verif-form-fields">
+                <h4>
+                  @if(!$is_edit)
+                  @lang('admin/app_verifications.titles.verification')
+                  @else
+                  <span class="text-primary">@lang('admin/app_verifications.titles.editing_last_verification')</span>
+                  <a href="{{ route('admin.app_verifications.review', ['app' => $verif->app_id]) }}" class="btn btn-warning btn-sm ml-1">@lang('common.cancel_edit')</a>
+                  @endif
+                </h4>
+
+                @if($is_edit)
+                <div class="alert alert-warning py-2">
+                  @lang('admin/app_verifications.you_are_editing_the_last_verification')
+                </div>
+                @endif
+                @if($ori->has_floating_changes)
+                <div class="callout callout-info py-2">
+                  @lang('admin/app_verifications.this_form_shows_the_app\'s_pending_changes')
+                  <br>
+                  @lang('admin/app_verifications.related_versions'): {{ $versions_range->rangeText() }}
+                </div>
+                @else
+                <div class="callout callout-warning py-2">
+                  @lang('admin/app_verifications.this_form_shows_version_x_the_app\'s_current_version', ['x' => $app->version_number])
+                </div>
+                @endif
+
+                <div class="callout callout-info py-2">
+                  @lang('admin/app_verifications.you_can_add_comments_to_any_related_fields_by_clicking_the_icon')
+                </div>
+
+                @csrf
+                @method('POST')
+
+                <input type="hidden" name="id" value="{{ $verif->id }}" >
+                <input type="hidden" name="base_version" value="{{ $verif->base_version }}" >
+                <input type="hidden" name="related_versions" value="{{ $verif->related_versions }}" >
+
+                @include('components.page-message', ['show_errors' => true])
+
+                <div class="row gutter-lg">
+                  <div class="col-12 col-md-8 col-xl-6">
+                    <div class="form-group">
+                      <div class="clearfix">
+                        <label>{{ __('admin/apps.fields.name') }}</label>
+                        @component('admin.app.components.detail-old-value')
+                          @isset($old_attributes['name'])
+                            @voe($old_attributes['name'])
+                          @endisset
+                        @endcomponent
+                        <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin/app_verifications.fields.add_comment_to_this_data') }}" data-target="#inputDetailsName">
+                          <span class="fas fa-comment"></span>
+                        </a>
+                      </div>
+                      <p class="value">@voe($app->name)</p>
+                      <input type="hidden" name="details[name]" id="inputDetailsName" value="{{ old('details.name', $verif->attrs['name']) }}">
+                    </div>
+
+                    <div class="form-group">
+                      <div class="clearfix">
+                        <label>{{ __('admin/apps.fields.short_name') }}</label>
+                        @component('admin.app.components.detail-old-value')
+                          @isset($old_attributes['short_name'])
+                            @voe($old_attributes['short_name'])
+                          @endisset
+                        @endcomponent
+                        <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin/app_verifications.fields.add_comment_to_this_data') }}" data-target="#inputDetailsShortName">
+                          <span class="fas fa-comment"></span>
+                        </a>
+                      </div>
+                      <p class="value">@voe($app->short_name)</p>
+                      <input type="hidden" name="details[short_name]" id="inputDetailsShortName" value="{{ old('details.short_name', $verif->attrs['short_name']) }}">
+                    </div>
+
+                    <div class="form-group">
+                      <div class="clearfix">
+                        <label>{{ __('admin/apps.fields.logo') }}</label>
+                        @component('admin.app.components.detail-old-value')
+                          @if(is_array($diff_relations['logo']) && array_key_exists('old', $diff_relations['logo']))
+                            @include('components.app-logo', ['logo' => $diff_relations['logo']['old'], 'size' => '80x80'])
+                          @endif
+                        @endcomponent
+                        <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin/app_verifications.fields.add_comment_to_this_data') }}" data-target="#inputDetailsLogo">
+                          <span class="fas fa-comment"></span>
+                        </a>
+                      </div>
+                      <div class="value">@include('components.app-logo', ['logo' => $app->logo, 'size' => '150x150'])</div>
+                      <input type="hidden" name="details[logo]" id="inputDetailsLogo" value="{{ old('details.logo', $verif->attrs['logo']) }}">
+                    </div>
+
+                    <div class="form-group">
+                      <div class="clearfix">
+                        <label>{{ __('admin/apps.fields.url') }}</label>
+                        @component('admin.app.components.detail-old-value')
+                          @isset($old_attributes['url'])
+                            @if($old_attributes['url'])
+                            <a href="{{ $old_attributes['url'] }}" target="_blank">{{ $old_attributes['url'] }} <span class="fas fa-external-link-alt text-080 ml-1"></span></a>
+                            @else
+                            @von
+                            @endif
+                          @endisset
+                        @endcomponent
+                        <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin/app_verifications.fields.add_comment_to_this_data') }}" data-target="#inputDetailsUrl">
+                          <span class="fas fa-comment"></span>
+                        </a>
+                      </div>
+                      <p class="value">
+                        @if($app->url)
+                        <a href="{{ $app->url }}" target="_blank">{{ $app->url }}</a>
+                        @else
+                        @von
+                        @endif
+                      </p>
+                      <input type="hidden" name="details[url]" id="inputDetailsUrl" value="{{ old('details.url', $verif->attrs['url']) }}">
+                    </div>
+
+                  </div>
+
+                  <div class="col-12 col-md-4 col-xl-6">
+                    <div class="form-group">
+                      <div class="clearfix">
+                        <label>
+                          {{ __('admin/apps.fields.categories') }}
+                          ({{ $app->categories->count() }})
+                        </label>
+                        @component('admin.app.components.detail-old-value')
+                          @if(is_array($diff_relations['categories']) && array_key_exists('old', $diff_relations['categories']))
+                            @if(($count = count($diff_relations['categories']['old'])) > 0)
+                            (@lang('common.total_x', ['x' => $count]))
+                            @each('components.app-category', $diff_relations['categories']['old'], 'category')
+                            @else
+                            @voe
+                            @endif
+                          @endisset
+                        @endcomponent
+                        <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin/app_verifications.fields.add_comment_to_this_data') }}" data-target="#inputDetailsCategories">
+                          <span class="fas fa-comment"></span>
+                        </a>
+                      </div>
+                      <div class="value">
+                        @if($app->categories->isNotEmpty())
+                        @each('components.app-category', $app->categories, 'category')
+                        @else
+                        @voe()
+                        @endif
+                      </div>
+                      <input type="hidden" name="details[categories]" id="inputDetailsCategories" value="{{ old('details.categories', $verif->attrs['categories']) }}">
+                    </div>
+
+                    <div class="form-group">
+                      <div class="clearfix">
+                        <label>
+                          {{ __('admin/apps.fields.tags') }}
+                          ({{ $app->tags->count() }})
+                        </label>
+                        @component('admin.app.components.detail-old-value')
+                          @if(is_array($diff_relations['tags']) && array_key_exists('old', $diff_relations['tags']))
+                            @if(($count = count($diff_relations['tags']['old'])) > 0)
+                            (@lang('common.total_x', ['x' => $count]))
+                            @each('components.app-tag', $diff_relations['tags']['old'], 'tag')
+                            @else
+                            @voe
+                            @endif
+                          @endisset
+                        @endcomponent
+                        <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin/app_verifications.fields.add_comment_to_this_data') }}" data-target="#inputDetailsTags">
+                          <span class="fas fa-comment"></span>
+                        </a>
+                      </div>
+                      <div class="value">
+                        @if($app->tags->isNotEmpty())
+                        @each('components.app-tag', $app->tags, 'tag')
+                        @else
+                        @voe()
+                        @endif
+                      </div>
+                      <input type="hidden" name="details[tags]" id="inputDetailsTags" value="{{ old('details.tags', $verif->attrs['tags']) }}">
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <div class="form-group">
+                      <div class="clearfix">
+                        <label>{{ __('admin/apps.fields.description') }}</label>
+                        @component('admin.app.components.detail-old-value')
+                          @isset($old_attributes['description'])
+                            <span class="text-pre-wrap">@voe($old_attributes['description'])</span>
+                          @endisset
+                        @endcomponent
+                        <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin/app_verifications.fields.add_comment_to_this_data') }}" data-target="#inputDetailsDescription">
+                          <span class="fas fa-comment"></span>
+                        </a>
+                      </div>
+                      <p class="value text-pre-wrap">@von($app->description)</p>
+                      <input type="hidden" name="details[description]" id="inputDetailsDescription" value="{{ old('details.description', $verif->attrs['description']) }}">
+                    </div>
+
+                    <div class="form-group">
+                      <div class="clearfix">
+                        <label>
+                          {{ __('admin/apps.fields.visuals') }}
+                          ({{ $app->visuals->count() }})
+                        </label>
+                        @if(is_array($diff_relations['visuals']) && array_key_exists('old', $diff_relations['visuals']))
+                          <a href="#visuals-old-{{ $rand }}" class="fas fa-history text-warning text-090 ml-2" title="@lang('admin/apps.visuals.visual_comparison_detail')" data-toggle="collapse" role="button"></a>
+                        @endisset
+                        <a href="#" class="d-inline-block ml-1 btn-pop-comment" title="{{ __('admin/app_verifications.fields.add_comment_to_this_data') }}" data-target="#inputDetailsThumbnails">
+                          <span class="fas fa-comment"></span>
+                        </a>
+                      </div>
+                      @include('admin.app.components.detail-visuals-list', ['visuals' => $app->visuals])
+                      @if(is_array($diff_relations['visuals']) && array_key_exists('old', $diff_relations['visuals']))
+                      <div class="collapse collapse-scrollto" id="visuals-old-{{ $rand }}">
+                        <div class="text-090 text-bold">@lang('admin/apps.visuals.old_visuals') ({{ count($diff_relations['visuals']['old']) }})</div>
+                        @include('admin.app.components.detail-visuals-list', ['visuals' => $diff_relations['visuals']['old'], 'smaller' => true])
+                      </div>
+                      @endisset
+                      <input type="hidden" name="details[visuals]" id="inputDetailsThumbnails" value="{{ old('details.visuals', $verif->attrs['visuals']) }}">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="list-group-item verif-form-fields">
+                <div class="form-group">
+                  <label for="inputOverallComment">{{ __('admin/app_verifications.fields.overall_comments') }}</label>
+                  <textarea name="overall_comment" id="inputOverallComment" class="form-control" placeholder="{{ __('admin/app_verifications.fields.overall_comments_hint') }}" rows="2" maxlength="1000" required>{{ old('overall_comment', $verif->comment) }}</textarea>
+                </div>
+
+                <div class="mt-2 mb-4">
+                  <label>{{ __('admin/app_verifications.fields.verification_result') }}</label>
+                  <div data-toggle="buttons">
+                    <div class="row">
+                      <div class="col-12 col-sm-6 col-lg-4">
+                        <label class="btn btn-outline-{{ $vstatus['approved']->bg_style }} media media-btn pl-3 py-2">
+                          <span class="media-icon mr-3 fa-fw {{ $vstatus['approved']->icon }}"></span>
+                          <div class="media-body">
+                            <p class="lead">{{ __($vstatus['approved']->name) }}</p>
+                            <p>{{ __('admin/app_verifications.status.approved_consequence') }}</p>
+                            <input type="radio" name="verif_status" value="{{ $vstatus['approved']->id }}" class="btn-group-input vstatus-radio vstatus-radio-{{ $vstatus['approved']->id }}" {!! old_checked('verif_status', $verif->status_id, $vstatus['approved']->id) !!} >
+                          </div>
+                        </label>
+                      </div>
+                      <div class="col-12 col-sm-6 col-lg-4">
+                        <label class="btn btn-outline-{{ $vstatus['rejected']->bg_style }} media media-btn pl-3 py-2">
+                          <span class="media-icon mr-3 fa-fw {{ $vstatus['rejected']->icon }}"></span>
+                          <div class="media-body">
+                            <p class="lead">{{ __($vstatus['rejected']->name) }}</p>
+                            <p>{{ __('admin/app_verifications.status.rejected_consequence') }}</p>
+                            <input type="radio" name="verif_status" value="{{ $vstatus['rejected']->id }}" class="btn-group-input vstatus-radio vstatus-radio-{{ $vstatus['rejected']->id }}" {!! old_checked('verif_status', $verif->status_id, $vstatus['rejected']->id) !!} >
+                          </div>
+                        </label>
+                      </div>
+                      <div class="col-12 col-sm-6 col-lg-4">
+                        <label class="btn btn-outline-{{ $vstatus['revision-needed']->bg_style }} media media-btn pl-3 py-2">
+                          <span class="media-icon mr-3 fa-fw {{ $vstatus['revision-needed']->icon }}"></span>
+                          <div class="media-body">
+                            <p class="lead">{{ __($vstatus['revision-needed']->name) }}</p>
+                            <p>{{ __('admin/app_verifications.status.revision-needed_consequence') }}</p>
+                            <input type="radio" name="verif_status" value="{{ $vstatus['revision-needed']->id }}" class="btn-group-input vstatus-radio vstatus-radio-{{ $vstatus['revision-needed']->id }}" {!! old_checked('verif_status', $verif->status_id, $vstatus['revision-needed']->id) !!} >
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-2 text-center">
+                  @if(!$is_edit)
+                  <button type="submit" class="btn btn-primary btn-min-100">{{ __('admin/app_verifications.verify') }}</button>
+                  @else
+                  <button type="submit" class="btn btn-info btn-min-100">{{ __('common.save') }}</button>
+                  <br>
+                  <a href="{{ route('admin.app_verifications.review', ['app' => $verif->app_id]) }}" class="btn btn-default btn-sm mt-3">@lang('common.cancel_edit')</a>
+                  @endif
+                </div>
+                <div class="d-none" id="inputDetailsContent">
+                  <div class="input-group">
+                    <textarea class="form-control input-comment-text" rows="1" placeholder="{{ __('admin/app_verifications.fields.comment_placeholder') }}" autocomplete="off" maxlength="200"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div id="aver-tab-history" class="tab-pane fade {{ $tabpanel_history_active }}" role="tabpanel">
+        @if($app->verifications->count() == 0)
+        <h6>&mdash; @lang('admin/app_verifications.there_are_no_verifications_yet') &mdash;</h6>
+        @else
+        <div class="pt-3 px-3 pb-1 text-secondary"><em>(@lang('common.sorted_from_newest_to_oldest'))</em></div>
+        <div class="verif-list verif-conversation">
+          @foreach($app->verifications->reverse() as $verif)
+            @include('admin.app_verification.components.verif-list-item', ['hide_edit' => false, 'other_comments' => true, 'item_class' => ($verif->status->by == 'editor' ? 'right blue' : 'left green')])
+          @endforeach
+        </div>
+        @endif
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @push('head-additional')
 <style>
-  .input-comment-text {
+  textarea.input-comment-text {
+    /*height: 60px;*/
     max-height: 100px;
     font-size: 0.9rem;
     line-height: 1.2;
@@ -206,9 +467,17 @@
 </style>
 @endpush
 
+@include('admin.app.changes.btn-view-version')
+@include('admin.app_verification.btn-view-verif')
+
 @push('scripts')
 <script>
 jQuery(document).ready(function($) {
+
+  /*$(".version-select-list").on("click", ".version-select-item", function(e) {
+    e.preventDefault();
+  });*/
+
   $('[data-toggle="popover"]').popover({
     container: "body",
   });
@@ -221,7 +490,7 @@ jQuery(document).ready(function($) {
       $tip.popover("hide");
     }
   });
-  var $popTrashBtn = '<button type="button" class="close other-icon text-danger text-sm mr-2"><span class="fas fa-trash"></span></button>';
+  var $popTrashBtn = '<button type="button" class="close other-icon text-danger text-sm mx-2"><span class="fas fa-trash"></span></button>';
   $popTrashBtn = $($popTrashBtn);
   $popTrashBtn.on("click", function(e) {
     var $tip = $(this).closest(".popover");
@@ -231,12 +500,18 @@ jQuery(document).ready(function($) {
     }
   });
 
+  // Reposition popover so it won't conflict with the comment popover
+  $("#formInputReview").find(".old-value-pop").popover("dispose").popover({
+    placement: "top",
+  });
+
   var $inputDetailsContent = $("#inputDetailsContent").remove().children();
   $("#formInputReview").popover({
     selector: ".btn-pop-comment",
-    container: "body",
+    // container: "body",
     html: true,
     sanitize: false,
+    // placement: "top",
     content: function() {
       return $inputDetailsContent.clone(true, true);
     },
@@ -263,10 +538,10 @@ jQuery(document).ready(function($) {
       $tip.find(".popover-header").prepend($popCloseBtn.clone(true, true));
 
       $input = $tip.find(".input-comment-text");
-      $input.css("height", "").val( $targetInput.val() );
-      // $input.one("change", function(e) {
-      //   $targetInput.val( $(this).val() );
-      // });
+      $input.css("height", "").val( $targetInput.val() ).trigger("input");
+      $input.on("input change", function(e) {
+        $targetInput.val( $(this).val() );
+      });
     }, 0);
   }).on("shown.bs.popover", ".btn-pop-comment", function(e) {
     var $elm = $(e.target),
@@ -283,7 +558,6 @@ jQuery(document).ready(function($) {
 
     var value = (""+ $input.val()).trim();
     $targetInput.val(value);
-    // $input.val(null);
 
     toggleCommentIconColor(e.target);
   }).on("hidden.bs.popover", ".btn-pop-comment", function(e) {
@@ -292,6 +566,15 @@ jQuery(document).ready(function($) {
         $input = $tip.find(".input-comment-text");
 
     $input.val(null);
+  });
+
+  $("#inputOverallComment").textareaShowLength().textareaAutoHeight({
+    bypassHeight: false,
+  });
+
+  // Delegate
+  $(document).textareaAutoHeight({
+    selector: ".input-comment-text",
   });
 
   function toggleCommentIconColor(elm) {
@@ -307,6 +590,47 @@ jQuery(document).ready(function($) {
   $("#formInputReview .btn-pop-comment").each(function(i, elm) {
     toggleCommentIconColor(elm);
   });
+
+  $("#reviewDetails").on("show.bs.collapse", function(e) {
+    // Check first to make sure the element is itself what we intended, and
+    // not some descendants whose event bubbled up
+    if(! $(e.target).is("#reviewDetails"))
+      return;
+
+    // Need to defer because during "show" event the element is not visible yet,
+    // so it doesn't have a scroll offset. To scroll we need to do calculations
+    // right after the element is set to be visible.
+    setTimeout(function() {
+      scrollToForm();
+    }, 10);
+  });
+
+  var $reviewHeader = $("#reviewEmptyHeader");
+  if($reviewHeader.is(":visible") && $reviewHeader.children().length > 1) {
+    Helpers.scrollTo($reviewHeader);
+  }
+
+  function scrollToForm(animate) {
+    if(typeof animate === "undefined")
+      animate = true;
+    Helpers.scrollTo($("#reviewDetails"), {
+      offset: -50,
+      animate: animate,
+    });
+  }
+
+  @if($old_exists || $is_edit)
+  // Activate tab containing form and scroll to it
+  /*var tabPaneWithForm = "aver-tab-review",
+      tabPaneWithFormId = "#"+ tabPaneWithForm;
+  var $tabPaneWithForm = $(tabPaneWithFormId);
+  var $tabWithForm = $('a[href="'+ tabPaneWithFormId +'"]');
+  $tabWithForm.one("shown.bs.tab", function(e) {
+  }).tab("show");*/
+  scrollToForm(false);
+  @endif
+
+  $("#formInputReview").noEnterSubmit();
 
 });
 </script>

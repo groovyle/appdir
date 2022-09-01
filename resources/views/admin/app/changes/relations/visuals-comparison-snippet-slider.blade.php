@@ -1,8 +1,9 @@
 
-		<h5>{{ $title }} ({{ count($items) }})</h5>
-		@if(count($items) == 0)
-		<h3 class="text-center my-4">&mdash; @lang('admin/apps.visuals.no_visuals') &mdash;</h3>
-		@else
+	<h5>{{ $title }} ({{ count($items) }})</h5>
+	@if(count($items) == 0)
+	<h3 class="text-center my-4">&mdash; @lang('admin/apps.visuals.no_visuals') &mdash;</h3>
+	@else
+		@if(!$simple)
 		<div class="splide mx-auto" id="{{ $rand }}-{{ $name }}" aria-labelledby="{{ $rand }}-{{ $name }}-title">
 			<h5 id="{{ $rand }}-{{ $name }}-title" style="display: none;" aria-hidden="yes">{{ $title }} ({{ count($items) }})</h5>
 			<div class="splide__track">
@@ -34,4 +35,7 @@
 				</ul>
 			</div>
 		</div>
+		@else
+		@include('admin.app.components.detail-visuals-list', ['visuals' => $items])
 		@endif
+	@endif

@@ -1,16 +1,10 @@
-<?php
-$with_modal = isset($with_modal) ? !!$with_modal : true;
-$btn_selector = $btn_selector ?? '.btn-view-version';
-?>
 
 @push('scripts')
-
-@if($with_modal)
-<div class="modal fade" id="versionViewModal" tabindex="-1" aria-labelledby="versionViewModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl">
+<div class="modal fade" id="changesVisualsModal" tabindex="-1" aria-labelledby="changesVisualsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="versionViewModalLabel">@lang('admin/apps.changes.version_preview')</h5>
+        <h5 class="modal-title" id="changesVisualsModalLabel">@lang('admin/apps.changes.visuals_comparison')</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="@lang('common.close')"><span aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body">
@@ -18,7 +12,7 @@ $btn_selector = $btn_selector ?? '.btn-view-version';
           <h4 class="my-5">loading...</h4>
         </div>
         <div class="error-message alert alert-danger d-none">
-          <h5 class="my-5">@lang('admin/apps.changes.cannot_load_version_preview')</h5>
+          <h5 class="my-5">@lang('admin/apps.changes.cannot_load_visuals_comparison')</h5>
         </div>
       </div>
       <div class="modal-footer text-right">
@@ -27,45 +21,43 @@ $btn_selector = $btn_selector ?? '.btn-view-version';
     </div>
   </div>
 </div>
-@endif
-
 
 <script>
 jQuery(document).ready(function($) {
-  AppGlobals.init("apps.VersionView", function() {
-    var $modal = $("#versionViewModal"),
-      $modalTitle = $modal.find(".modal-title"),
+  AppGlobals.init("apps.ChangesVisuals", function() {
+    var $modal = $("#changesVisualsModal"),
       $modalBody = $modal.find(".modal-body"),
       $placeholderContent = $modalBody.find(".placeholder-content").remove(),
       $error = $modalBody.find(".error-message").remove().removeClass("d-none");
-
-    function modalTitle(version) {
-      $modalTitle.html( @json(__('admin/apps.changes.version_preview')) +': '+ version );
-    }
 
     function modalContent(content) {
       $modalBody.empty().append(content);
     }
 
-    function modalShow(appId, version) {
-      if(!appId || !version) {
-        modalContent($error);
-        $modal.modal("show");
-        return;
-      }
+    $(document).on("click", ".btn-compare-visuals", function(e) {
+      e.preventDefault();
 
-      modalTitle(version);
+      // Show modal containing the difference
+      var $btn = $(this);
+      var version = $btn.data("version") || "";
+      var newIds = $btn.data("visualsNew") || "";
+      var oldIds = $btn.data("visualsOld") || "";
+      var simple = $btn.data("simple") || "";
+      simple = simple == "true" || simple == 1;
+
       modalContent($placeholderContent);
       $modal.modal("show");
 
       $.ajax({
-        url: @json( route('admin.apps.changes.details') ),
+        url: @json( route('admin.apps.changes.visuals', ['app' => $app->id]) ),
         method: "GET",
         cache: true,
         data: {
-          app_id: appId,
+          new: newIds,
+          old: oldIds,
           version: version,
-          view_only: 1,
+          simple: simple ? 1 : 0,
+          // autoplay: 1,
         },
         dataType: "html",
         success: function(response, status, xhr) {
@@ -76,20 +68,8 @@ jQuery(document).ready(function($) {
           modalContent($error);
         },
       });
-    }
-
-    $(document).on("click", @json($btn_selector), function(e) {
-      e.preventDefault();
-
-      // Show modal containing the item
-      var $btn = $(this);
-      var appId = $btn.data("appId");
-      var version = $btn.data("version");
-
-      modalShow(appId, version);
     });
   });
 });
 </script>
-
 @endpush

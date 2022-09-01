@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\App;
 use App\Models\AppCategory;
+use App\Models\AppChangelog;
 use App\Models\AppTag;
 use App\Models\AppLogo;
 use App\Models\AppVisualMedia;
@@ -21,7 +22,6 @@ use App\DataManagers\AppManager;
 
 use App\Rules\AppDirectory;
 use App\Rules\AppUrl;
-use App\Rules\DirectoryPath;
 use App\Rules\FQDN;
 use App\Rules\ModelExists;
 
@@ -89,6 +89,7 @@ class AppController extends Controller
 
 		$data['app'] = $app;
 		$data['is_edit'] = FALSE;
+		$data['pending_add'] = settings('app.creation_needs_verification', false);
 
 		$data['action'] = route('admin.apps.store');
 		$data['method'] = 'POST';
@@ -101,8 +102,8 @@ class AppController extends Controller
 		$is_edit = $app instanceof App;
 		if(!$is_edit) {
 			$app = new App;
-		} elseif($app->has_pending_changes) {
-			list($ori, $app) = AppManager::getPendingVersion($app);
+		} elseif($app->has_floating_changes) {
+			list($ori, $app) = AppManager::getPendingVersion($app, false, false);
 		}
 
 		$user = $request->user();
@@ -121,6 +122,7 @@ class AppController extends Controller
 			'app_name'			=> ['required', 'max:100'],
 			'app_short_name'	=> ['nullable', 'max:20'],
 			'app_description'	=> ['nullable'],
+			'app_url'			=> ['nullable', 'string', 'url', new AppUrl],
 			// 'app_logo'			=> ['file', 'image', 'max:2048'], // NOTE: using filepond validation instead
 			'categories'		=> ['required', 'array'],
 			'categories.*'		=> [/*'required', */'integer', new ModelExists(AppCategory::class)],
@@ -151,7 +153,7 @@ class AppController extends Controller
 
 		// Validate files
 		$validFiles = Filepond::field($logo_input_hash)->validate([
-			'app_logo'	=> ['nullable', 'file', 'image', 'max:2048'], // TODO: settings on max image size
+			'app_logo'	=> ['nullable', 'file', 'image', 'max:2048'],
 		]);
 
 		AppManager::prepareForVersionDiff($app);
@@ -160,7 +162,7 @@ class AppController extends Controller
 			$app->owner_id		= $user_id;
 		} else {
 			// App has to be owned by user to edit.
-			// TODO: also allow superadmins and others to edit.
+			// TODO: also allow superadmins and others to edit...?
 			if($user_id != $app->owner_id) {
 				// Not allowed
 				$request->session()->flash('flash_message', [
@@ -172,9 +174,29 @@ class AppController extends Controller
 		}
 
 		$app->name			= $request->app_name;
-		$app->slug			= Str::slug($request->app_name);
 		$app->short_name	= $request->has('app_has_short_name') ? $request->app_short_name : null;
 		$app->description	= $request->app_description;
+
+		if($request->app_url) {
+			// For URLs that don't start with a scheme, automatically add one.
+			$url = url_auto_scheme($request->app_url);
+			// $app->url			= trim($url, '/').'/';
+		} else {
+			$url = null;
+		}
+		$app->url			= $url;
+
+		if(!$is_edit) {
+			$app->owner_id		= $user_id;
+
+			// NOTE: slug is only generated during creation to prevent any duplicates
+			// while doing pending changes in case of edits
+			$inc = 1;
+			do {
+				$app->slug = Str::slug($app->public_name . ($inc > 1 ? '-'.++$inc : ''));
+				$exists = App::where('slug', $app->slug)->where('id', '<>', $app->id)->exists();
+			} while($exists);
+		}
 
 		$result = TRUE;
 		$messages = [];
@@ -203,7 +225,7 @@ class AppController extends Controller
 				$app->categories()->attach($categories);
 				$app->tags()->attach($tags);
 			} else {
-				// TODO: if verification is used, attach/detach relationships later
+				// NOTE: if verification is used, attach/detach relationships later
 
 				// Categories
 				// Detach all then attach
@@ -401,12 +423,14 @@ class AppController extends Controller
 				$automator = Automator::instance();
 
 				$ver = new AppVerification;
+				// TODO: automator should be the verifier, here the editor is
+				// inputting data. Automator is the auto-approver
 				$ver->verifier_id = $automator->id;
 
 				if(!$is_edit) {
 					// Generate first verification step
 					$ver->status_id = 'unverified';
-					$ver->comment = 'new';
+					$ver->concern = AppVerification::CONCERN_NEW;
 					$result = $result && !! $app->verifications()->save($ver);
 				} elseif(!empty($changes['diffs'])) {
 					// Revert verification status if:
@@ -415,7 +439,7 @@ class AppController extends Controller
 					// TODO: check config for auto-unverify
 					if($app->is_verified) {
 						$ver->status_id = 'resubmitted';
-						$ver->comment = 'status revert because of edit after approval';
+						$ver->concern = AppVerification::CONCERN_EDIT;
 
 						$result = !! $app->verifications()->save($ver);
 
@@ -515,7 +539,7 @@ class AppController extends Controller
 	 * @param  \App\App  $app
 	 * @return \Illuminate\Http\Response
 	 */
-	public function show(App $app, $snippet = false)
+	public function show(App $app)
 	{
 		//
 		$data = [];
@@ -535,20 +559,19 @@ class AppController extends Controller
 		$data = $this->_getFormPreps();
 
 		// Show the latest edits if there are any pending changes
-		if($app->has_pending_changes) {
+		if($app->has_floating_changes) {
 			list($ori, $app) = AppManager::getPendingVersion($app);
-			$app->setRelation('version', $ori->pending_changes->last());
 			$data['ori'] = $ori;
 		}
 
 		$data['app'] = $app;
 		$data['is_edit'] = TRUE;
+		$data['pending_edits'] = settings('app.modification_needs_verification', false);
 
 		$data['action'] = route('admin.apps.update', ['app' => $app->id]);
 		$data['method'] = 'PATCH';
 
 		$data['user'] = Auth::user();
-		$data['old_uploads'] = old('app_logo', []);
 
 		return view('admin/app/edit', $data);
 	}
@@ -612,63 +635,7 @@ class AppController extends Controller
 		$data = [];
 		$data['app'] = $app;
 
-		$app->load(['verifications.verifier', 'verifications.status', 'actions_log.actor']);
-
-		// Mix update actions with verification actions and sort them
-		$updates = $app->actions_log()->whereIn('action', ['create', 'update'])->get();
-		// dd($updates);
-		$mixed = collect()->concat($app->verifications)->concat($updates)->map(function($item) {
-			$item->at = $item->updated_at ?? $item->created_at ?? $item->at;
-			return $item;
-		})->sortBy('at');
-		dd($mixed);
-
-		$actions = collect();
-		foreach($mixed as $item) {
-			$tmp = new \stdClass;
-			if($item instanceof AppVerification) {
-				$tmp->type = 'verification';
-				$tmp->actor = $item->verifier;
-				$tmp->status = $item->status;
-				if(in_array($tmp->status_id, ['approved', 'rejected'])) {
-					$tmp->background = 'bg-'.$tmp->status->bg_style;
-				} else {
-					$tmp->background = 'bg-lightblue';
-				}
-				$tmp->field_comments = $item->details;
-				$tmp->comment = $item->comment;
-				// qwe
-			} else {
-				$is_create = $item->action == 'create';
-				$tmp->type = 'owner';
-				$tmp->actor = $item->actor;
-				$tmp->status = VerificationStatus::find($is_create ? 'unverified' : 'revised');
-				// asd
-			}
-
-			$tmp->background = $item->status->bg_style;
-			$tmp->at = $item->at;
-			$actions[] = $tmp;
-		}
-
-		$timeline = collect();
-		/*foreach($app->verifications as $v) {
-			$v->_date = $v->updated_at ?? $v->created_at;
-			$v->_grouping = $group = $v->_date ? $v->_date->format('Y-m-d') : NULL;
-
-			// $v->icon =
-
-			if(!isset($timeline[$group])) {
-				$timeline[$group] = (object) [
-					'date'	=> $group,
-					'text'	=> $v->_date->format('j F Y'),
-					'items'	=> collect(),
-				];
-			}
-			$timeline[$group]['items'][] = $v;
-		}*/
-		$data['timeline'] = $timeline->sortKeysDesc();
-		// dd($app->verifications[0]->updated_at);
+		$app->load(['verifications.verifier', 'verifications.status']);
 
 		return view('admin/app/verifications', $data);
 	}
@@ -681,19 +648,31 @@ class AppController extends Controller
 		$per_page = 10;
 		$page = request()->input('page', 1);
 		$go_current = request()->has('current');
-		if($go_current && $app->version_id) {
+		$go_version = request()->input('go_version');
+		if(($go_current && $app->version_id) || $go_version) {
 			// Find page
 			// https://stackoverflow.com/questions/9086719/mysql-paginated-results-find-page-for-specific-result
 			// Normally you'd do operator <= but since the order is desc, we use >=
-			$offset = $app->changelogs()->where('id', '>=', $app->version_id)->count();
-			$page = ceil($offset / $per_page);
+			if($go_version) {
+				$target_version = $app->changelogs()->where('version', $go_version)->firstOrNew([]);
+				$target_version = $target_version->id;
+			} else {
+				$target_version = $app->version_id;
+			}
+			$offset = $app->changelogs()
+				->where('id', '>=', $target_version)
+				->count()
+			;
+			if($offset) {
+				$page = ceil($offset / $per_page);
+				$data['goto_version'] = $target_version;
+			}
 		}
 
 		$changelogs = $app->changelogs()->paginate($per_page, ['*'], 'page', $page);
-		foreach($changelogs as $item) {
-			$item->display_diffs = AppManager::transformDiffsForDisplay($item->diffs);
-		}
 		$data['changelogs'] = $changelogs;
+		$data['page'] = $page;
+		$data['linked_based_on'] = true;
 
 		return view('admin/app/changes/index', $data);
 	}
@@ -704,9 +683,8 @@ class AppController extends Controller
 
 		$app->load('visuals');
 		// Show the latest edits if there are any pending changes
-		if($app->has_pending_changes) {
+		if($app->has_floating_changes) {
 			list($ori, $app) = AppManager::getPendingVersion($app);
-			$app->setRelation('version', $ori->pending_changes->last());
 			$data['ori'] = $ori;
 		}
 
@@ -760,8 +738,8 @@ class AppController extends Controller
 	public function updateVisuals(Request $request, App $app)
 	{
 		//
-		if($app->has_pending_changes) {
-			list($ori, $app) = AppManager::getPendingVersion($app);
+		if($app->has_floating_changes) {
+			list($ori, $app) = AppManager::getPendingVersion($app, false, false);
 		}
 
 		$rules = [
@@ -1049,6 +1027,143 @@ class AppController extends Controller
 		}
 	}
 
+	public function reviewChanges(Request $request, App $app)
+	{
+		// Review the approved changes and compare between old and new item
+		// dd($app->approved_changes);
+		$approved_changes = $app->approved_changes;
+		$verifs = $app->latest_approved_verifications;
+		list($ori, $app, $changes) = AppManager::getPendingVersion($app, $approved_changes);
+
+		$ori->load('latest_approved_verifications.changelogs');
+
+		$verif = new AppVerification;
+		$verif->app_id = $ori->id;
+		$verif->setRelation('changelogs', $approved_changes->reverse()->values());
+
+		$summary = new AppChangelog;
+		$summary->app_id = $ori->id;
+		$summary->diffs = $changes;
+
+		$data = [
+			'app'		=> $app,
+			'ori'		=> $ori,
+			'changes'	=> $changes,
+			'verif'		=> $verif,
+			'verifs'	=> $verifs,
+			'summary'	=> $summary,
+		];
+
+		return view('admin/app/publish', $data);
+	}
+
+	public function publishChanges(Request $request, App $app)
+	{
+		// Commit the approved changes
+		// TODO: outsource the publish code to the manager, so that an
+		// 'auto-commit-upon-approval' setting can be used
+
+		// dd($request->input());
+
+		$rules = [
+			// 'versionb'			=> ['required'],
+			'verif_ids'	=> [
+				'required',
+				new ModelExists(AppVerification::class, 'id', ',', function($query) use($app) {
+					$query->where('app_id', $app->id);
+				}),
+			],
+		];
+		$validData = $request->validate($rules);
+
+		$input_verif_ids = explode(',', $request->input('verif_ids'));
+		$input_verif_ids = array_filter(array_unique($input_verif_ids));
+
+		// Begin storing entries
+		DB::beginTransaction();
+
+		$result = true;
+		$error = [];
+		try {
+			// Find the verifications, then the changelogs, then apply them
+			$verifs = $app->verifications()->find($input_verif_ids);
+			$changelogs = $app->changelogs()->whereHas('verifications', function($query) use($input_verif_ids) {
+				$query->whereIn('id', $input_verif_ids);
+			})->orderBy('created_at')
+			->orderBy('version')
+			->get();
+
+			// Make sure all the changelogs status are approved
+			$all_approved = $changelogs->every(function($item) {
+				return $item->status == AppChangelog::STATUS_APPROVED;
+			});
+			// Huh, what to do if it's false...?
+			if(!$all_approved) {
+				throw new \UnexpectedValueException(__('admin/apps.messages.the_changelogs_data_are_corrupted'));
+			}
+
+			// Apply the thing
+			$base_version = optional($app->version);
+			$app->is_verified = 1;
+			$compiled = AppManager::applyVersionsChanges($app, $changelogs);
+
+			// New verification
+			$verif = new AppVerification;
+			$verif->app_id = $app->id;
+			$verif->verifier_id = $request->user()->id;
+			$verif->status_id = 'published';
+			$verif->base_changes_id = $base_version->id;
+			$verif->concern = AppVerification::CONCERN_PUBLISH_ITEM;
+			$verif->save();
+
+			// Change the changelogs' status
+			foreach($changelogs as $cl) {
+				$cl->status = AppChangelog::STATUS_COMMITTED;
+				$cl->save();
+			}
+
+			// Attach the changelogs
+			$verif->changelogs()->attach($changelogs->modelKeys());
+		} catch(\Exception $e) {
+			$result = FALSE;
+			// TODO: do something with the message
+			$error[] = $e->getMessage();
+			// dd($e->getMessage());
+		}
+
+		if(!$result) {
+			DB::rollback();
+
+			// Pass a message...?
+			$request->session()->flash('flash_message', [
+				'message'	=> __('admin.app_verification.message.publish_failed'),
+				'type'		=> 'error'
+			]);
+
+			return redirect()->back()->withInput()->withErrors($error);
+		} else {
+			DB::commit();
+
+			// Pass a message
+			// TODO: maybe different messages for when it's an edit/new thing?
+			$request->session()->flash('flash_message', [
+				'message'	=> __('admin.app_verification.message.app_has_been_published'),
+				'type'		=> 'success'
+			]);
+			$request->session()->flash('post_publish', true);
+
+			return redirect()->route('admin.apps.published', ['app' => $app->id]);
+		}
+	}
+
+	public function afterPublishChanges(Request $request, App $app) {
+		$data = [];
+
+		$data['app'] = $app;
+
+		return view('admin/app/publish-after', $data);
+	}
+
 	public function snippetVisualsComparison(Request $request, $app = null, $version = null)
 	{
 		if(!$app && $request->has('app_id')) {
@@ -1104,12 +1219,14 @@ class AppController extends Controller
 
 		// dd($items);
 
-		$load_library = $request->input('init', '0') == '1';
-		$autoplay = $request->input('autoplay', '0') == '1';
+		$simple = $request->input('simple', '0') == '1';
+		$load_library = !$simple && $request->input('init', '0') == '1';
+		$autoplay = !$simple && $request->input('autoplay', '0') == '1';
 		$image_only = $request->input('complete', '0') == '0';
 
 		return view('admin/app/changes/relations/visuals-comparison-snippet', [
 			'items'	=> $items,
+			'simple' => $simple,
 			'load_library' => $load_library,
 			'autoplay' => $autoplay,
 			'image_only_mode' => $image_only,
@@ -1122,17 +1239,42 @@ class AppController extends Controller
 			$app = $request->input('app_id');
 		}
 		$app = App::findOrFail($app);
+		$data = [];
+
+		$verif_id = $request->input('verif_id');
+		$verif = $app->verifications()->find($verif_id);
 
 		if($version === null)
 			$version = $request->input('version');
 
-		if($version) {
+		if($verif) {
+			// Gather all changes
+			$version_item = $verif->changelogs->first();
+			if($version_item) {
+				// TODO: compile changes based on verif status, i.e:
+				// for approved and/or needs-revision, mock the last version
+				// for rejected, mock the first version only (and maybe inform that the later versions also gets rejected...?)
+				$version_item->diffs = AppManager::compileVersionsChanges($verif->changelogs->reverse()->values());
+				$data['version'] = $version_item;
+				$data['verif'] = $verif;
+
+				// Mock the latest version affected by this verification
+				$app = AppManager::getMockItem($app->id, $version_item->version);
+			}
+		} elseif($version) {
 			// Make item first
+			$version_item = $app->changelogs()->where('version', $version)->first();
+			if($request->input('accumulate_changes', 0) == 1 && $version > $app->version_number) {
+				// Accumulate changes and actually compare to the current version
+				$version_item->diffs = AppManager::getVersionsChanges($app, $version)['changes'];
+			}
+			$data['version'] = $version_item;
+			$data['show_version_status'] = true;
 			$app = AppManager::getMockItem($app->id, $version);
 		}
 
-		$data = [];
 		$data['app'] = $app;
+		$data['view_only'] = $request->input('view_only', 0) == 1;
 		return view('admin/app/detail-snippet', $data);
 	}
 
@@ -1145,7 +1287,7 @@ class AppController extends Controller
 
 		// Ajax
 
-		$versions = $app->pending_changes;
+		$versions = $app->floating_changes;
 		$versions = $versions->map(function($v, $k) {
 			return $v->only('id', 'version');
 		})->reverse()->values();

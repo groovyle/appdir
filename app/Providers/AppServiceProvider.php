@@ -71,5 +71,11 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('vo_', function($expression) {
             return "<?php echo vo_({$expression}); ?>";
         });
+        Blade::directive('puser', function($expression) {
+            return "<?php echo pretty_username({$expression}); ?>";
+        });
+        Blade::directive('nl2br', function($expression) {
+            return "<?php echo nl2br({$expression}); ?>";
+        });
     }
 }

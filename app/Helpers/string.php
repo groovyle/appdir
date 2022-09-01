@@ -107,34 +107,56 @@ function db_escape_like(string $value, string $char = '\\'): string
  *
  * @return string
  */
-function random_string($length, $keyspace = NULL) {
+function random_string($length, $keyspace = NULL, $pool = true) {
+	static $random_pool = [];
+
 	if($keyspace === NULL)
 		$keyspace = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 	elseif(is_array($keyspace))
 		$keyspace = implode('', $keyspace);
-	$str = '';
 	$max = mb_strlen($keyspace, '8bit') - 1;
 	if($max < 1) {
 		throw new Exception('$keyspace must be at least 2 characters long');
 		return false;
 	}
 	$keyspace = str_shuffle($keyspace);
-	for($i = 0; $i < $length; $i++) {
-		if(function_exists('openssl_random_pseudo_bytes')) {
-			// 1. openssl_random_pseudo_bytes is a CSPRNG function which generates bytes
-			// 2. bin2hex converts the binary data to hexadecimal
-			// 3. hexdec converts it to decimal representation
-			// 4. fmod is used instead of the % operator because the decimal
-			// 		result is often a very large float more than PHP_INT_MAX
-			// 5. intval to get the integer to be used as an array key
-			$index = intval(fmod(hexdec(bin2hex(openssl_random_pseudo_bytes(min($length + $i, 64)))), $max));
-		} else {
-			// Less secure
-			$index = mt_rand(0, $max);
+	$j = 1;
+	do {
+		$str = '';
+		for($i = 0; $i < $length; $i++) {
+			if(function_exists('openssl_random_pseudo_bytes')) {
+				// 1. openssl_random_pseudo_bytes is a CSPRNG function which generates bytes
+				// 2. bin2hex converts the binary data to hexadecimal
+				// 3. hexdec converts it to decimal representation
+				// 4. fmod is used instead of the % operator because the decimal
+				// 		result is often a very large float more than PHP_INT_MAX
+				// 5. intval to get the integer to be used as an array key
+				$index = intval(fmod(hexdec(bin2hex(openssl_random_pseudo_bytes(min($length + $i, 64)))), $max));
+			} else {
+				// Less secure
+				$index = mt_rand(0, $max);
+			}
+			$str .= $keyspace[$index];
 		}
-		$str .= $keyspace[$index];
-	}
+
+		if(!$pool || !in_array($str, $random_pool)) {
+			// Unique
+			$random_pool[] = $str;
+			break;
+		} elseif($j == 10) {
+			// Try how many times?
+			$j = 0;
+			$max++;
+		}
+		$j++;
+	} while(true);
+
 	return $str;
+}
+
+function random_alpha($length, $pool = true) {
+	$keyspace = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+	return random_string($length, $keyspace, $pool);
 }
 
 

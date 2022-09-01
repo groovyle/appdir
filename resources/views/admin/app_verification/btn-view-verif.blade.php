@@ -1,16 +1,16 @@
 <?php
 $with_modal = isset($with_modal) ? !!$with_modal : true;
-$btn_selector = $btn_selector ?? '.btn-view-version';
+$btn_selector = $btn_selector ?? '.btn-view-verif';
 ?>
 
 @push('scripts')
 
 @if($with_modal)
-<div class="modal fade" id="versionViewModal" tabindex="-1" aria-labelledby="versionViewModalLabel" aria-hidden="true">
+<div class="modal fade" id="verifViewModal" tabindex="-1" aria-labelledby="verifViewModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="versionViewModalLabel">@lang('admin/apps.changes.version_preview')</h5>
+        <h5 class="modal-title" id="verifViewModalLabel">@lang('admin/app_verifications.verification_view')</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="@lang('common.close')"><span aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body">
@@ -18,7 +18,7 @@ $btn_selector = $btn_selector ?? '.btn-view-version';
           <h4 class="my-5">loading...</h4>
         </div>
         <div class="error-message alert alert-danger d-none">
-          <h5 class="my-5">@lang('admin/apps.changes.cannot_load_version_preview')</h5>
+          <h5 class="my-5">@lang('admin/app_verifications.cannot_load_verification_view')</h5>
         </div>
       </div>
       <div class="modal-footer text-right">
@@ -32,40 +32,34 @@ $btn_selector = $btn_selector ?? '.btn-view-version';
 
 <script>
 jQuery(document).ready(function($) {
-  AppGlobals.init("apps.VersionView", function() {
-    var $modal = $("#versionViewModal"),
+  AppGlobals.init("apps.VerifView", function() {
+    var $modal = $("#verifViewModal"),
       $modalTitle = $modal.find(".modal-title"),
       $modalBody = $modal.find(".modal-body"),
       $placeholderContent = $modalBody.find(".placeholder-content").remove(),
       $error = $modalBody.find(".error-message").remove().removeClass("d-none");
 
-    function modalTitle(version) {
-      $modalTitle.html( @json(__('admin/apps.changes.version_preview')) +': '+ version );
-    }
-
     function modalContent(content) {
       $modalBody.empty().append(content);
     }
 
-    function modalShow(appId, version) {
-      if(!appId || !version) {
+    function modalShow(appId, verifId) {
+      if(!appId || !verifId) {
         modalContent($error);
         $modal.modal("show");
         return;
       }
 
-      modalTitle(version);
       modalContent($placeholderContent);
       $modal.modal("show");
 
       $.ajax({
-        url: @json( route('admin.apps.changes.details') ),
+        url: @json( route('admin.app_verifications.details_snippet') ),
         method: "GET",
         cache: true,
         data: {
-          app_id: appId,
-          version: version,
-          view_only: 1,
+          verif_id: verifId,
+          snippet: 1,
         },
         dataType: "html",
         success: function(response, status, xhr) {
@@ -84,9 +78,9 @@ jQuery(document).ready(function($) {
       // Show modal containing the item
       var $btn = $(this);
       var appId = $btn.data("appId");
-      var version = $btn.data("version");
+      var verifId = $btn.data("verifId");
 
-      modalShow(appId, version);
+      modalShow(appId, verifId);
     });
   });
 });

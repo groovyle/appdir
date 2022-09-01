@@ -28,10 +28,10 @@ class App extends Model
 
 	protected $with = [
 		'owner',
-		'verifications',
-		'verifications.status',
-		'last_verification',
-		'last_verification.status',
+		// 'verifications',
+		// 'verifications.status',
+		// 'last_verification',
+		// 'last_verification.status',
 	];
 
 	/**
@@ -83,9 +83,14 @@ class App extends Model
 		$query->where('is_verified', 1);
 	}
 
-	public function scopeFrontendItem($query, $slug) {
-		$query->frontend();
-		return $query->where('slug', $slug)->firstOrFail();
+	public static function getFrontendItem($slug) {
+		$item = null;
+		if(is_numeric($slug))
+			$item = static::frontend()->whereKey($slug)->first();
+		if(!$item)
+			$item = static::frontend()->where('slug', $slug)->firstOrFail();
+
+		return $item;
 	}
 
 	/**
@@ -146,15 +151,60 @@ class App extends Model
 	}
 
 	public function verifications() {
-		return $this->hasMany('App\Models\AppVerification', 'app_id');
+		return $this->hasMany('App\Models\AppVerification', 'app_id')
+			->orderBy(AppVerification::UPDATED_AT)
+		;
+	}
+
+	public function admin_verifications() {
+		return $this->verifications()->whereHas('status', function($query) {
+			$query->where('by', 'verifier');
+		});
 	}
 
 	public function last_verification() {
 		return $this->hasOne('App\Models\AppVerification', 'app_id')->latest(AppVerification::UPDATED_AT);
 	}
 
+	public function latest_approved_verifications() {
+		// Get latest sequential approvals
+		return $this->hasMany('App\Models\AppVerification', 'app_id')->latestSequence('approved');
+	}
+
 	public function changelogs() {
 		return $this->hasMany('App\Models\AppChangelog', 'app_id');
+	}
+
+	public function pending_changes() {
+		$query = $this->changelogs()->pending();
+		$query = $this->_future_changes($query);
+		return $query;
+	}
+
+	public function approved_changes() {
+		$verif_ids = $this->latest_approved_verifications->modelKeys();
+		$query = $this->changelogs()->inVerifIds($verif_ids);
+		$query = $this->_future_changes($query);
+		return $query;
+	}
+
+	public function floating_changes() {
+		$query = $this->changelogs()->floating();
+		$query = $this->_future_changes($query);
+		return $query;
+	}
+
+	protected function _future_changes($query) {
+		// $query = $this->changelogs() or similar
+		if($this->version) {
+			$query->where('created_at', '>=', (string) $this->version->created_at)
+				->where('id', '>', $this->version->id)
+			;
+		}
+		$query->orderBy('created_at');
+		$query->orderBy('version');
+
+		return $query;
 	}
 
 	public function version() {
@@ -189,24 +239,43 @@ class App extends Model
 		return $this->changelogs()->count() > 1;
 	}
 
-	protected function getPendingChangesQuery() {
-		$query = $this->changelogs()->where('is_verified', 0);
-		if($this->version) {
-			$query->where('created_at', '>=', (string) $this->version->created_at)
-				->where('id', '<>', $this->version->id)
-			;
-		}
-		return $query;
-	}
-
-	public function getPendingChangesAttribute() {
-		$query = $this->getPendingChangesQuery();
-		$query->orderBy('created_at');
-		$query->orderBy('version');
-		return $query->get();
+	public function getHasAdminVerificationsAttribute() {
+		return $this->admin_verifications()->exists();
 	}
 
 	public function getHasPendingChangesAttribute() {
-		return count($this->pending_changes) > 0;
+		return $this->pending_changes()->exists();
+	}
+
+	public function getHasApprovedChangesAttribute() {
+		return $this->approved_changes()->exists();
+	}
+
+	public function getHasFloatingChangesAttribute() {
+		return $this->floating_changes()->exists();
+	}
+
+	public function getIsUnverifiedNewAttribute() {
+		// TODO: maybe check if it has any verifications as well?
+		return !$this->is_verified && $this->changelogs()->count() < 2;
+	}
+
+	public function getCompleteNameAttribute() {
+		return $this->name . ($this->short_name ? ' ('.$this->short_name.')' : '');
+	}
+
+	public function getPublicNameAttribute() {
+		return $this->short_name ?: $this->name;
+	}
+
+	public function getPublicUrlAttribute() {
+		// TODO: decide whether to use slug or ID for the public URL
+		// ID	= weird number
+		// Slug	= nicer, but changes with the name, so can't really be bookmarked
+		return $this->get_public_url($this->id);
+	}
+
+	public function get_public_url($slug, $params = []) {
+		return route('apps.page', array_merge(['slug' => $slug], $params));
 	}
 }

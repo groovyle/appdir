@@ -7,6 +7,9 @@ use App\User;
 class Base extends User {
 
 	public $table = 'users';
+	protected $attributes = [
+		'entity' => 'system',
+	];
 	protected $fillable = [];
 
 	public $system_user = true;
@@ -35,11 +38,6 @@ class Base extends User {
 	public function delete()
 	{
 		return false;
-	}
-
-	public function __toString()
-	{
-		return $this->getKey();
 	}
 
 }

@@ -29,7 +29,7 @@ $append_breadcrumb = [
 @if($use_mock)
 <div class="alert alert-info">
   <p class="mb-0">
-    @lang('admin/apps.message.form_showing_pending_changes') (<strong>@lang('admin/apps.changes.version_x', ['x' => $app->version_number])</strong>).
+    @lang('admin/apps.messages.form_showing_pending_changes') (<strong>@lang('admin/apps.changes.version_x', ['x' => $app->version_number])</strong>).
     <br>
     <a href="#" class="text-reset btn-view-version" data-app-id="{{ $ori->id }}" data-version="{{ $ori->version_number }}">
       @lang('admin/apps.changes.show_current_version') (@lang('admin/apps.changes.version_x', ['x' => $ori->version_number]))
@@ -50,7 +50,7 @@ $append_breadcrumb = [
   <div class="card">
     <div class="card-body">
       <h4 class="mb-3">
-        @lang('admin/apps.field.visuals')
+        @lang('admin/apps.fields.visuals')
         <span class="text-primary">{{ $app->name }} </span>
       </h4>
       <p class="mt-n2 mb-3">
@@ -85,14 +85,14 @@ $append_breadcrumb = [
             </div>
             <div class="media-body visuals-body">
               <div class="visuals-title">
-                @lang('admin/apps.field.order'):
+                @lang('admin/apps.fields.order'):
                 <input type="text" name="visuals[{{ $vis->id }}][order]" class="form-control input-order" value="{{ old('visuals.'.$vis->id.'.order', $vis->order ?: ($i + 1)) }}" maxlength="3">
                 <input type="hidden" name="visuals[{{ $vis->id }}][id]" value="{{ $vis->id }}" >
               </div>
               <div class="visuals-content">
-                <small class="text-muted">@lang('admin/apps.field.caption'):</small>
+                <small class="text-muted">@lang('admin/apps.fields.caption'):</small>
                 <div class="textarea-length-container textarea-length-top-right">
-                  <textarea class="form-control form-control-sm input-caption" name="visuals[{{ $vis->id }}][caption]" placeholder="@lang('admin/apps.field.caption_placeholder')" rows="1" maxlength="{{ $caption_limit }}">{{ old('visuals.'.$vis->id.'.caption', $vis->caption) }}</textarea>
+                  <textarea class="form-control form-control-sm input-caption" name="visuals[{{ $vis->id }}][caption]" placeholder="@lang('admin/apps.fields.caption_placeholder')" rows="1" maxlength="{{ $caption_limit }}">{{ old('visuals.'.$vis->id.'.caption', $vis->caption) }}</textarea>
                 </div>
                 @include('components.input-feedback', ['name' => 'visuals.'.$vis->id.'.caption'])
               </div>
@@ -111,16 +111,16 @@ $append_breadcrumb = [
         </h5>
         <div class="form-group">
           <label for="input-file-visuals">
-            @lang('admin/apps.field.upload_image')
+            @lang('admin/apps.fields.upload_image')
             @component('admin.slots.label-hint')
-            @lang('admin/apps.field.upload_image_hint')
+            @lang('admin/apps.fields.upload_image_hint')
             @endcomponent
           </label>
           <input type="file" name="new_images[]" class="visuals-filepond" id="input-file-visuals" multiple>
         </div>
         <div class="form-group">
           <label>
-            @lang('admin/apps.field.or_add_other_visual_types')
+            @lang('admin/apps.fields.or_add_other_visual_types')
             <a href="#" class="d-inline-block ml-2 btn-viso-add" title="@lang('common.add')" data-toggle="tooltip" data-trigger="hover focus">
               <span class="fas fa-plus"></span>
             </a>
@@ -131,13 +131,13 @@ $append_breadcrumb = [
               <div class="d-flex flex-row align-items-start">
                 <div class="flex-grow-1 flex-shrink-0 ml-2">
                   <select name="viso[__I__][type]" id="input-viso-__I__-type" class="custom-select custom-select-sm d-inline-block mb-1 viso-data-value" data-field="type">
-                    <option value="" class="text-muted">&mdash; @lang('admin/apps.field.choose_other_visuals_type') &mdash;</option>
+                    <option value="" class="text-muted">&mdash; @lang('admin/apps.fields.choose_other_visuals_type') &mdash;</option>
                     <optgroup label="@lang('admin/apps.visuals.types.video')">
                       <option value="video.youtube">@lang('admin/apps.visuals.types.video_youtube')</option>
                     </optgroup>
                   </select>
                   <br>
-                  <input type="text" name="viso[__I__][value]" id="input-viso-__I__-type" class="form-control form-control-sm d-inline-block viso-data-value" placeholder="@lang('admin/apps.field.visuals_other_value_placeholder')" data-field="value">
+                  <input type="text" name="viso[__I__][value]" id="input-viso-__I__-type" class="form-control form-control-sm d-inline-block viso-data-value" placeholder="@lang('admin/apps.fields.visuals_other_value_placeholder')" data-field="value">
                   <div class="invalid-feedback viso-data-html" data-field="message"></div>
                 </div>
                 <div class="flex-shrink-1 ml-2">
@@ -181,8 +181,7 @@ jQuery(document).ready(function($) {
     selector: ".input-order",
   });
   $list.textareaAutoHeight({
-    delegate: true,
-    delegateTo: ".input-caption",
+    selector: ".input-caption",
     bypassHeight: false,
   });
   $list.find(".input-caption").textareaShowLength();
@@ -306,7 +305,6 @@ jQuery(document).ready(function($) {
     dropOnElement: false,
     allowImagePreview: true,
     imagePreviewMaxHeight: 160,
-    imagePreviewMaxInstantPreviewFileSize: 1024 * 1024,
     maxFiles: @json($max_visuals),
     dropValidation: false,
     allowFileTypeValidation: true,

@@ -1,5 +1,5 @@
-<div class="item field-group">
-	<div class="title">{{ __('admin/apps.field.visuals') }}</div>
+<div class="item field-group col-lg-4 col-md-6 col-12">
+	<div class="title">{{ __('admin/apps.fields.visuals') }}</div>
 	<div class="visuals comparison">
 		<span class="value old-value text-secondary" title="@lang('admin.app.old_value')">@lang('common.x_items', ['x' => count($rel['old'])])</span>
 		<span class="fas fa-arrow-right arrow text-primary mx-2"></span>
