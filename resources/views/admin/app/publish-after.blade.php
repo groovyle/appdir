@@ -29,7 +29,7 @@ $append_breadcrumb = [
 <div class="jumbotron bg-transparent text-center" id="afterPublishPage">
   <span class="fas fa-check text-success" style="font-size: 5em;"></span>
   <h1 class="display-4">@lang('admin/apps.messages.congrats!')</h1>
-  <p class="lead">@lang('admin/apps.messages.your_changes_have_been_published!')</p>
+  <p class="lead">@lang('admin/apps.messages.your_changes_have_been_applied!')</p>
   <hr class="my-4">
   <div class="d-flex justify-content-center" style="gap: 2em;">
     <a class="btn btn-lg btn-secondary" href="{{ route('admin.apps.show', ['app' => $app->id]) }}">&laquo; @lang('common.go_back')</a>

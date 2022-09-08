@@ -123,15 +123,7 @@
                 @include('components.app-logo', ['logo' => $app->logo, 'size' => '150x80', 'none' => false])
               </td>
               <td>
-                {!! status_badge($app->verification_status->name, $app->verification_status->bg_style) !!}
-                @if ($app->verifications()->exists())
-                <br>
-                <div class="d-inline-block small" title="{{ $app->last_verification->updated_at->translatedFormat('j F Y, H:i') }}" data-toggle="tooltip" data-placement="right" data-trigger="hover click">
-                  <span class="fa-fw far fa-clock"></span>
-                 {{ $app->last_verification->updated_at->longRelativeToNowDiffForHumans() }}
-                 <span class="sr-only">{{ $app->last_verification->updated_at->translatedFormat('j F Y, H:i') }}</span>
-               </div>
-               @endif
+                @include('components.app-verification-status', ['app' => $app, 'newline' => true])
               </td>
               <td class="text-nowrap">
                 <a href="{{ route('admin.apps.show', ['app' => $app->id]) }}" class="btn btn-default btn-sm text-nowrap">

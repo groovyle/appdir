@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 
 class LogAction extends Model
 {
+	use Concerns\Immutable;
+
 	public $timestamps = TRUE;
 	const CREATED_AT = 'at';
 	const UPDATED_AT = NULL;
@@ -20,14 +22,6 @@ class LogAction extends Model
 	protected $dates = [
 		'at',
 	];
-
-	public function update(array $attributes = [], array $options = []) {
-		return false;
-	}
-
-	public function delete() {
-		return false;
-	}
 
 	public function entity() {
 		return $this->morphTo();

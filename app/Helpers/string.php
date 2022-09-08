@@ -7,6 +7,10 @@
  */
 
 
+function escape_mysql_like_str($string) {
+	return addcslashes($string, '\\_%');
+}
+
 function app_name() {
 	return config('app.name');
 }

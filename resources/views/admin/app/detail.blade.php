@@ -67,7 +67,7 @@ $append_breadcrumb = [
     <div class="row gutter-lg app-detail-panels">
       <div class="col-12 col-md-4 side-panel right">
         <div class="mb-2 text-center">
-          @if($app->has_admin_verifications)
+          @if($app->has_verifications)
           <a href="{{ route('admin.apps.verifications', ['app' => $app->id]) }}" class="btn btn-app text-dark">
             <span class="fas fa-clipboard-check"></span>
             {{ __('admin/apps.verifications') }}

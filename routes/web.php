@@ -22,6 +22,8 @@ Route::get('/apps', 'AppController@index')->name('apps');
 Route::get('/apps/{slug}', 'AppController@page')->name('apps.page');
 Route::get('/apps/{slug}/preview', 'AppController@preview')->name('apps.preview');
 
+Route::get('/color_test', 'TestColorsController@index')->name('color_test');
+
 Route::redirect('/admin', URL::to('/admin/home'));
 Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
     Route::get('home', 'HomeController@index')->name('home');

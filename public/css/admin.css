@@ -672,7 +672,7 @@ textarea.auto-height-init-bypass {
 }
 
 
-.table-responsive:only-child > .table:only-child {
+.table-responsive:last-child > .table:only-child {
 	margin-bottom: 0;
 }
 

@@ -16,14 +16,21 @@ class App extends Model
 
 	protected $attributes = [
 		'is_verified' => false,
+		'is_published' => false,
 	];
 
 	protected $guarded = [
 		'is_verified',
+		'is_published',
 	];
 
 	protected $casts = [
 		'is_verified' => 'boolean',
+		'is_published' => 'boolean',
+	];
+
+	protected $dates = [
+		'published_at',
 	];
 
 	protected $with = [
@@ -63,7 +70,7 @@ class App extends Model
 			}
 		);*/
 		static::addGlobalScope('order_verification', function (Builder $builder) {
-			$builder->latest(static::UPDATED_AT);
+			$builder->latest(static::UPDATED_AT)->latest('id');
 		});
 	}
 
@@ -81,6 +88,7 @@ class App extends Model
 		]);
 
 		$query->where('is_verified', 1);
+		$query->where('is_published', 1);
 	}
 
 	public static function getFrontendItem($slug) {
@@ -163,7 +171,10 @@ class App extends Model
 	}
 
 	public function last_verification() {
-		return $this->hasOne('App\Models\AppVerification', 'app_id')->latest(AppVerification::UPDATED_AT);
+		return $this->hasOne('App\Models\AppVerification', 'app_id')
+			->latest(AppVerification::UPDATED_AT)
+			->latest('id')
+		;
 	}
 
 	public function latest_approved_verifications() {
@@ -212,7 +223,7 @@ class App extends Model
 	}
 
 	public function last_changes() {
-		return $this->hasOne('App\Model\AppChangelog', 'app_id')->latest(AppVerification::CREATED_AT);
+		return $this->hasOne('App\Model\AppChangelog', 'app_id')->latest(AppVerification::CREATED_AT)->latest('id');
 	}
 
 	public function lastVersionNumber() {
@@ -239,6 +250,12 @@ class App extends Model
 		return $this->changelogs()->count() > 1;
 	}
 
+	public function getHasVerificationsAttribute() {
+		return $this->verifications->count() > 0
+			&& ($this->verifications->count() > 1 || $this->verifications->first()->status_id != 'unverified')
+		;
+	}
+
 	public function getHasAdminVerificationsAttribute() {
 		return $this->admin_verifications()->exists();
 	}
@@ -257,7 +274,11 @@ class App extends Model
 
 	public function getIsUnverifiedNewAttribute() {
 		// TODO: maybe check if it has any verifications as well?
-		return !$this->is_verified && $this->changelogs()->count() < 2;
+		return !$this->is_verified
+			&& !$this->is_published
+			// && $this->changelogs()->count() == $this->floating_changes()->count()
+			&& $this->verifications()->where('concern', AppVerification::CONCERN_PUBLISH_ITEM)->doesntExist()
+		;
 	}
 
 	public function getCompleteNameAttribute() {
@@ -277,5 +298,10 @@ class App extends Model
 
 	public function get_public_url($slug, $params = []) {
 		return route('apps.page', array_merge(['slug' => $slug], $params));
+	}
+
+	public function setToPublished($state = true) {
+		$this->is_published = $state;
+		$this->published_at = $state ? now() : null;
 	}
 }

@@ -21,11 +21,16 @@
     </div>
     <div class="verif-metas">
       <div class="icon-text-pair text-muted">
-        @include('components.date-with-tooltip', ['date' => $verif->created_at])
+        @include('components.date-with-tooltip', ['date' => $verif->updated_at])
       </div>
       <div class="icon-text-pair">
+        @if($verif->status->by == 'verifier')
+        <span class="fas fa-spell-check icon"></span>
+        <span>@lang('admin/app_verifications.versions_verified'): @vo_((string) $verif->changelog_range)</span>
+        @else
         <span class="far fa-copy icon"></span>
-        @lang('admin/app_verifications.reviewed_versions'): {{ $verif->changelog_range }}
+        <span>@lang('admin/app_verifications.related_versions'): @vo_((string) $verif->changelog_range)</span>
+        @endif
       </div>
     </div>
     <div class="verif-body">

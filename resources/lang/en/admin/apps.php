@@ -147,10 +147,11 @@ return [
 	'last_verification_rejected'			=> 'The pending changes you requested were rejected.',
 	'last_verification_approved'			=> "Your pending changes had been approved! \nYou can finalize the edits and make it public now.",
 	'check_verification_details'			=> 'Check verification details',
-	'the_changelogs_data_are_corrupted'		=> "The changes cannot be published because the data were corrupted. \nPlease contact the administrator to sort this problem out.",
+	'the_changelogs_data_are_corrupted'		=> "The changes cannot be applied because the data were corrupted. \nPlease contact the administrator to sort this problem out.",
 
 	'congrats!'								=> 'Congrats!',
 	'your_changes_have_been_published!'		=> 'Your changes have been published!',
+	'your_changes_have_been_applied!'		=> 'Your changes have been applied!',
 ],
 
 ];

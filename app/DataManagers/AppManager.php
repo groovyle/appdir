@@ -16,6 +16,7 @@ class AppManager {
 		'slug',
 		'owner_id',
 		'is_verified',
+		'is_published',
 		'version_id',
 		'created_by',
 		'created_at',
@@ -286,7 +287,7 @@ class AppManager {
 		$result = static::makeVersionDiff($model, true, $comment);
 		$result['saved'] = false;
 		$result['diff_status'] = $result['status'];
-		$result['status'] = false;
+		$result['status'] = true;
 
 		if(!$result['diff_status'])
 			return $result;
@@ -296,26 +297,60 @@ class AppManager {
 		$verf_edit = settings('app.modification_needs_verification', false);
 
 		$needs_verf = (!$is_edit && $verf_add) || ($is_edit && $verf_edit);
-		if(!$needs_verf) {
+		/*if(!$needs_verf) {
+			// TODO: not here, but on verifications
 			// Set to published
 			$model->is_verified = 1;
-		}
+		}*/
+
+		$version_id = optional($result['model'])->id;
 
 		if(!$is_edit) {
 			// New item, just save
 			// We don't really need to do this actually, the item should exist already
-			static::applyDiff($model, $result['changes'], false);
-			$result['saved'] = true;
+			// static::applyDiff($model, $result['changes'], false);
+			// $result['saved'] = true;
 			$model->version()->associate($result['model']);
+
+			// Generate first verification step for the new item
+			$verif = new AppVerification;
+			$verif->app_id = $model->id;
+			$verif->verifier_id = $model->owner_id;
+			$verif->status_id = 'unverified';
+			$verif->base_changes_id = $version_id;
+			$verif->concern = AppVerification::CONCERN_NEW_ITEM;
+			$result['saved'] = $verif->save();
+
+			if($result['saved'])
+				$verif->changelogs()->attach($result['model']);
+
 			if(!$verf_add) {
-				$result['model']->is_verified = 1;
+				// $result['model']->is_verified = 1;
+
+				// TODO: generate a verification to publish the changes immediately,
+				// and/or approve it before committing it
+				// Also set it to published
+				$result['saved'] = $result['saved'] && static::verifyAndApplyChanges($model, collect([$result['model']]), true);
 			}
-			$result['model']->save();
 		} else {
 			// Edit
+
+			// Generate verification step for the edit
+			$verif = new AppVerification;
+			$verif->app_id = $model->id;
+			$verif->verifier_id = request()->user()->id;
+			$verif->status_id = 'revised';
+			$verif->base_changes_id = optional($model->version)->id;
+			$verif->concern = AppVerification::CONCERN_EDIT_ITEM;
+			$result['saved'] = $verif->save();
+
+			if($result['saved'])
+				$verif->changelogs()->attach($result['model']);
+
 			if($verf_edit) {
 				// Pending updates, save nothing to the main item, the diff
 				// had been saved earlier by makeVersionDiff
+				$result['saved'] = true;
 			} else {
 				// Apply changes immediately
 				// NOTE: do not use $result['changes'], because we're saving all pending
@@ -325,19 +360,14 @@ class AppManager {
 				// item right now, so that current relations deletion
 				// can be done accurately
 				$to_save = $model->find($model->getKey());
-
-				$compiled = static::applyVersionsChanges($to_save, 'void', null, function($query) {
-					$query->where('status', AppChangelog::STATUS_PENDING);
+				$compiled = static::getVersionsChanges($to_save, 'void', null, function($query) {
+					$query->floating();
 				});
-				foreach($compiled['versions'] as $v) {
-					$v->is_verified = 1;
-					$v->save();
-				}
-				$result['saved'] = true;
+				$result['saved'] = static::verifyAndApplyChanges($to_save, $compiled['versions'], false);
 			}
 		}
 
-		$result['status'] = $result['diff_status'];
+		$result['status'] = $result['diff_status'] && $result['saved'];
 
 		// TODO: verification stuff
 
@@ -869,6 +899,64 @@ class AppManager {
 		}
 
 		return [$model, $pending, $compiled_changes, $pending_changes];
+	}
+
+	// This skips the approval and just commits the changes immediately
+	public static function verifyAndApplyChanges(App $model, $changelogs, $publish = false, $user = null) {
+		if(!$user)
+			$user = \App\Models\SystemUsers\Automator::instance();
+		$user = optional($user);
+
+		// Make sure all the changelogs status are not rejected
+		$all_ok = $changelogs->every(function($item) {
+			return $item->status != AppChangelog::STATUS_REJECTED;
+		});
+		if(!$all_ok) {
+			return false;
+		}
+
+		// Apply the thing
+		$base_version = optional($model->version);
+		$model->is_verified = 1;
+		if($publish) {
+			$model->setToPublished();
+		}
+		$compiled = AppManager::applyVersionsChanges($model, $changelogs);
+
+		// Verification
+		$verif = new AppVerification;
+		$verif->app_id = $model->id;
+		$verif->verifier_id = $user->id;
+		$verif->base_changes_id = $base_version->id;
+		if($publish) {
+			$verif->status_id = 'published';
+			$verif->concern = AppVerification::CONCERN_PUBLISH_ITEM;
+		} else {
+			$verif->status_id = 'applied';
+			$verif->concern = AppVerification::CONCERN_COMMIT;
+		}
+		$result = $verif->save();
+
+		// Attach the changelogs
+		if($result)
+			$verif->changelogs()->attach($changelogs->pluck('id')->all());
+
+		// Change the changelogs' status
+		foreach($changelogs as $cl) {
+			$cl->is_verified = 1;
+			$cl->status = AppChangelog::STATUS_COMMITTED;
+			$result = $result && $cl->save();
+		}
+
+		// Change the current version
+		$model->version_id = $changelogs->last()->id;
+		$result = $result && $model->save();
+
+		return $result;
+	}
+
+	public static function publishItem(App $model, $changelogs, $user = null) {
+
 	}
 
 }

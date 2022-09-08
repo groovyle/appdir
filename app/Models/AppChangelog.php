@@ -48,7 +48,7 @@ class AppChangelog extends Model
 		static::addGlobalScope('_order', function (Builder $builder) {
 			// TODO: sort by creation order or version number?
 			// $builder->orderBy('version', 'desc');
-			$builder->latest();
+			$builder->latest()->latest('id');
 		});
 	}
 

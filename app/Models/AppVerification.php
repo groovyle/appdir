@@ -17,7 +17,8 @@ class AppVerification extends Model
 	const CONCERN_NEW_ITEM		= 'new'; // for new items
 	const CONCERN_EDIT_ITEM		= 'edit'; // for pending changes
 	const CONCERN_VERIFICATION	= 'verification'; // else
-	const CONCERN_PUBLISH_ITEM	= 'publish'; // for publishing approved changes
+	const CONCERN_COMMIT		= 'commit'; // for applying approved changes
+	const CONCERN_PUBLISH_ITEM	= 'publish'; // for publishing item, usually also applying changes
 
 	protected $attributes = [
 		'concern'		=> self::CONCERN_VERIFICATION,

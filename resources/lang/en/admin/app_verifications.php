@@ -35,7 +35,8 @@ return [
 
 'new_item_submitted'	=> 'New item submitted',
 'item_edited'			=> 'Item edited',
-'pending_changes_published'	=> 'Pending data published',
+'pending_changes_applied'	=> 'Pending data applied',
+'item_published'		=> 'Item published',
 'changes_verified'		=> 'Changes verified',
 
 'titles'		=> [

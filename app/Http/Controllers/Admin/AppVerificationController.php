@@ -38,7 +38,7 @@ class AppVerificationController extends Controller
 		//
 		$data = [];
 		$data['verified'] = App::with('thumbnail')->withCount('thumbnail')->where('is_verified', 1)->get();
-		$data['unverified'] = App::with('thumbnail')->withCount('thumbnail')->where('is_verified', 0)->get();
+		$data['unverified'] = App::whereHas('pending_changes')->get();
 		// $data['apps'] = [];
 
 		return view('admin/app_verification/index', $data);
@@ -226,6 +226,12 @@ class AppVerificationController extends Controller
 				if(!$is_edit) {
 					$ver->changelogs()->detach();
 					$ver->changelogs()->attach($related_versions->modelKeys());
+				}
+
+				// Auto commit
+				$auto_commit = settings('app.verification.auto_commit_upon_approval', false);
+				if($result && $auto_commit) {
+					$result = AppManager::verifyAndApplyChanges($app, $related_versions, false);
 				}
 			}
 		} catch(\Illuminate\Database\QueryException $e) {

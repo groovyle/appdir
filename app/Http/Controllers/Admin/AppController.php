@@ -193,8 +193,13 @@ class AppController extends Controller
 			// while doing pending changes in case of edits
 			$inc = 1;
 			do {
-				$app->slug = Str::slug($app->public_name . ($inc > 1 ? '-'.++$inc : ''));
-				$exists = App::where('slug', $app->slug)->where('id', '<>', $app->id)->exists();
+				$app->slug = Str::slug($app->public_name . ($inc > 1 ? '-'.$inc : ''));
+				$query = App::where('slug', $app->slug);
+				if($is_edit) {
+					$query->where('id', '<>', $app->id);
+				}
+				$exists = $query->exists();
+				$inc++;
 			} while($exists);
 		}
 
@@ -419,57 +424,6 @@ class AppController extends Controller
 			}
 
 			// TODO: check config whether verification is used at all
-			if($result) {
-				$automator = Automator::instance();
-
-				$ver = new AppVerification;
-				// TODO: automator should be the verifier, here the editor is
-				// inputting data. Automator is the auto-approver
-				$ver->verifier_id = $automator->id;
-
-				if(!$is_edit) {
-					// Generate first verification step
-					$ver->status_id = 'unverified';
-					$ver->concern = AppVerification::CONCERN_NEW;
-					$result = $result && !! $app->verifications()->save($ver);
-				} elseif(!empty($changes['diffs'])) {
-					// Revert verification status if:
-					// 1. App is edited, and
-					// 2. App is already verified.
-					// TODO: check config for auto-unverify
-					if($app->is_verified) {
-						$ver->status_id = 'resubmitted';
-						$ver->concern = AppVerification::CONCERN_EDIT;
-
-						$result = !! $app->verifications()->save($ver);
-
-						// NOTE: don't use the existing $app object because it's used
-						// to mock changes. Get a new one instead
-						// NOTE: no need to do this here because the app stays at
-						// the same, approved version
-						/*$apptemp = $app->find($app->getKey());
-						$apptemp->setNextActionActor($automator->id);
-						$apptemp->is_verified = false;
-						$result = $result && $apptemp->save();*/
-					} else {
-						// Change status to revised if the current status is verifier-acted
-						// Que: compile changes to any existing verifications, or
-						// just make a new entry and then do the compilation somewhere
-						// else down the line (e.g when opening the verification page)?
-
-						// TODO: compile somewhere else, e.g when viewing a verification's
-						// pending changes
-						// If the last verification is verifier-acted, generate a
-						// new verification step.
-						// Else do nothing i guess?
-						if($app->last_verification->status->by == 'verifier') {
-							$ver->status_id = 'revised';
-
-							$result = !! $app->verifications()->save($ver);
-						}
-					}
-				}
-			}
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = FALSE;
 			$messages[] = $e->getMessage();
@@ -1057,6 +1011,7 @@ class AppController extends Controller
 		return view('admin/app/publish', $data);
 	}
 
+	// POST
 	public function publishChanges(Request $request, App $app)
 	{
 		// Commit the approved changes
@@ -1086,12 +1041,11 @@ class AppController extends Controller
 		$error = [];
 		try {
 			// Find the verifications, then the changelogs, then apply them
-			$verifs = $app->verifications()->find($input_verif_ids);
-			$changelogs = $app->changelogs()->whereHas('verifications', function($query) use($input_verif_ids) {
-				$query->whereIn('id', $input_verif_ids);
-			})->orderBy('created_at')
-			->orderBy('version')
-			->get();
+			$changelogs = $app->changelogs()->inVerifIds($input_verif_ids)
+				->orderBy('created_at')
+				->orderBy('version')
+				->get()
+			;
 
 			// Make sure all the changelogs status are approved
 			$all_approved = $changelogs->every(function($item) {
@@ -1102,28 +1056,10 @@ class AppController extends Controller
 				throw new \UnexpectedValueException(__('admin/apps.messages.the_changelogs_data_are_corrupted'));
 			}
 
-			// Apply the thing
-			$base_version = optional($app->version);
-			$app->is_verified = 1;
-			$compiled = AppManager::applyVersionsChanges($app, $changelogs);
+			// Only publish if it's new, otherwise don't change the status
+			$publish = $app->is_unverified_new;
+			$result = AppManager::verifyAndApplyChanges($app, $changelogs, $publish);
 
-			// New verification
-			$verif = new AppVerification;
-			$verif->app_id = $app->id;
-			$verif->verifier_id = $request->user()->id;
-			$verif->status_id = 'published';
-			$verif->base_changes_id = $base_version->id;
-			$verif->concern = AppVerification::CONCERN_PUBLISH_ITEM;
-			$verif->save();
-
-			// Change the changelogs' status
-			foreach($changelogs as $cl) {
-				$cl->status = AppChangelog::STATUS_COMMITTED;
-				$cl->save();
-			}
-
-			// Attach the changelogs
-			$verif->changelogs()->attach($changelogs->modelKeys());
 		} catch(\Exception $e) {
 			$result = FALSE;
 			// TODO: do something with the message

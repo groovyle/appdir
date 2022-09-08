@@ -225,7 +225,7 @@ trait LoggedActions {
 	}
 
 	/**
-	 * Set the *next* action is to *not* be logged automatically.
+	 * Set the *next* action is to be logged automatically.
 	 *
 	 * @return bool
 	 */
