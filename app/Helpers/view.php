@@ -78,10 +78,10 @@ function old_conditional($key, $valueToCheck = NULL, $compareTo = NULL, $default
 	$old = old($key, $valueToCheck);
 	if($old !== NULL) {
 		if($compareTo !== NULL) {
-			if($compareTo == $old) {
-				$out = TRUE;
+			if(is_array($old)) {
+				$out = in_array($compareTo, $old);
 			} else {
-				$out = FALSE;
+				$out = $compareTo == $old;
 			}
 		} else {
 			$out = TRUE;

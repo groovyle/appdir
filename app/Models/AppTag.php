@@ -39,6 +39,10 @@ class AppTag extends Model
 		return $this->has('creator');
 	}
 
+	public function apps() {
+		return $this->belongsToMany('App\Models\App', 'app_tags', 'tag', 'app_id');
+	}
+
 	public function __toString() {
 		return $this->name;
 	}

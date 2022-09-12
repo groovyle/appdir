@@ -725,6 +725,7 @@ if(jQuery) {
 					lineHeight = $element.css("lineHeight"),
 					// paddingTop = $element.css("paddingTop"),
 					// paddingBottom = $element.css("paddingBottom"),
+					resizable = ["vertical", "both"].indexOf($element.css("resize")) !== -1,
 					targetHeight;
 
 				// console.log(boxSizing, paddingTop, paddingBottom);
@@ -754,8 +755,15 @@ if(jQuery) {
 					targetHeight += parseFloat(paddingTop) + parseFloat(paddingBottom);
 				}*/
 
-				$element.height(targetHeight);
-				if(targetHeight != curHeight) {
+				var finalHeight;
+				if(!resizable) {
+					finalHeight = targetHeight;
+				} else {
+					finalHeight = targetHeight > curHeight ? targetHeight : curHeight;
+				}
+
+				$element.height(finalHeight);
+				if(finalHeight != curHeight) {
 					$element.trigger("autoheight");
 				}
 
@@ -768,10 +776,19 @@ if(jQuery) {
 			}
 			function handleAutoHeightParents(elm) {
 				var $elm = $(elm),
-					$target = $elm.closest(".tab-pane, .modal-dialog");
+					$target = $elm.closest(".tab-pane, .modal-dialog"),
+					$collapseTarget = $elm.closest(".collapse");
 
 				var handler = function(e) {
 					$elm.trigger("input");
+				}
+				var collapseHandler = function(e) {
+					// Have to check whether the event occurred on the element
+					// itself, to guard from descendant collapse elements' event
+					// bubbling up
+					if(e.target != e.currentTarget)
+						return;
+					handler(e);
 				}
 
 				// If inside a tab pane, find the toggle first
@@ -788,6 +805,11 @@ if(jQuery) {
 					// jerk out a bit, but that's just how it is
 					$target.off("shown.bs.tab shown.bs.modal", handler)
 							.on("shown.bs.tab shown.bs.modal", handler)
+					;
+				}
+				if($collapseTarget.length > 0) {
+					$collapseTarget.off("shown.bs.collapse", collapseHandler)
+									.on("shown.bs.collapse", collapseHandler)
 					;
 				}
 			}
@@ -863,7 +885,15 @@ if(jQuery) {
 					? $ta.prop("maxLength") || $ta.data("maxLength") || $container.data("maxLength") || 0
 					: parseInt(maxLength) || 0
 				;
+				var hasMaxLength = maxLength > -1;
 				var separator = ""+ options.separator;
+
+				var fillProgressClass;
+				if(typeof options.fillProgressClass == "function") {
+					fillProgressClass = options.fillProgressClass.bind($length[0]);
+				} else {
+					fillProgressClass = function() { return options.fillProgressClass; };
+				}
 
 				$container.addClass(posClass);
 
@@ -878,13 +908,14 @@ if(jQuery) {
 						return;
 					}
 
-					$length.removeClass("d-none").html(`${length}${separator}${maxLength}`);
+					var lengthText = hasMaxLength ? `${length}${separator}${maxLength}` : (""+length);
+					$length.removeClass("d-none").html(lengthText);
 
 					if(options.showFillProgress && options.fillProgressClass) {
-						var classes = ""+ options.fillProgressClass(length, maxLength);
+						var classes = ""+ fillProgressClass(length, maxLength);
 
 						var prefix = options.fillProgressClassPrefix;
-						classes = classes.split(" ");
+						classes = classes.split(" ").filter(x => !!x);
 						if(prefix) {
 							Helpers.removeClassStartingWith($length, prefix);
 							classes = classes.map(function(v) {
@@ -974,4 +1005,48 @@ if(jQuery) {
 			});
 		},
 	});
+
+
+	// Flash an element
+	$(document).on("click", ".btn-flash-elm", function(e) {
+		var target = $(this).data("flashTarget"),
+			$target = $(target).first(),
+			scrollOptions = $(this).data("scrollOptions") || {},
+			flashOptions = $(this).data("flashOptions") || {}
+		;
+
+		// Scroll to element and flash it
+		if($target.length) {
+			e.preventDefault();
+			scrollOptions = $.extend({
+				animate: true,
+			}, scrollOptions);
+			$target.one("scrolled.scrollto", function(e) {
+				Helpers.flashElement($target, flashOptions);
+			});
+			Helpers.scrollTo($target, scrollOptions);
+		}
+	});
+
+	$(document).on("show.bs.collapse", ".collapse-scrollto", function(e) {
+		// Make sure the event is on itself, not on any descendants
+		if(e.target != e.currentTarget)
+			return;
+
+		var scrollOffset = $(this).data("scrollOffset");
+		var options = $.extend({
+			animate: true,
+			offset: 50,
+		}, {
+			offset: scrollOffset,
+		});
+
+		// Need to defer because during "show" event the element is not visible yet,
+		// so it doesn't have a scroll offset. To scroll we need to do calculations
+		// right after the element is set to be visible.
+		setTimeout(function() {
+			Helpers.parentScrollTo(e.target, options);
+		}, 10);
+	});
+
 }

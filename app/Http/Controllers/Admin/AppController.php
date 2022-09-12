@@ -41,8 +41,6 @@ use Gumlet\ImageResize;
 class AppController extends Controller
 {
 
-	protected $provider;
-
 	public function __construct()
 	{
 		$this->middleware('auth');
@@ -118,10 +116,11 @@ class AppController extends Controller
 
 
 		// Validation rules
+		request_replace_nl($request);
 		$rules = [
 			'app_name'			=> ['required', 'max:100'],
 			'app_short_name'	=> ['nullable', 'max:20'],
-			'app_description'	=> ['nullable'],
+			'app_description'	=> ['nullable', 'string'],
 			'app_url'			=> ['nullable', 'string', 'url', new AppUrl],
 			// 'app_logo'			=> ['file', 'image', 'max:2048'], // NOTE: using filepond validation instead
 			'categories'		=> ['required', 'array'],
@@ -684,6 +683,7 @@ class AppController extends Controller
 		$data['user'] = Auth::user();
 		$data['old_uploads'] = old('new_images', []);
 
+		$data['pending_edits'] = settings('app.modification_needs_verification', false);
 		$data['caption_limit'] = settings('app.visuals.caption_limit', 300);
 
 		return view('admin/app/visuals', $data);
@@ -696,11 +696,12 @@ class AppController extends Controller
 			list($ori, $app) = AppManager::getPendingVersion($app, false, false);
 		}
 
+		request_replace_nl($request);
 		$rules = [
 			'visuals_count'		=> ['required'], // dummy field for validation
 			'visuals'			=> ['nullable', 'array'],
 			'visuals.*.id'		=> ['required', 'integer', new ModelExists(AppVisualMedia::class)],
-			'visuals.*.order'	=> ['nullable', 'integer'/*, 'max:10'*/],
+			'visuals.*.order'	=> ['nullable', 'integer'],
 			'visuals.*.caption'	=> ['nullable', 'string'],
 			'visuals.*.delete'	=> ['nullable'],
 			// 'new_images.*'		=> ['nullable', 'string'],
@@ -763,8 +764,6 @@ class AppController extends Controller
 				}
 			};
 		}
-
-
 
 		// Validate
 		$validData = $request->validate($rules);

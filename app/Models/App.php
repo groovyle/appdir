@@ -17,20 +17,24 @@ class App extends Model
 	protected $attributes = [
 		'is_verified' => false,
 		'is_published' => false,
+		'is_reported' => false,
 	];
 
 	protected $guarded = [
 		'is_verified',
 		'is_published',
+		'is_reported',
 	];
 
 	protected $casts = [
 		'is_verified' => 'boolean',
 		'is_published' => 'boolean',
+		'is_reported' => 'boolean',
 	];
 
 	protected $dates = [
 		'published_at',
+		'reported_at',
 	];
 
 	protected $with = [
@@ -50,25 +54,6 @@ class App extends Model
 	{
 		parent::boot();
 
-		/*static::addGlobalScope('order_verification',
-			function (Builder $builder) {
-				$self = __CLASS__;
-				$app = new $self;
-				$table = $app->getTable();
-				$updated_at = $app->getQualifiedUpdatedAtColumn();
-				$pkey = $app->getQualifiedKeyName();
-
-				$ver = (new AppVerification);
-				$ver_table = $ver->getTable();
-				$ver_updated_at = $ver->getQualifiedUpdatedAtColumn();
-				$ver_fk = $ver->getQualifiedAppColumn();
-
-				$builder->select($table.'.*');
-				$builder->leftJoin($ver_table, $pkey, '=', $ver_fk);
-				$builder->orderByRaw(sprintf('COALESCE(%s, %s) DESC', $ver_updated_at, $updated_at));
-				$builder->groupBy($pkey);
-			}
-		);*/
 		static::addGlobalScope('order_verification', function (Builder $builder) {
 			$builder->latest(static::UPDATED_AT)->latest('id');
 		});
@@ -89,6 +74,7 @@ class App extends Model
 
 		$query->where('is_verified', 1);
 		$query->where('is_published', 1);
+		// $query->where('is_reported', 0);
 	}
 
 	public static function getFrontendItem($slug) {
@@ -148,10 +134,6 @@ class App extends Model
 
 	public function tags() {
 		return $this->belongsToMany('App\Models\AppTag', 'app_tags', 'app_id', 'tag');
-	}
-
-	public function type() {
-		return $this->belongsTo('App\Models\AppType');
 	}
 
 	public function owner() {
@@ -303,5 +285,13 @@ class App extends Model
 	public function setToPublished($state = true) {
 		$this->is_published = $state;
 		$this->published_at = $state ? now() : null;
+	}
+
+	public function increasePageViews($save = true) {
+		$this->page_views += 1;
+		if($save) {
+			$this->dontLogNextAction();
+			return $this->save();
+		}
 	}
 }

@@ -23,7 +23,9 @@
 	@stack('load-styles')
 
 	<!-- Styles -->
+	<link href="{{ asset('css/custom-libraries.css') }}" rel="stylesheet">
 	<link href="{{ asset('css/app.css') }}" rel="stylesheet">
+	<link href="{{ asset('css/helpers.css') }}" rel="stylesheet">
 
 	@stack('styles')
 
@@ -101,6 +103,8 @@
 		</footer>
 	</div>
 
+	<div id="to-top" title="@lang('frontend.back_to_top_button')"></div>
+
 	<!-- Scripts -->
 	<script src="{{ asset('js/app.js') }}"></script>
 	<script src="{{ asset('plugins/toastr/toastr.min.js') }}"></script>
@@ -108,6 +112,8 @@
 
 	@stack('load-scripts')
 
+	<script src="{{ asset('js/helpers.js') }}"></script>
+	<script src="{{ asset('js/custom-libraries.js') }}"></script>
 	<script src="{{ asset('js/frontend.js') }}"></script>
 
 	@stack('scripts')

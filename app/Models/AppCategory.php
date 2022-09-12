@@ -25,6 +25,10 @@ class AppCategory extends Model
 		});
 	}
 
+	public function apps() {
+		return $this->belongsToMany('App\Models\App', 'app_categories', 'category_id', 'app_id');
+	}
+
 	public function __toString() {
 		return $this->name;
 	}

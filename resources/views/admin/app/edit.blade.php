@@ -185,7 +185,7 @@ if(!$is_edit) {
 
             <div class="form-group">
               <label for="inputAppDescription">{{ __('admin/apps.fields.description') }}</label>
-              <textarea name="app_description" class="form-control" id="inputAppDescription" placeholder="{{ __('admin/apps.fields.description_placeholder') }}" rows="3" maxlength="{{ settings('app.description_limit', 500) }}" style="max-height: 300px;">{{ old('app_description', $app->description) }}</textarea>
+              <textarea name="app_description" class="form-control" id="inputAppDescription" placeholder="{{ __('admin/apps.fields.description_placeholder') }}" rows="3" maxlength="{{ settings('app.description_limit', 1000) }}" style="max-height: 300px;">{{ old('app_description', $app->description) }}</textarea>
             </div>
           </div>
         </div>
@@ -255,7 +255,9 @@ jQuery(document).ready(function($) {
       $wrapperShortName = $("#wrapperShortName");
 
 
-  $("#inputAppDescription").textareaShowLength().textareaAutoHeight({
+  $("#inputAppDescription").textareaShowLength({
+    position: "bottom center",
+  }).textareaAutoHeight({
     bypassHeight: false,
   });
 

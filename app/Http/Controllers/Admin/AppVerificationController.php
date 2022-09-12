@@ -142,8 +142,8 @@ class AppVerificationController extends Controller
 				}),
 			],
 			'details'			=> ['array'],
-			'details.*'			=> ['nullable', 'string', 'max:200'],
-			'overall_comment'	=> ['required', 'string', 'max:1000'],
+			'details.*'			=> ['nullable', 'string', 'nnl', 'max:200'],
+			'overall_comment'	=> ['required', 'string', 'nnl', 'max:1000'],
 			'verif_status'		=> ['required', new ModelExists(VVStatus::class)],
 		];
 		$validData = $request->validate($rules);
@@ -347,8 +347,8 @@ class AppVerificationController extends Controller
 			// 'versionb'			=> ['required'],
 			'version'			=> ['required'],
 			'details'			=> ['array'],
-			'details.*'			=> ['nullable', 'string', 'max:200'],
-			'overall_comment'	=> ['required', 'string', 'max:1000'],
+			'details.*'			=> ['nullable', 'string', 'nnl', 'max:200'],
+			'overall_comment'	=> ['required', 'string', 'nnl', 'max:1000'],
 			'verif_status'		=> ['required', new ModelExists(VVStatus::class)],
 		];
 		$validData = $request->validate($rules);

@@ -1,0 +1,105 @@
+
+/* Textarea Auto Height */
+textarea.auto-height-init,
+textarea.auto-height-init-bypass {
+	height: auto;
+	/*overflow-y: hidden !important;*/
+}
+textarea.auto-height-init:not(.show-resize),
+textarea.auto-height-init-bypass:not(.show-resize) {
+	resize: none !important;
+}
+textarea.auto-height-init-bypass {
+	min-height: auto !important;
+}
+
+/* END Textarea Auto Height */
+
+
+
+/* Textarea Length Indicator */
+.textarea-length-container {
+	position: relative;
+}
+.textarea-length-container > textarea {
+	width: 100%;
+}
+.textarea-length-container > .textarea-length {
+	position: absolute;
+	display: none;
+	overflow: hidden;
+	font-size: 0.8em;
+	text-align: center;
+	white-space: nowrap;
+	max-width: 50%;
+	padding: 0.1em 0.2em;
+	color: var(--softgray);
+	/*background-color: rgba(255,255,255,0.5);*/
+	background-color: #fff;
+	border: 1px solid #bbb;
+	pointer-events: none;
+	transition: all 0.1s;
+}
+.textarea-length-container > .textarea-length:empty {
+	display: none !important;
+}
+.textarea-length-container > textarea:hover + .textarea-length,
+.textarea-length-container > textarea:focus + .textarea-length {
+	display: inline-block;
+}
+.textarea-length-container > textarea:hover + .textarea-length {
+	opacity: 0.75;
+}
+.textarea-length-container > textarea:focus + .textarea-length {
+	color: #007bff;
+	border-color: #80bdff;
+	opacity: 1;
+}
+.textarea-length-container > textarea:focus + .textarea-length.tlen-progress--half-full {
+	color: #d39e00;
+	border-color: #ffc107;
+}
+.textarea-length-container > textarea:focus + .textarea-length.tlen-progress--is-full {
+	color: #bd2130;
+	border-color: #dc3545;
+}
+.textarea-length-container.textarea-length-top-right > .textarea-length {
+	right: 0.5em;
+	bottom: 100%;
+	margin-bottom: -1px;
+	border-bottom-width: 0;
+}
+.textarea-length-container.textarea-length-bottom-right > .textarea-length {
+	right: 0.5em;
+	top: 100%;
+	margin-top: -1px;
+	border-top-width: 0;
+}
+.textarea-length-container.textarea-length-top-left > .textarea-length {
+	left: 0.5em;
+	bottom: 100%;
+	margin-bottom: -1px;
+	border-bottom-width: 0;
+}
+.textarea-length-container.textarea-length-bottom-left > .textarea-length {
+	left: 0.5em;
+	top: 100%;
+	margin-top: -1px;
+	border-top-width: 0;
+}
+.textarea-length-container.textarea-length-top-center > .textarea-length {
+	left: 50%;
+	bottom: 100%;
+	margin-bottom: -1px;
+	border-bottom-width: 0;
+	transform: translateX(-50%);
+}
+.textarea-length-container.textarea-length-bottom-center > .textarea-length {
+	left: 50%;
+	top: 100%;
+	margin-top: -1px;
+	border-top-width: 0;
+	transform: translateX(-50%);
+}
+
+/* END Textarea Length Indicator */

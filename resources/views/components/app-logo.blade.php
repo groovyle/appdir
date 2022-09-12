@@ -1,15 +1,24 @@
 <?php
 $width = null;
 $height = null;
+$style = '';
 if(isset($size)) {
 	$tmp = explode('x', $size);
 	if(count($tmp) == 1)
 		$width = $height = $tmp[0];
 	else
 		list($width, $height) = $tmp;
+	$style = sprintf('style="max-width: %spx; max-height: %spx;"', $width, $height);
+}
+if(isset($exact)) {
+	$tmp = explode('x', $exact);
+	if(count($tmp) == 1)
+		$width = $height = $tmp[0];
+	else
+		list($width, $height) = $tmp;
+	$style = sprintf('style="width: %spx; height: %spx;"', $width, $height);
 }
 
-$style = sprintf('style="max-width: %spx; max-height: %spx;"', $width, $height);
 $none = isset($none) ? !!$none : true;
 
 $attrs = '';

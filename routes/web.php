@@ -21,6 +21,7 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/apps', 'AppController@index')->name('apps');
 Route::get('/apps/{slug}', 'AppController@page')->name('apps.page');
 Route::get('/apps/{slug}/preview', 'AppController@preview')->name('apps.preview');
+Route::post('/apps/{slug}/submit_report', 'AppController@postReport')->name('apps.report.save');
 
 Route::get('/color_test', 'TestColorsController@index')->name('color_test');
 

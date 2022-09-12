@@ -43,6 +43,13 @@ $append_breadcrumb = [
   @csrf
   @method('POST')
 
+  @if($pending_edits)
+  <div class="alert alert-warning">
+    <h5>{{ __('common.attention') }}!</h5>
+    <p class="mb-0">{{ __('admin/apps.messages.edits_will_be_staged') }}.</p>
+  </div>
+  @endif
+
   <input type="hidden" name="visuals_count" value="{{ $app->visuals->count() }}" readonly>
   <input type="hidden" id="inputBackAfterSave" name="back_after_save" value="0" >
 

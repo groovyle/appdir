@@ -1,0 +1,128 @@
+
+/* Helper classes */
+:root {
+	--lightgray: #ddd;
+	--softgray: #bbb;
+}
+
+ul:only-child,
+ol:only-child {
+	margin-bottom: 0;
+}
+
+textarea.form-control {
+	/* formula = font-size * line-height + padding-y + border */
+	min-height: calc(1em * 1.5 + 0.75rem + 2px);
+}
+textarea.form-control-sm {
+	/* formula = font-size * line-height + padding-y + border */
+	min-height: calc(1em * 1.5 + 0.5rem + 2px);
+}
+
+.alert > p {
+	margin-bottom: 0.25rem;
+}
+
+p:last-child {
+	margin-bottom: 0;
+}
+
+.btn-flex-row {
+	display: inline-flex;
+	flex-flow: row nowrap;
+	align-items: baseline;
+}
+
+.icon-text-pair {
+	display: inline-flex;
+	align-items: baseline;
+	column-gap: 0.35rem;
+}
+.icon-text-pair:not(.icon-color-reset) > .icon {
+	color: var(--gray);
+}
+.icon-text-pair.icon-2x {
+	align-items: flex-start;
+	column-gap: 0.75rem;
+}
+.icon-text-pair.icon-2x > .icon {
+	font-size: 2em;
+	margin-top: 0.25rem;
+	margin-right: 0; /* decided by gap property */
+}
+
+.flash-element,
+.flash-element > td {
+	background-color: rgba(255, 152, 26, 0.9);
+	box-shadow: 0 0 0 0.5rem rgba(255, 152, 26, 0.9);
+	animation: flash-element 2s linear 0.25s;
+	animation-fill-mode: forwards;
+}
+
+@keyframes flash-element {
+	to {
+		background-color: transparent;
+		box-shadow: 0 0 0 0.5rem transparent;
+	}
+}
+
+.badge-soft {
+	font-size: 0.9em;
+	font-weight: normal;
+}
+
+.tooltip-wider .tooltip-inner {
+	/* usually 200px */
+	max-width: 300px;
+}
+
+
+
+.text-bold { font-weight: bold; }
+.text-unbold { font-weight: normal; }
+
+.w-100 { width: 100%; }
+.maxw-100 { max-width: 100%; }
+.minw-100 { min-width: 100%; }
+.h-100 { height: 100%; }
+.maxh-100 { max-height: 100%; }
+.minh-100 { min-height: 100%; }
+
+.btn-min-100 { min-width: 100px; }
+
+.z-index-1 { z-index: 1; }
+.z-index-2 { z-index: 2; }
+
+.text-pre-line { white-space: pre-line; }
+.text-pre-wrap { white-space: pre-wrap; }
+.text-wrap-word {
+	word-wrap: break-word;
+	word-break: break-word;
+}
+
+.text-120 { font-size: 120%; }
+.text-110 { font-size: 110%; }
+.text-100 { font-size: 100%; }
+.text-090 { font-size: 90%; }
+.text-085 { font-size: 85%; }
+.text-080 { font-size: 80%; }
+.text-070 { font-size: 70%; }
+
+.text-r120 { font-size: 1.2rem; }
+.text-r110 { font-size: 1.1rem; }
+.text-r100 { font-size: 1.0rem; }
+.text-r090 { font-size: 0.9rem; }
+.text-r085 { font-size: 0.8rem; }
+.text-r080 { font-size: 0.8rem; }
+.text-r070 { font-size: 0.7rem; }
+
+.text-light-gray { color: var(--lightgray); }
+
+.ofx-auto { overflow-x: auto; }
+.ofy-auto { overflow-y: auto; }
+
+.cursor-default { cursor: default; }
+.cursor-pointer { cursor: pointer; }
+
+.pointer-none { pointer-events: none !important; }
+

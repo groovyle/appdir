@@ -36,5 +36,30 @@ return [
 'on_s'				=> 'on %s',
 'sorted_from_newest_to_oldest'		=> 'sorted from newest to oldest',
 'publish'			=> 'Publish',
+'submit'			=> 'Submit',
+
+
+
+
+'app_report_categories'		=> [
+	'racist/discrimination'					=> 'Racist/Discrimination',
+	'racist/discrimination_description'		=>
+		'The content contains racist, discrimination, or other negative divisive remarks or elements.',
+	'spam'									=> 'Spam',
+	'spam_description'						=>
+		'The content is generated automatically, and/or is being posted multiple times without any essences to it.',
+	'porn/suggestive_content'				=> 'Porn or Suggestive Contents',
+	'porn/suggestive_content_description'	=>
+		'Explicit images/texts, or non-explicit content that imply sexual topics.',
+	'plagiarism'							=> 'Plagiarism',
+	'plagiarism_description'				=>
+		'The content was copied from somewhere else without permission, and/or belongs to someone else.',
+	'fraud/scam'							=> 'Fraud/Scam',
+	'fraud/scam_description'				=>
+		'Content which suggests the readers to do something, or to interact in any way. Usually contains links to external, shady websites.',
+	'others'								=> 'Others',
+	'others_description'					=>
+		'Other types of inappropriate content. Please explain in the reasons section on how the content may be inappropriate.',
+],
 
 ];

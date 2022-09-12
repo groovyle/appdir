@@ -6,6 +6,29 @@
  * right away.
  */
 
+function nnl($str) {
+	// -- Normalize New Line -- //
+	/**
+	 * Normalize newlines so that it's always \n instead of sometimes \r\n.
+	 * Normalizing is needed so that a newline only count as 1 character for validation,
+	 * where if it's \r\n it counts as 2 characters for mb_strlen(). This way
+	 * newlines would count only as 1 character instead of 2.
+	 * Do this for any textarea input data so that size rules like `max` works correctly.
+	 */
+	return str_replace(["\r\n", "\r"/*, "\n"*/], "\n", $str);
+}
+
+function request_replace_nl($request) {
+	$all = $request->all();
+
+	foreach(\Arr::dot($all) as $key => $value) {
+		if(is_string($value) && strpos($value, "\r") !== false) {
+			data_set($all, $key, nnl($value));
+		}
+	}
+
+	$request->replace($all);
+}
 
 function escape_mysql_like_str($string) {
 	return addcslashes($string, '\\_%');

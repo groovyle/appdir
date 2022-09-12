@@ -23,7 +23,9 @@
 
   <!-- Theme style -->
   <link rel="stylesheet" href="{{ asset('css/adminlte.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/custom-libraries.css') }}">
   <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/helpers.css') }}">
   <!-- Google Font: Source Sans Pro -->
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 
@@ -90,6 +92,7 @@ window.AppGlobals = {
 @stack('load-scripts')
 
 <script src="{{ asset('js/helpers.js') }}"></script>
+<script src="{{ asset('js/custom-libraries.js') }}"></script>
 <script src="{{ asset('js/admin.js') }}"></script>
 
 @stack('scripts')

@@ -1,9 +1,4 @@
 
-:root {
-	--lightgray: #ddd;
-	--softgray: #bbb;
-}
-
 .content-wrapper {
 	position: relative;
 }
@@ -13,107 +8,8 @@
 	word-break: break-word;
 }
 
-ul:only-child,
-ol:only-child {
-	margin-bottom: 0;
-}
-
 .form-check-input {
 	/*margin-top: 0.4rem;*/
-}
-
-.badge-soft {
-	font-size: 0.9em;
-	font-weight: normal;
-}
-
-textarea.form-control {
-	/* formula = font-size * line-height + padding-y + border */
-	min-height: calc(1em * 1.5 + 0.75rem + 2px);
-}
-textarea.form-control-sm {
-	/* formula = font-size * line-height + padding-y + border */
-	min-height: calc(1em * 1.5 + 0.5rem + 2px);
-}
-
-textarea.auto-height-init,
-textarea.auto-height-init-bypass {
-	height: auto;
-	/*overflow-y: hidden !important;*/
-	resize: none !important;
-}
-textarea.auto-height-init-bypass {
-	min-height: auto !important;
-}
-
-.textarea-length-container {
-	position: relative;
-}
-.textarea-length-container > textarea {
-	width: 100%;
-}
-.textarea-length-container > .textarea-length {
-	position: absolute;
-	display: none;
-	overflow: hidden;
-	font-size: 0.8em;
-	text-align: center;
-	white-space: nowrap;
-	max-width: 50%;
-	padding: 0.1em 0.2em;
-	color: var(--softgray);
-	/*background-color: rgba(255,255,255,0.5);*/
-	background-color: #fff;
-	border: 1px solid #bbb;
-	pointer-events: none;
-	transition: all 0.1s;
-}
-.textarea-length-container > .textarea-length:empty {
-	display: none !important;
-}
-.textarea-length-container > textarea:hover + .textarea-length,
-.textarea-length-container > textarea:focus + .textarea-length {
-	display: inline-block;
-}
-.textarea-length-container > textarea:hover + .textarea-length {
-	opacity: 0.75;
-}
-.textarea-length-container > textarea:focus + .textarea-length {
-	color: #007bff;
-	border-color: #80bdff;
-	opacity: 1;
-}
-.textarea-length-container > textarea:focus + .textarea-length.tlen-progress--half-full {
-	color: #d39e00;
-	border-color: #ffc107;
-}
-.textarea-length-container > textarea:focus + .textarea-length.tlen-progress--is-full {
-	color: #bd2130;
-	border-color: #dc3545;
-}
-.textarea-length-container.textarea-length-top-right > .textarea-length {
-	right: 0.5em;
-	bottom: 100%;
-	margin-bottom: -1px;
-	border-bottom-width: 0;
-}
-.textarea-length-container.textarea-length-bottom-right > .textarea-length {
-	right: 0.5em;
-	top: 100%;
-	margin-top: -1px;
-	border-top-width: 0;
-}
-.textarea-length-container.textarea-length-top-left > .textarea-length {
-	left: 0.5em;
-	bottom: 100%;
-	margin-bottom: -1px;
-	border-bottom-width: 0;
-}
-.textarea-length-container.textarea-length-bottom-left > .textarea-length {
-	left: 0.5em;
-	top: 100%;
-	margin-top: -1px;
-	border-top-width: 0;
 }
 
 /* Reset the Select2 AdminLTE light theme colors because it's awkward */
@@ -653,24 +549,6 @@ textarea.auto-height-init-bypass {
 	}
 }
 
-.icon-text-pair {
-	display: inline-flex;
-	align-items: baseline;
-	column-gap: 0.35rem;
-}
-.icon-text-pair:not(.icon-color-reset) > .icon {
-	color: var(--gray);
-}
-.icon-text-pair.icon-2x {
-	align-items: flex-start;
-	column-gap: 0.75rem;
-}
-.icon-text-pair.icon-2x > .icon {
-	font-size: 2em;
-	margin-top: 0.25rem;
-	margin-right: 0; /* decided by gap property */
-}
-
 
 .table-responsive:last-child > .table:only-child {
 	margin-bottom: 0;
@@ -712,14 +590,6 @@ textarea.auto-height-init-bypass {
 	color: #495057;
 }
 
-.alert > p {
-	margin-bottom: 0.25rem;
-}
-
-p:last-child {
-	margin-bottom: 0;
-}
-
 .flash-element,
 .flash-element > td {
 	background-color: rgba(255, 152, 26, 0.9);
@@ -733,58 +603,4 @@ p:last-child {
 		background-color: transparent;
 		box-shadow: 0 0 0 0.5rem transparent;
 	}
-}
-
-/* Helper classes */
-.text-unbold { font-weight: normal; }
-
-.w-100 { width: 100%; }
-.maxw-100 { max-width: 100%; }
-.minw-100 { min-width: 100%; }
-.h-100 { height: 100%; }
-.maxh-100 { max-height: 100%; }
-.minh-100 { min-height: 100%; }
-
-.scale-smaller {
-	scale:  0.75;
-	transform-origin: top left;
-}
-
-.btn-min-100 { min-width: 100px; }
-
-.z-index-1 { z-index: 1; }
-.z-index-2 { z-index: 2; }
-
-.text-pre-line { white-space: pre-line; }
-.text-pre-wrap { white-space: pre-wrap; }
-
-.text-120 { font-size: 120%; }
-.text-110 { font-size: 110%; }
-.text-090 { font-size: 90%; }
-.text-085 { font-size: 85%; }
-.text-080 { font-size: 80%; }
-.text-070 { font-size: 70%; }
-
-.text-light-gray { color: var(--lightgray); }
-
-.ofx-auto { overflow-x: auto; }
-.ofy-auto { overflow-y: auto; }
-
-.cursor-default { cursor: default; }
-.cursor-pointer { cursor: pointer; }
-
-.pointer-none { pointer-events: none !important; }
-
-.row.gutter-lg {
-	/* In AdminLTE the grid gutter got cut to half (7.5px)
-	 * which can make some layouts awkward
-	 */
-	margin-left: -15px;
-	margin-right: -15px;
-}
-.row.gutter-lg > .col,
-.row.gutter-lg > [class^="col-"],
-.row.gutter-lg > [class *=" col-"] {
-	padding-left: 15px;
-	padding-right: 15px;
 }
