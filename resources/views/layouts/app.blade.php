@@ -11,6 +11,7 @@
 	<title>{{ make_title(View::yieldContent('title')) }}</title>
 
 	<link href="{{ asset('css/base.css') }}" rel="stylesheet">
+	<link href="{{ asset('css/login.css') }}" rel="stylesheet">
 	<link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
 	<link href="{{ asset('plugins/ekko-lightbox/ekko-lightbox.css') }}" rel="stylesheet">
 

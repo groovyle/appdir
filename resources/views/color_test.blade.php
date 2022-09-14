@@ -7,7 +7,7 @@
 			<div class="float-right">
 				<span class="mr-1">Test text color:</span>
 				<button type="button" class="btn btn-dark btn-sm btn-test-text-color" data-target-chroma="dark">Light</button>
-				<button type="button" class="btn btn-light border-secondary btn-sm btn-test-text-color" data-target-chroma="light">Dark</button>
+				<button type="button" class="btn btn-light bordered btn-sm btn-test-text-color" data-target-chroma="light">Dark</button>
 				<button type="button" class="btn btn-link btn-sm btn-test-text-color" data-target-chroma="reset">Reset</button>
 			</div>
 			<div>Color Schemes Test ({{ $schemes->count() }})</div>

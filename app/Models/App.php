@@ -66,7 +66,10 @@ class App extends Model
 		]);
 		$query->with([
 			'visuals',
-			'visual',
+			'logo',
+			'categories',
+			'tags',
+			'owner',
 		]);
 		$query->withCount([
 			'visuals',
@@ -264,7 +267,7 @@ class App extends Model
 	}
 
 	public function getCompleteNameAttribute() {
-		return $this->name . ($this->short_name ? ' ('.$this->short_name.')' : '');
+		return $this->short_name ? $this->short_name .' - '. $this->name : $this->name;
 	}
 
 	public function getPublicNameAttribute() {
@@ -272,14 +275,16 @@ class App extends Model
 	}
 
 	public function getPublicUrlAttribute() {
+		return $this->get_public_url();
+	}
+
+	public function get_public_url($params = []) {
 		// TODO: decide whether to use slug or ID for the public URL
 		// ID	= weird number
 		// Slug	= nicer, but changes with the name, so can't really be bookmarked
-		return $this->get_public_url($this->id);
-	}
-
-	public function get_public_url($slug, $params = []) {
-		return route('apps.page', array_merge(['slug' => $slug], $params));
+		if(!isset($params['slug']))
+			$params['slug'] = $this->id;
+		return route('apps.page', $params);
 	}
 
 	public function setToPublished($state = true) {

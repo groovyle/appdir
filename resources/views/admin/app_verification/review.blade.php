@@ -77,7 +77,7 @@ $rand = random_alpha(5);
           @lang('admin/apps.app_is_not_public')
         </span>
         @endif
-        <a href="{{ $ori->get_public_url($app->id, ['version' => $app->version_number]) }}" class="btn btn-xs btn-secondary px-2" target="_blank">
+        <a href="{{ $ori->get_public_url(['version' => $app->version_number]) }}" class="btn btn-xs btn-secondary px-2" target="_blank">
           @lang('admin/app_verifications.review_public_page')
           <span class="fas fa-globe-americas ml-1"></span>
         </a>

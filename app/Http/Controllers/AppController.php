@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\App;
+use App\Models\AppCategory;
+use App\Models\AppTag;
 use App\Models\AppReport;
 use App\Models\AppReportCategory;
 
@@ -21,7 +23,62 @@ class AppController extends Controller
 	public function index() {
 
 		$data = [];
-		$data['apps'] = App::frontend()->get();
+
+		$query = App::frontend();
+		$filter_count = 0;
+		$filters = request(['s', 'c', 't']);
+		$total_all = $query->count();
+
+		if($search = trim(request('s'))) {
+			$str = escape_mysql_like_str($search);
+			$like = '%'.$str.'%';
+			$query->where(function($query) use($like) {
+				$query->where('name', 'like', $like);
+				$query->orWhere('short_name', 'like', $like);
+				$query->orWhere('description', 'like', $like);
+			});
+
+			$filter_count++;
+		}
+
+		if($categories = request('c')) {
+			if(!is_array($categories))
+				$categories = explode(',', $categories);
+
+			$categories = array_unique(array_filter($categories));
+			$query->whereHas('categories', function($query) use($categories) {
+				$query->whereIn('id', $categories);
+			});
+
+			$filter_count++;
+		}
+
+		if($tags = request('t')) {
+			if(!is_array($tags))
+				$tags = explode(',', $tags);
+
+			$tags = array_unique(array_filter($tags));
+			$query->whereHas('tags', function($query) use($tags) {
+				$query->whereIn('name', $tags);
+			});
+
+			$filter_count++;
+		}
+
+		$query->orderBy('name');
+		$query->orderBy('short_name');
+
+		// $total_search = $query->count();
+		$per_page = settings('app.listing.per_page', 20);
+		$apps = $query->paginate($per_page);
+		$apps->appends($filters);
+
+		$data['total_all'] = $total_all;
+		// $data['total_search'] = $total_search;
+		$data['apps'] = $apps;
+		$data['categories'] = AppCategory::all();
+		$data['tags'] = AppTag::all();
+		$data['filter_count'] = $filter_count;
 
 		return view('app/index', $data);
 	}

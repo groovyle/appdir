@@ -25,9 +25,28 @@ $attrs = '';
 if(isset($attributes)) {
 	$attrs = html_attributes($attributes);
 }
+
+$img_class = $img_class ?? '';
+$default = $default ?? false;
+$logo_url = null;
+if($logo) {
+	$logo_url = $logo->url;
+} elseif($default) {
+	$logo_url = asset('img/image-where-sm.png');
+}
+
+$as_link = $as_link ?? true;
+$rand = 'logo-'.random_alpha(5);
 ?>
-@if($logo)
-<a href="{{ $logo->url }}" target="_blank" {!! $attrs !!}><img rel="logo" src="{{ $logo->url }}" class="maxw-100" {!! $style !!}></a>
+@section($rand)
+<img rel="logo" src="{{ $logo_url }}" class="maxw-100 {{ $img_class }}" {!! $style !!}>
+@endsection
+@if($logo_url)
+@if($as_link)
+<a href="{{ $logo_url }}" target="_blank" {!! $attrs !!}>@yield($rand)</a>
+@else
+@yield($rand)
+@endif
 @elseif($none)
 <span {!! $attrs !!}>@von(null)</span>
 @endif

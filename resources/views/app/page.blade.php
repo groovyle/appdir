@@ -16,7 +16,7 @@ $show_report_form = $is_report_form ? 'show' : '';
 			<div class="app-with-logo">
 				@if($app->logo)
 				<div class="logo-wrapper">
-					@include('components.app-logo', ['logo' => $app->logo, 'exact' => '80x80'])
+					@include('components.app-logo', ['logo' => $app->logo, 'exact' => '80x80', 'img_class' => 'app-logo', 'as_link' => false])
 				</div>
 				@endif
 				<div class="logo-complement">
@@ -181,7 +181,7 @@ $show_report_form = $is_report_form ? 'show' : '';
 						<div class="card">
 							<div class="card-body">
 								<h4>@lang('frontend.apps.author')</h4>
-								<p>{{ $app->owner->name }} TODO: clickable user to user page</p>
+								<p><a href="{{ route('user.profile', ['user' => $app->owner->id]) }}">{{ $app->owner->name }}</a> TODO: clickable user to user page</p>
 								<p>number of apps, user details, etc.</p>
 								<p>@lang('frontend.apps.share_this_app'): --- TODO: socmed share buttons</p>
 								<div class="text-center">
@@ -211,32 +211,32 @@ $show_report_form = $is_report_form ? 'show' : '';
 									<dd>@vo_</dd>
 									@endif
 
-									TODO: make categories and tags clickable to search
+									<dt>@lang('frontend.apps.fields.long_name')</dt>
+									<dd>{{ $app->name }}</dd>
+
+									<dt>@lang('frontend.apps.fields.short_name')</dt>
+									<dd>@vo_($app->short_name)</dd>
 
 									<dt>@lang('frontend.apps.fields.version')</dt>
 									<dd>@vo_($app->version_number)</dd>
 
-									<dt>@lang('frontend.apps.fields.app_categories')</dt>
+									<dt>@lang('frontend.apps.fields.app_categories') ({{ count($app->categories) }})</dt>
 									<dd>
 										@if(count($app->categories) > 0)
-										<ul class="pl-3">
-											@foreach($app->categories as $category)
-											<li>{{ $category->name }}</li>
-											@endforeach
-										</ul>
+										@foreach($app->categories as $category)
+										<a href="{{ route('apps', ['c' => $category->id]) }}" class="btn btn-sm btn-light bordered rounded-pill" title="{{ __('frontend.apps.search_by_this_category_x', ['x' => $category->name]) }}" data-toggle="tooltip">{{ $category->name }}</a>
+										@endforeach
 										@else
 										@vo_
 										@endif
 									</dd>
 
-									<dt>@lang('frontend.apps.fields.tags')</dt>
+									<dt>@lang('frontend.apps.fields.tags') ({{ count($app->tags) }})</dt>
 									<dd>
 										@if(count($app->tags) > 0)
-										<ul class="pl-3">
-											@foreach($app->tags as $tag)
-											<li>{{ $tag->name }}</li>
-											@endforeach
-										</ul>
+										@foreach($app->tags as $tag)
+										<a href="{{ route('apps', ['t' => $tag->name]) }}" class="btn btn-sm btn-light bordered rounded-pill" title="{{ __('frontend.apps.search_by_this_tag_x', ['x' => $tag->name]) }}" data-toggle="tooltip">{{ $tag->name }}</a>
+										@endforeach
 										@else
 										@vo_
 										@endif

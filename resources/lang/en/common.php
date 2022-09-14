@@ -37,6 +37,8 @@ return [
 'sorted_from_newest_to_oldest'		=> 'sorted from newest to oldest',
 'publish'			=> 'Publish',
 'submit'			=> 'Submit',
+'clear'				=> 'Clear',
+'search'			=> 'Search',
 
 
 

@@ -241,7 +241,7 @@ if(!$is_edit) {
 </form>
 @endsection
 
-@include('admin.libraries.select2')
+@include('libraries.select2')
 @include('admin.libraries.filepond')
 @include('admin.app.changes.btn-view-version')
 
@@ -356,20 +356,6 @@ jQuery(document).ready(function($) {
     $logoFile.val(null).trigger("change");
     $(this).tooltip("hide");
   });
-
-  $("#inputAppDomain").on("change", function(e) {
-    var value = $(this).val();
-    var $inputUrl = $("#inputAppUrl");
-    var disabled;
-    if(value) {
-      value = value +"/";
-      disabled = false;
-    } else {
-      value = null;
-      disabled = true;
-    }
-    $inputUrl.prop("disabled", disabled).toggleClass("disabled", disabled).val( value ).trigger("change");
-  }).trigger("change");
 
   $('[data-toggle="popover"]').popover({
     container: "body",
