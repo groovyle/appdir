@@ -369,6 +369,14 @@ if(jQuery) {
 			}, 3000);
 		};
 
+		var scrollAndFlash = function(element, scrollOptions, flashOptions) {
+			var $element = $(element);
+			$element.one("scrolled.scrollto", function(e) {
+				Helpers.flashElement($element, flashOptions);
+			});
+			Helpers.scrollTo($element, scrollOptions);
+		}
+
 		// Remove a certain value in an array
 		// https://stackoverflow.com/questions/5767325/how-can-i-remove-a-specific-item-from-an-array
 		var removeArrayElement = function(arr, needle, multiple, isStrict) {
@@ -625,6 +633,7 @@ if(jQuery) {
 			hScrollTo,
 			parentHScrollTo,
 			flashElement,
+			scrollAndFlash,
 			removeArrayElement,
 			uniqueArrayElements,
 			moveCursorToEnd,
@@ -1021,10 +1030,7 @@ if(jQuery) {
 			scrollOptions = $.extend({
 				animate: true,
 			}, scrollOptions);
-			$target.one("scrolled.scrollto", function(e) {
-				Helpers.flashElement($target, flashOptions);
-			});
-			Helpers.scrollTo($target, scrollOptions);
+			Helpers.scrollAndFlash($target, scrollOptions, flashOptions);
 		}
 	});
 
@@ -1047,6 +1053,16 @@ if(jQuery) {
 		setTimeout(function() {
 			Helpers.parentScrollTo(e.target, options);
 		}, 10);
+	});
+
+	$(document).on("change", "select[multiple].compile-values", function(e) {
+		var target = $(this).data("compileTo"),
+				$target = $(target)
+		;
+		if(target && $target.length > 0) {
+			var compiled = $(this).val().filter(x => !!(String(x).trim())).join(",");
+			$target.val(compiled);
+		}
 	});
 
 }

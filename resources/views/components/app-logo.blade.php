@@ -32,7 +32,7 @@ $logo_url = null;
 if($logo) {
 	$logo_url = $logo->url;
 } elseif($default) {
-	$logo_url = asset('img/image-where-sm.png');
+	$logo_url = asset('img/default-product-logo-bw.png');
 }
 
 $as_link = $as_link ?? true;

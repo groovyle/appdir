@@ -39,6 +39,7 @@ class App extends Model
 
 	protected $with = [
 		'owner',
+		'logo',
 		// 'verifications',
 		// 'verifications.status',
 		// 'last_verification',
@@ -77,7 +78,8 @@ class App extends Model
 
 		$query->where('is_verified', 1);
 		$query->where('is_published', 1);
-		// $query->where('is_reported', 0);
+		// $query->where('is_reported', 0); // TODO
+		// $query->where('id', 0); // dummy
 	}
 
 	public static function getFrontendItem($slug) {
@@ -194,7 +196,7 @@ class App extends Model
 		// $query = $this->changelogs() or similar
 		if($this->version) {
 			$query->where('created_at', '>=', (string) $this->version->created_at)
-				->where('id', '>', $this->version->id)
+				// ->where('id', '>', $this->version->id)
 			;
 		}
 		$query->orderBy('created_at');
@@ -208,7 +210,7 @@ class App extends Model
 	}
 
 	public function last_changes() {
-		return $this->hasOne('App\Model\AppChangelog', 'app_id')->latest(AppVerification::CREATED_AT)->latest('id');
+		return $this->hasOne('App\Models\AppChangelog', 'app_id')->latest(AppVerification::CREATED_AT)->latest('id');
 	}
 
 	public function lastVersionNumber() {
@@ -233,6 +235,10 @@ class App extends Model
 
 	public function getHasHistoryAttribute() {
 		return $this->changelogs()->count() > 1;
+	}
+
+	public function getHasCommittedAttribute() {
+		return $this->changelogs()->committed()->count() > 0;
 	}
 
 	public function getHasVerificationsAttribute() {
@@ -260,14 +266,15 @@ class App extends Model
 	public function getIsUnverifiedNewAttribute() {
 		// TODO: maybe check if it has any verifications as well?
 		return !$this->is_verified
-			&& !$this->is_published
+			// && !$this->is_published
 			// && $this->changelogs()->count() == $this->floating_changes()->count()
 			&& $this->verifications()->where('concern', AppVerification::CONCERN_PUBLISH_ITEM)->doesntExist()
 		;
 	}
 
 	public function getCompleteNameAttribute() {
-		return $this->short_name ? $this->short_name .' - '. $this->name : $this->name;
+		// return $this->short_name ? $this->short_name .' - '. $this->name : $this->name;
+		return $this->short_name ? $this->name .' ('.$this->short_name.')' : $this->name;
 	}
 
 	public function getPublicNameAttribute() {

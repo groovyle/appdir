@@ -86,6 +86,23 @@ function model_uses_soft_deletes($model) {
 	return in_array(Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive($model));
 }
 
+function get_filters(array $only = null, array $defaults = []) {
+	$queries = collect(request()->query());
+	if($only)
+		$queries = $queries->only($only);
+	$filters = array_merge($defaults, $queries->all());
+
+	// Need to turn null values into '' so that it's buildable with http_build_query()
+	// NOTE: null values gets ignored by http_build_query, which gets troublesome
+	// if you have default values
+	foreach($filters as $k => $v) {
+		if($v === null)
+			$filters[$k] = '';
+	}
+
+	return $filters;
+}
+
 
 // NOTE: per the docs, a value of 0 means unlimited
 function ini_max_post_size() {

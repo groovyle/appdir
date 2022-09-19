@@ -275,7 +275,10 @@ class AppManager {
 		]);
 		if($model->exists) {
 			$changelog->app_id = $model->id;
-			$changelog->based_on_id = optional($model->floating_changes->last())->id ?? optional($model->version)->id ?? null;
+			$changelog->based_on_id = optional($model->floating_changes->last())->id
+				?? optional($model->version)->id
+				?? optional($model->changelogs()->oldest()->first())->id
+				?? null;
 		}
 		if($save) {
 			$model->changelogs()->save($changelog);
@@ -315,6 +318,7 @@ class AppManager {
 			// static::applyDiff($model, $result['changes'], false);
 			// $result['saved'] = true;
 			$model->version()->associate($result['model']);
+			$result['saved'] = $model->save();
 
 			// Generate first verification step for the new item
 			$verif = new AppVerification;
@@ -323,7 +327,7 @@ class AppManager {
 			$verif->status_id = 'unverified';
 			$verif->base_changes_id = $version_id;
 			$verif->concern = AppVerification::CONCERN_NEW_ITEM;
-			$result['saved'] = $verif->save();
+			$result['saved'] = $result['saved'] && $verif->save();
 
 			if($result['saved'])
 				$verif->changelogs()->attach($result['model']);
@@ -343,7 +347,14 @@ class AppManager {
 			$verif = new AppVerification;
 			$verif->app_id = $model->id;
 			$verif->verifier_id = request()->user()->id;
-			$verif->status_id = 'revised';
+			if($model->last_changes->is_rejected
+				|| $model->last_verification->status == 'resubmitted') {
+				$verif->status_id = 'resubmitted';
+			} elseif(!$model->has_committed) {
+				$verif->status_id = 'unverified';
+			} else {
+				$verif->status_id = 'revised';
+			}
 			$verif->base_changes_id = optional($model->version)->id;
 			$verif->concern = AppVerification::CONCERN_EDIT_ITEM;
 			$result['saved'] = $verif->save();

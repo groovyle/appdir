@@ -100,6 +100,9 @@ p:last-child {
 	word-break: break-word;
 }
 
+.text-150 { font-size: 150%; }
+.text-140 { font-size: 140%; }
+.text-130 { font-size: 130%; }
 .text-120 { font-size: 120%; }
 .text-110 { font-size: 110%; }
 .text-100 { font-size: 100%; }
@@ -108,6 +111,9 @@ p:last-child {
 .text-080 { font-size: 80%; }
 .text-070 { font-size: 70%; }
 
+.text-r150 { font-size: 1.5rem; }
+.text-r140 { font-size: 1.4rem; }
+.text-r130 { font-size: 1.3rem; }
 .text-r120 { font-size: 1.2rem; }
 .text-r110 { font-size: 1.1rem; }
 .text-r100 { font-size: 1.0rem; }

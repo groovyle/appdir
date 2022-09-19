@@ -52,7 +52,8 @@
 	.logo {
 		display: block;
 		margin: 1.25rem auto;
-		max-width: 200px;
+		// max-width: 200px;
+		max-width: 75%;
 		max-height: 100px;
 
 		@include media-breakpoint-down(sm) {
@@ -148,6 +149,7 @@
 	font-size: 0.9rem;
 	cursor: pointer;
 	outline: none;
+	transition: all 0.15s;
 
 	&:hover, &:focus, &:active {
 		background-color: $gray-800;

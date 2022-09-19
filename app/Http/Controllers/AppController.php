@@ -79,6 +79,7 @@ class AppController extends Controller
 		$data['categories'] = AppCategory::all();
 		$data['tags'] = AppTag::all();
 		$data['filter_count'] = $filter_count;
+		$data['show_filter'] = $filter_count > 0 || request()->has('show_filter');
 
 		return view('app/index', $data);
 	}

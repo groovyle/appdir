@@ -37,9 +37,44 @@ class AppVerificationController extends Controller
 	{
 		//
 		$data = [];
-		$data['verified'] = App::with('thumbnail')->withCount('thumbnail')->where('is_verified', 1)->get();
-		$data['unverified'] = App::whereHas('pending_changes')->get();
-		// $data['apps'] = [];
+		$filters = get_filters(['keyword', 'status'], [
+			'status'	=> 'unverified',
+		]);
+
+		$query = (new App)->newQueryWithoutScopes();
+		$query->from('apps as a');
+		$query->leftJoin('app_changelogs as cv', 'a.version_id', '=', 'cv.id');
+		$query->leftJoin('app_changelogs as cl', function($query) {
+			$query->on('a.id', '=', 'cl.app_id');
+			$query->where('cl.status', AppChangelog::STATUS_PENDING);
+			$query->whereRaw('if(cv.id is not null, cl.created_at >= cv.created_at and cl.id > cv.id, 1)');
+		});
+		$query->groupBy('a.id');
+		$query->orderBy('a.updated_at', 'desc');
+		$query->orderBy('a.id', 'desc');
+		$query->select('a.*');
+
+		if($keyword = trim(optional($filters)['keyword'])) {
+			$str = escape_mysql_like_str($keyword);
+			$like = '%'.$str.'%';
+			$query->where(function($query) use($like) {
+				$query->where('a.name', 'like', $like);
+				$query->orWhere('a.short_name', 'like', $like);
+				$query->orWhere('a.description', 'like', $like);
+			});
+		}
+
+		if($filters['status'] == 'unverified') {
+			$query->whereNotNull('cl.id');
+		} elseif($filters['status'] == 'verified') {
+			$query->whereNull('cl.id');
+		}
+
+		$items = $query->paginate(10);
+		$items->appends($filters);
+
+		$data['items'] = $items;
+		$data['filters'] = optional($filters);
 
 		return view('admin/app_verification/index', $data);
 	}
@@ -61,7 +96,7 @@ class AppVerificationController extends Controller
 				? $versions->pluck('version')->sort()->values()->implode(',')
 				: $app->version_number
 			;
-			$verif->base_version = $app->version_number;
+			$verif->base_version = $app->version_number ?? $app->changelogs()->oldest()->value('version');
 
 			if(count($versions) > 0) {
 				list($ori, $app, $all_changes) = AppManager::getPendingVersion($app);
@@ -126,6 +161,7 @@ class AppVerificationController extends Controller
 		$id = $request->input('id');
 		$is_edit = !empty($id);
 
+		request_replace_nl($request);
 		$rules = [
 			// 'versionq'			=> ['required'],
 			// 'versionb'			=> ['required'],
@@ -142,8 +178,8 @@ class AppVerificationController extends Controller
 				}),
 			],
 			'details'			=> ['array'],
-			'details.*'			=> ['nullable', 'string', 'nnl', 'max:200'],
-			'overall_comment'	=> ['required', 'string', 'nnl', 'max:1000'],
+			'details.*'			=> ['nullable', 'string', 'max:200'],
+			'overall_comment'	=> ['required', 'string', 'max:1000'],
 			'verif_status'		=> ['required', new ModelExists(VVStatus::class)],
 		];
 		$validData = $request->validate($rules);
@@ -342,13 +378,14 @@ class AppVerificationController extends Controller
 	{
 		//
 
+		request_replace_nl($request);
 		$rules = [
 			// 'versionq'			=> ['required'],
 			// 'versionb'			=> ['required'],
 			'version'			=> ['required'],
 			'details'			=> ['array'],
-			'details.*'			=> ['nullable', 'string', 'nnl', 'max:200'],
-			'overall_comment'	=> ['required', 'string', 'nnl', 'max:1000'],
+			'details.*'			=> ['nullable', 'string', 'max:200'],
+			'overall_comment'	=> ['required', 'string', 'max:1000'],
 			'verif_status'		=> ['required', new ModelExists(VVStatus::class)],
 		];
 		$validData = $request->validate($rules);

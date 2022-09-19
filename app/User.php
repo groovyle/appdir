@@ -63,6 +63,10 @@ class User extends Authenticatable
 		return $this->entity == 'system';
 	}
 
+	public function getIsRegularUserAttribute() {
+		return $this->entity == 'user';
+	}
+
 	public function getNameAttribute() {
 		$name = $this->attributes['name'];
 		if(!$this->is_system) {

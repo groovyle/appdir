@@ -45,7 +45,7 @@ function app_nick() {
 function make_title($title = '', $app_title = NULL) {
 	$title = trim($title);
 	if(!$app_title)
-		$app_title = config('app.title', app_nick());
+		$app_title = config('app.title', app_name());
 
 	$title_format = '%s | %s';
 	return $title ? sprintf($title_format, $title, $app_title) : $app_title;

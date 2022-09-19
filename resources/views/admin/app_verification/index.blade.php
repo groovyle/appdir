@@ -7,12 +7,49 @@
 @section('page-title', __('admin/app_verifications.page_title.index'))
 
 @section('content')
+  <!-- Filters -->
+  <form class="card card-primary card-outline filters-wrapper" method="GET" action="{{ route('admin.app_verifications.index') }}">
+    <div class="card-header">
+      <h3 class="card-title cursor-pointer" data-card-widget="collapse">{{ __('admin/common.filters') }}</h3>
+      <div class="card-tools">
+        <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+          <i class="fas fa-minus"></i></button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="form-horizontal">
+        <div class="form-group row">
+          <label for="fKeyword" class="col-sm-3 col-lg-2">{{ __('admin/common.keyword') }}</label>
+          <div class="col-sm-8 col-lg-5">
+            <input type="text" class="form-control" name="keyword" id="fKeyword" value="{{ $filters['keyword'] }}" placeholder="{{ __('admin/common.keyword') }}">
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="fStatus" class="col-sm-3 col-lg-2">{{ __('admin/common.status') }}</label>
+          <div class="col-sm-8 col-lg-5">
+            <select class="form-control" name="status" id="fStatus" autocomplete="off">
+              <option value="">&ndash; {{ __('admin/common.all') }} &ndash;</option>
+              <option value="unverified" {!! old_selected('', $filters['status'], 'unverified') !!}>{{ __('admin/app_verifications.status_unverified') }}</option>
+              <option value="verified" {!! old_selected('', $filters['status'], 'verified') !!}>{{ __('admin/app_verifications.status_verified') }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group row mb-0">
+          <div class="offset-sm-3 offset-lg-2 col">
+            <button type="submit" class="btn btn-primary">{{ __('admin/common.search') }}</button>
+            <a class="btn btn-secondary btn-sm ml-2" href="{{ route('admin.app_verifications.index') }}">{{ __('admin/common.reset') }}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
   <!-- Card -->
-  <div class="card">
+  <div class="card main-content scroll-to-me">
     <div class="card-header">
       <h3 class="card-title">{{ __('admin/app_verifications.submissions') }}</h3>
     </div>
-    @if (empty($unverified))
+    @if($items->isEmpty())
     <div class="card-body">
       <h4 class="text-left">{{ __('admin/app_verifications.no_app_submissions_yet') }}</h4>
     </div>
@@ -29,10 +66,13 @@
             </tr>
           </thead>
           <tbody>
-            @foreach ($unverified as $app)
+            @foreach ($items as $app)
             <tr>
-              <td class="text-right">{{ $loop->iteration }}</td>
-              <td>{{ $app->name }}</td>
+              <td class="text-right">{{ $items->firstItem() + $loop->index }}</td>
+              <td>
+                <div>{{ $app->complete_name }}</div>
+                @include('components.app-logo', ['logo' => $app->logo, 'exact' => '40x40', 'none' => false, 'img_class' => 'mini-app-logo'])
+              </td>
               <td>
                 @include('components.app-verification-status', ['app' => $app])
               </td>
@@ -48,41 +88,14 @@
         </table>
       </div>
     </div>
+    @if($items->hasPages())
+    <div class="card-footer">
+      {{ $items->links() }}
+    </div>
+    @endif
     @endif
     <!-- /.card-body -->
   </div>
   <!-- /.card -->
-
-  @if (!empty($verified))
-  <!-- Card -->
-  <div class="card">
-    <div class="card-header">
-      <h3 class="card-title">{{ __('admin.app.verified_apps') }}</h3>
-    </div>
-    <div class="card-body">
-      <div class="row">
-        @foreach ($verified as $app)
-        <div class="card mx-2 mb-2" style="width: 14rem; line-height: 1.2;">
-          <div class="card-img-top" style="background-color: #868e96; min-height: 3rem; max-height: 7rem; overflow: hidden;">
-            @if ($app->visual_count)
-            <img class="d-block mw-100 mh-100 m-auto" src="{{ $app->visuals[0]->url }}" alt="Thumbnail">
-            @else
-            <span>{{ __('admin.app.message.no_visuals') }}</span>
-            @endif
-          </div>
-          <div class="card-body p-2">
-            <h5><a href="javascript:void(0)" class="stretched-link">{{ $app->name }}</a></h5>
-            <p class="small mb-0">
-              {!! description_text(Str::limit($app->description, 30)) !!}
-            </p>
-          </div>
-        </div>
-        @endforeach
-      </div>
-    </div>
-    <!-- /.card-body -->
-  </div>
-  <!-- /.card -->
-  @endif
 
 @endsection

@@ -10,7 +10,7 @@
 <div class="login-container">
 	<div class="login-box">
 		<div class="login-header">
-			<img src="{{ asset('img/image-where.png') }}" class="logo" rel="TODO: logo here, then app name as rel">
+			<img src="{{ asset('img/logo-dark.png') }}" class="logo" rel="{{ app_name() }}">
 		</div>
 		<form method="POST" action="{{ route('login') }}" class="login-form">
 			@csrf
@@ -63,19 +63,6 @@
 				</li>
 				@endif
 			</ul>
-		</div>
-	</div>
-</div>
-
-<div class="container d-none">
-	<div class="row justify-content-center">
-		<div class="col-md-8">
-			<div class="card">
-				<div class="card-header">{{ __('Login') }}</div>
-
-				<div class="card-body">
-				</div>
-			</div>
 		</div>
 	</div>
 </div>

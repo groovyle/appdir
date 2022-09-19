@@ -48,9 +48,13 @@ $append_breadcrumb = [
         @endif
       </div>
       <div class="text-right ml-auto">
-        @if($app->has_history)
+        @if($app->has_committed)
         <span class="text-bold">
           @lang('admin/apps.changes.version_x', ['x' => $app->version_number])
+        </span>
+        @else
+        <span class="text-bold">
+          @lang('admin/apps.this_new_item_is_waiting_verification')
         </span>
         @endif
         @if($app->has_floating_changes)
@@ -136,7 +140,12 @@ $append_breadcrumb = [
 @push('scripts')
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-  @if(request()->has('show_pending'))
+  @if(request()->has('show_verification'))
+  // Put in a slight timeout so that everything else finishes first
+  setTimeout(function() {
+    Helpers.scrollAndFlash($(".last-verif-info"), { animate: true });
+  }, 10);
+  @elseif(request()->has('show_pending'))
   // Put in a slight timeout so that everything else finishes first
   setTimeout(function() {
     $(".btn-pending-changes-show").trigger("click");

@@ -116,7 +116,9 @@
 <script>
 jQuery(document).ready(function($) {
 	var $navbar = $("#navbar"),
-			$footer = $("#footer")
+			$footer = $("#footer"),
+			$logo = $navbar.find(".navbar-brand img"),
+			logoPath = @json(asset('img/'))
 	;
 	var $carousel = $("#colorsCarousel");
 
@@ -145,6 +147,8 @@ jQuery(document).ready(function($) {
 
 		$footer.removeClass("text-light text-dark");
 		$footer.addClass(color == "dark" ? "text-light" : "text-dark");
+
+		$logo.prop("src", logoPath +"/fineprint-"+ (color == "dark" ? "light" : "dark") +".png");
 	}
 
 	$carousel.on("slid.bs.carousel", function(e) {

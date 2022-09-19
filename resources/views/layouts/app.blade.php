@@ -37,8 +37,8 @@
 		<header>
 			<nav class="navbar navbar-expand-md bg-fragrant-clouds navbar-light shadow-sm" id="navbar">
 				<div class="container">
-					<a class="navbar-brand" href="{{ url('/') }}" title="{{ app_name() }}">
-						{{ app_nick() }}
+					<a class="navbar-brand" href="{{ route('index') }}" title="{{ app_name() }}">
+						<img src="{{ asset('img/fineprint-dark.png') }}" >
 					</a>
 					<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
 						<span class="navbar-toggler-icon"></span>
@@ -48,7 +48,7 @@
 						<!-- Left Side Of Navbar -->
 						<ul class="navbar-nav mr-auto">
 							<li class="nav-item">
-								<a class="nav-link" href="{{ route('apps') }}">Apps</a>
+								<a class="nav-link" href="{{ route('apps') }}">{{ __('frontend.navs.browse_apps') }}</a>
 							</li>
 						</ul>
 
@@ -57,11 +57,11 @@
 							<!-- Authentication Links -->
 							@guest
 								<li class="nav-item">
-									<a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+									<a class="nav-link" href="{{ route('login') }}">{{ __('frontend.navs.login') }}</a>
 								</li>
 								@if (Route::has('register'))
 									<li class="nav-item">
-										<a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
+										<a class="nav-link" href="{{ route('register') }}">{{ __('frontend.navs.register') }}</a>
 									</li>
 								@endif
 							@else
@@ -71,17 +71,12 @@
 									</a>
 
 									<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-										<a class="dropdown-item" href="{{ url('/admin') }}">Admin</a>
+										<a class="dropdown-item" href="{{ url('/admin') }}">{{ __('frontend.navs.admin_panel') }}</a>
+										<a class="dropdown-item" href="{{ url('/admin') }}">TODO: {{ __('frontend.navs.account_settings') }}</a>
 										<div class="dropdown-divider"></div>
-										<a class="dropdown-item" href="{{ route('logout') }}"
-										   onclick="event.preventDefault();
-														 document.getElementById('logout-form').submit();">
-											{{ __('Logout') }}
+										<a class="dropdown-item btn-logout" href="{{ route('logout') }}">
+											{{ __('frontend.navs.logout') }}
 										</a>
-
-										<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-											@csrf
-										</form>
 									</div>
 								</li>
 							@endguest
@@ -97,7 +92,7 @@
 		</main>
 		@show
 
-		<footer class="footer main-footer mt-auto py-1 bg-fragrant-clouds" id="footer">
+		<footer class="footer main-footer mt-auto bg-fragrant-clouds" id="footer">
 			<div class="container">
 				<div class="text-center">@lang('frontend.footer_text')</div>
 			</div>
@@ -106,7 +101,14 @@
 
 	<div id="to-top" title="@lang('frontend.back_to_top_button')"></div>
 
+	@include('components.frontend-logout-form')
+
 	<!-- Scripts -->
+	<script>
+	window.AppGlobals = {
+		lang: @json(app()->getLocale()),
+	}
+	</script>
 	<script src="{{ asset('js/app.js') }}"></script>
 	<script src="{{ asset('plugins/toastr/toastr.min.js') }}"></script>
 	<script src="{{ asset('plugins/ekko-lightbox/ekko-lightbox.min.js') }}"></script>

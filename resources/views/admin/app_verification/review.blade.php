@@ -83,9 +83,13 @@ $rand = random_alpha(5);
         </a>
       </div>
       <div class="text-right ml-auto">
-        @if($ori->has_history)
+        @if($ori->has_committed)
         <span class="text-bold">
           @lang('admin/apps.changes.version_x', ['x' => $ori->version_number])
+        </span>
+        @else
+        <span class="text-bold">
+          @lang('admin/apps.this_new_item_is_waiting_verification')
         </span>
         @endif
         @if($ori->has_floating_changes)

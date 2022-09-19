@@ -55,10 +55,107 @@ class AppController extends Controller
 	{
 		//
 		$data = [];
-		$apps = Auth::user()->apps()->get();
-		$data['verified'] = $apps->where('is_verified', 1);
+		$user = Auth::user();
+		// $apps = Auth::user()->apps()->get();
 
-		$data['unverified'] = $apps->where('is_verified', 0);
+		$filters = get_filters(['keyword', 'status', 'published', 'categories', 'tags']);
+		$opt_filters = optional($filters);
+		$filter_count = 0;
+
+		$categories = array_filter(explode(',', $opt_filters['categories']));
+		$tags = array_filter(explode(',', $opt_filters['tags']));
+
+		$query = (new App)->newQueryWithoutScopes();
+		$query->with(['last_verification.status', 'last_changes', 'categories', 'tags']);
+		$query->from('apps as a');
+		$query->leftJoin('app_changelogs as cv', 'a.version_id', '=', 'cv.id');
+		$query->leftJoin('app_changelogs as cl', function($query) {
+			$query->on('a.id', '=', 'cl.app_id');
+			$query->whereIn('cl.status', [AppChangelog::STATUS_PENDING, AppChangelog::STATUS_APPROVED]);
+			$query->whereRaw('if(cv.id is not null, cl.created_at >= cv.created_at and cl.id >= cv.id, 1)');
+		});
+		$query->leftJoin('app_categories as acat', function($query) use($categories) {
+			$query->on('a.id', '=', 'acat.app_id');
+			if($categories) {
+				$query->whereIn('acat.category_id', $categories);
+			}
+		});
+		$query->leftJoin('app_tags as atag', function($query) use($tags) {
+			$query->on('a.id', '=', 'atag.app_id');
+			if($tags) {
+				$query->whereIn('atag.tag', $tags);
+			}
+		});
+		$query->groupBy('a.id');
+		$query->orderBy('a.name', 'asc');
+		$query->orderBy('a.updated_at', 'desc');
+		$query->orderBy('a.id', 'desc');
+		$query->select('a.*');
+		$query->selectRaw('(count(cl.id) > 0) as has_floating');
+		$query->selectRaw('(count(if(cl.status = ?, cl.id, null)) > 0) as has_pending', [AppChangelog::STATUS_PENDING]);
+		$query->selectRaw('(count(if(cl.status = ?, cl.id, null)) > 0) as has_approved', [AppChangelog::STATUS_APPROVED]);
+
+		// TODO: don't filter if admin
+		$query->where('a.owner_id', $user->id);
+
+		if($keyword = trim($opt_filters['keyword'])) {
+			$str = escape_mysql_like_str($keyword);
+			$like = '%'.$str.'%';
+			$query->where(function($query) use($like) {
+				$query->where('a.name', 'like', $like);
+				$query->orWhere('a.short_name', 'like', $like);
+				$query->orWhere('a.description', 'like', $like);
+			});
+			$filter_count++;
+		}
+
+		if(count($categories) > 0) {
+			// operator OR (match any)
+			// $query->whereIn('acat.category_id', $categories);
+
+			// operator AND (match all)
+			$query->havingRaw('count(distinct acat.category_id) = ?', [count($categories)]);
+			$filter_count++;
+		}
+		if(count($tags) > 0) {
+			// operator OR (match any)
+			// $query->whereIn('atag.tag', $tags);
+
+			// operator AND (match all)
+			$query->havingRaw('count(distinct atag.tag) = ?', [count($tags)]);
+			$filter_count++;
+		}
+
+		switch($opt_filters['status']) {
+			case 'unverified':
+				$query->whereNotNull('cl.id');
+				$filter_count++;
+				break;
+			case 'verified':
+				$query->whereNull('cl.id');
+				$filter_count++;
+				break;
+		}
+
+		switch($opt_filters['published']) {
+			case 'yes':
+				$query->where('is_published', 1);
+				$filter_count++;
+				break;
+			case 'no':
+				$query->where('is_published', 0);
+				$filter_count++;
+				break;
+		}
+
+		$items = $query->paginate(10);
+		$items->appends($filters);
+
+		$data['items'] = $items;
+		$data['filters'] = $opt_filters;
+		$data['filter_count'] = $filter_count;
+		$data['categories'] = AppCategory::all();
+		$data['tags'] = AppTag::all();
 
 		return view('admin/app/index', $data);
 	}
@@ -1032,6 +1129,7 @@ class AppController extends Controller
 
 		$input_verif_ids = explode(',', $request->input('verif_ids'));
 		$input_verif_ids = array_filter(array_unique($input_verif_ids));
+		$user = Auth::user();
 
 		// Begin storing entries
 		DB::beginTransaction();
@@ -1057,8 +1155,7 @@ class AppController extends Controller
 
 			// Only publish if it's new, otherwise don't change the status
 			$publish = $app->is_unverified_new;
-			$result = AppManager::verifyAndApplyChanges($app, $changelogs, $publish);
-
+			$result = AppManager::verifyAndApplyChanges($app, $changelogs, $publish, $user);
 		} catch(\Exception $e) {
 			$result = FALSE;
 			// TODO: do something with the message

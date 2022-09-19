@@ -4,13 +4,31 @@ if(!isset($is_snippet))
 
 $view_only = !!($view_only ?? false);
 $hide_changes = $view_only || !!($hide_changes ?? false);
-if($hide_changes) {
-  $old_attributes = optional();
-  $diff_relations = optional();
-} else {
+$show_changes = !$hide_changes;
+$mark_changes = $mark_changes ?? false;
+$mark_changes_mode = $mark_changes_mode ?? 'old';
+$mark_changes_class = is_string($mark_changes) ? $mark_changes : 'text-primary';
+
+$mark_attributes = optional($version->display_diffs['attributes'] ?? null);
+$mark_relations = optional($version->display_diffs['relations'] ?? null);
+
+if($show_changes) {
   $old_attributes = optional($version->display_diffs['attributes']['old'] ?? null);
   $diff_relations = optional($version->display_diffs['relations'] ?? null);
+} else {
+  $old_attributes = optional();
+  $diff_relations = optional();
 }
+
+$mark_changes_attr = function($key) use($mark_changes, $mark_changes_mode, $mark_changes_class, $mark_attributes) {
+  return $mark_changes && isset($mark_attributes[$mark_changes_mode][$key]) ? $mark_changes_class : '';
+};
+$mark_changes_rel = function($key) use($mark_changes, $mark_changes_mode, $mark_changes_class, $mark_relations) {
+  return $mark_changes
+  && is_array($mark_relations[$key]) && array_key_exists($mark_changes_mode, $mark_relations[$key])
+  ? $mark_changes_class
+  : '';
+};
 
 $comments = optional($verif->details ?? null);
 $hide_status = $view_only || !!($hide_status ?? true);
@@ -23,7 +41,7 @@ $rand = random_alpha(5);
 ?>
 @section($section)
       <dl class="row">
-        <dt class="col-12 col-sm-3 col-xl-2">{{ __('admin/apps.fields.name') }}</dt>
+        <dt class="col-12 col-sm-3 col-xl-2 {{ $mark_changes_attr('name') }}">{{ __('admin/apps.fields.name') }}</dt>
         <dd class="col-12 col-sm-9 col-xl-10">
           @von($app->name)
 
@@ -38,7 +56,7 @@ $rand = random_alpha(5);
           @endcomponent
         </dd>
 
-        <dt class="col-12 col-sm-3 col-xl-2">{{ __('admin/apps.fields.short_name') }}</dt>
+        <dt class="col-12 col-sm-3 col-xl-2 {{ $mark_changes_attr('short_name') }}">{{ __('admin/apps.fields.short_name') }}</dt>
         <dd class="col-12 col-sm-9 col-xl-10">
           @von($app->short_name)
 
@@ -53,7 +71,7 @@ $rand = random_alpha(5);
           @endcomponent
         </dd>
 
-        <dt class="col-12 col-sm-3 col-xl-2">{{ __('admin/apps.fields.url') }}</dt>
+        <dt class="col-12 col-sm-3 col-xl-2 {{ $mark_changes_attr('url') }}">{{ __('admin/apps.fields.url') }}</dt>
         <dd class="col-12 col-sm-9 col-xl-10">
           @if($app->url)
           <a href="{{ $app->url }}" target="_blank">{{ $app->url }} <span class="fas fa-external-link-alt text-080 ml-1"></span></a>
@@ -76,7 +94,7 @@ $rand = random_alpha(5);
           @endcomponent
         </dd>
 
-        <dt class="col-12 col-sm-3 col-xl-2">{{ __('admin/apps.fields.logo') }}</dt>
+        <dt class="col-12 col-sm-3 col-xl-2 {{ $mark_changes_rel('logo') }}">{{ __('admin/apps.fields.logo') }}</dt>
         <dd class="col-12 col-sm-9 col-xl-10">
           @include('components.app-logo', ['logo' => $app->logo, 'size' => '150x150'])
 
@@ -91,7 +109,7 @@ $rand = random_alpha(5);
           @endcomponent
         </dd>
 
-        <dt class="col-12 col-md-3 col-xl-2">{{ __('admin/apps.fields.description') }}</dt>
+        <dt class="col-12 col-md-3 col-xl-2 {{ $mark_changes_attr('description') }}">{{ __('admin/apps.fields.description') }}</dt>
         <dd class="col-12 col-md-9 col-xl-10">
           <span class="text-pre-wrap">@von($app->description)</span>
 
@@ -106,7 +124,7 @@ $rand = random_alpha(5);
           @endcomponent
         </dd>
 
-        <dt class="col-12 col-sm-3 col-xl-2">
+        <dt class="col-12 col-sm-3 col-xl-2 {{ $mark_changes_rel('categories') }}">
           {{ __('admin/apps.fields.categories') }}
           ({{ $app->categories->count() }})
         </dt>
@@ -133,7 +151,7 @@ $rand = random_alpha(5);
           @endcomponent
         </dd>
 
-        <dt class="col-12 col-sm-3 col-xl-2">
+        <dt class="col-12 col-sm-3 col-xl-2 {{ $mark_changes_rel('tags') }}">
           {{ __('admin/apps.fields.tags') }}
           ({{ $app->tags->count() }})
         </dt>
@@ -161,8 +179,10 @@ $rand = random_alpha(5);
         </dd>
 
         <dt class="col-12">
-          {{ __('admin/apps.fields.visuals') }}
-          ({{ $app->visuals->count() }})
+          <span class="{{ $mark_changes_rel('visuals') }}">
+            {{ __('admin/apps.fields.visuals') }}
+            ({{ $app->visuals->count() }})
+          </span>
           @if(!$is_snippet)
           <a href="{{ route('admin.apps.visuals', ['app' => $app->id]) }}" class="text-info ml-2" title="@lang('admin/apps.edit_visuals')" data-toggle="tooltip"><span class="fas fa-edit"></span></a>
           @endif

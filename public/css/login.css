@@ -131,7 +131,7 @@
 .login-header .logo {
   display: block;
   margin: 1.25rem auto;
-  max-width: 200px;
+  max-width: 75%;
   max-height: 100px;
 }
 @media (max-width: 767.98px) {
@@ -219,6 +219,7 @@
   font-size: 0.9rem;
   cursor: pointer;
   outline: none;
+  transition: all 0.15s;
 }
 .btn-login:hover, .btn-login:focus, .btn-login:active {
   background-color: #343a40;

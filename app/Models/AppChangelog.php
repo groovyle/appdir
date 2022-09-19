@@ -56,9 +56,18 @@ class AppChangelog extends Model
 		$query->where('status', self::STATUS_PENDING);
 	}
 
+	public function scopeRejected($query) {
+		$query->where('status', self::STATUS_REJECTED);
+	}
+
 	public function scopeApproved($query) {
 		// waiting to be committed
 		$query->where('status', self::STATUS_APPROVED);
+	}
+
+	public function scopeCommitted($query) {
+		// waiting to be committed
+		$query->where('status', self::STATUS_COMMITTED);
 	}
 
 	public function scopeFloating($query) {
@@ -94,6 +103,26 @@ class AppChangelog extends Model
 
 	public function getDisplayDiffsAttribute() {
 		return AppManager::transformDiffsForDisplay($this->diffs);
+	}
+
+	public function getIsPendingAttribute() {
+		return $this->attributes['status'] == self::STATUS_PENDING;
+	}
+
+	public function getIsApprovedAttribute() {
+		return $this->attributes['status'] == self::STATUS_APPROVED;
+	}
+
+	public function getIsRejectedAttribute() {
+		return $this->attributes['status'] == self::STATUS_REJECTED;
+	}
+
+	public function getIsCommittedAttribute() {
+		return $this->attributes['status'] == self::STATUS_COMMITTED;
+	}
+
+	public function getIsFloatingAttribute() {
+		return in_array($this->attributes['status'], [self::STATUS_PENDING, self::STATUS_APPROVED]);
 	}
 
 }

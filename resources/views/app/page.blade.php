@@ -14,11 +14,10 @@ $show_report_form = $is_report_form ? 'show' : '';
 	<div class="app-header full-page-tabs">
 		<div class="container">
 			<div class="app-with-logo">
-				@if($app->logo)
+				<!-- TODO: use default app logo or not? -->
 				<div class="logo-wrapper">
-					@include('components.app-logo', ['logo' => $app->logo, 'exact' => '80x80', 'img_class' => 'app-logo', 'as_link' => false])
+					@include('components.app-logo', ['logo' => $app->logo, 'exact' => '80x80', 'img_class' => 'app-logo', 'default' => true, 'as_link' => false])
 				</div>
-				@endif
 				<div class="logo-complement">
 					<h1 class="app-title mb-1">
 						{{ $app->name }}

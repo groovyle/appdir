@@ -5,6 +5,24 @@ return [
 'footer_text'				=> '&copy; 2022, Gagas AI',
 'back_to_top_button'		=> 'back to top',
 
+'splash'	=> [
+	'your_apps_x'						=> 'Your Apps (:x)',
+	'browse_through_x_amazing_apps'		=> 'Surf through <b>:x</b> amazing apps',
+	'looking_for_something_specific_x?'	=> 'Looking for something specific? You can apply <a href=":x">filters</a>!',
+	'there_are_no_apps_yet'				=> 'There are no apps yet in our listing (exactly zero). Consider submitting yours?',
+	'you_are_not_logged_in_yet'			=> 'You\'re not logged in yet. Submit your own app into our listing! <br>Login to your account. Don\'t have one yet? Register an account for free.',
+	'hey_x_you_are_logged_in'			=> 'Hey <b>:x</b>, you are logged in. Time to do amazing stuff!',
+],
+
+'navs'		=> [
+	'browse_apps'			=> 'Browse Apps',
+	'login'					=> 'Login',
+	'register'				=> 'Register',
+	'logout'				=> 'Logout',
+	'admin_panel'			=> 'Admin Panel',
+	'account_settings'		=> 'Account Settings',
+],
+
 'apps'		=> [
 	'by'					=> 'by',
 	'x_views'				=> 'viewed :x times',

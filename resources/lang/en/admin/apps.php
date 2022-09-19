@@ -18,6 +18,7 @@ return [
 	'app_info'		=> 'App Info',
 ],
 
+'apps_list'				=> 'List of Apps',
 'verified_apps'			=> 'Verified Apps',
 'app_submissions'		=> 'App Submissions',
 'submit_an_app'			=> 'Add a product',
@@ -35,8 +36,12 @@ return [
 'view_public_page'		=> 'View app public page',
 'verification'			=> 'Verification',
 'verifications'			=> 'Verifications',
+'this_new_item_is_waiting_verification'	=> 'This item is new and awaits verification',
 'app_had_been_verified'	=> 'This app had been verified and is publicly listed',
 'app_has_pending_changes'	=> 'This app has pending changes waiting to be reviewed',
+'app_has_approved_changes'	=> 'This app\'s has changes which has been reviewed and approved',
+'app_has_rejected_changes'	=> 'This app\'s last changes was rejected',
+'app_changes_needs_revision_to_be_approved'	=> 'This app needs revision to be approved',
 'app_is_public'				=> 'App is public',
 'app_is_not_public'			=> 'App is not public',
 'your_app\'s_edits_version_x_has_been_approved'	=> 'Your app\'s edits (up to Version :x) has been approved! <br>You can now publish your edits.',
@@ -76,6 +81,7 @@ return [
 	'choose_other_visuals_type'			=> 'Choose type',
 	'visuals_other_value_placeholder'	=> 'Visual media',
 	'submission_status'			=> 'Submission Status',
+	'is_published'				=> 'Published',
 ],
 
 'changes'	=> [

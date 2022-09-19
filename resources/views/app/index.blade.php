@@ -24,7 +24,7 @@ $filter_btn_class = $filter_count == 0 ? 'btn-light bordered' : 'btn-success';
 			</button>
 			@endif
 		</div>
-		<div class="collapse @if($filter_count > 0) show @endif" id="searchFormInner">
+		<div class="collapse @if($show_filter) show @endif" id="searchFormInner">
 			<input type="hidden" name="f" value="1" readonly>
 
 			<div class="form-inline interactable-inputs">
@@ -34,8 +34,7 @@ $filter_btn_class = $filter_count == 0 ? 'btn-light bordered' : 'btn-success';
 				</div>
 				<div class="mb-2 mr-sm-3" style="min-width: 200px;">
 					<input type="hidden" name="c" id="inputCategories" value="{{ request('c') }}">
-					<select class="w-100" id="searchCategories" data-compile-to="#inputCategories" autocomplete="off">
-						<option value=""></option>
+					<select class="w-100 compile-values" id="searchCategories" data-compile-to="#inputCategories" autocomplete="off" multiple>
 						@foreach($categories as $category)
 						<option value="{{ $category->id }}" {{ $selected_in_compiled($category->id, 'c') }}>{{ $category->name }}</option>
 						@endforeach
@@ -43,8 +42,7 @@ $filter_btn_class = $filter_count == 0 ? 'btn-light bordered' : 'btn-success';
 				</div>
 				<div class="mb-2 mr-sm-3" style="min-width: 200px;">
 					<input type="hidden" name="t" id="inputTags" value="{{ request('t') }}">
-					<select class="w-100" id="searchTags" data-compile-to="#inputTags" autocomplete="off">
-						<option value=""></option>
+					<select class="w-100 compile-values" id="searchTags" data-compile-to="#inputTags" autocomplete="off" multiple>
 						@foreach($tags as $tag)
 						<option value="{{ $tag->name }}" {{ $selected_in_compiled($tag->name, 't') }}>{{ $tag->name }}</option>
 						@endforeach
@@ -181,16 +179,6 @@ jQuery(document).ready(function($) {
 			$(this).val(null).trigger("change");
 		});
 		$searchForm.submit();
-	});
-
-	$searchForm.on("change", "select[multiple]", function(e) {
-		var target = $(this).data("compileTo"),
-				$target = $(target)
-		;
-		if(target && $target.length > 0) {
-			var compiled = $(this).val().filter(x => !!(String(x).trim())).join(",");
-			$target.val(compiled);
-		}
 	});
 
 	$searchFormInner.on("shown.bs.collapse", function(e) {

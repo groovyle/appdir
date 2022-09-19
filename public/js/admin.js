@@ -58,4 +58,11 @@ $("body").tooltip({
 
 $(".init-popover").popover();
 
+
+var $mainContent = $(".main-content").first();
+if($mainContent.length > 0 && $mainContent.is(".scroll-to-me")) {
+	Helpers.scrollTo($mainContent, { animate: false });
+	$mainContent.removeClass("scroll-to-me");
+}
+
 });

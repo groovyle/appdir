@@ -54,4 +54,7 @@ return [
 	'verification_result'			=> 'Verification Result',
 ],
 
+'status_unverified'		=> 'Unverified',
+'status_verified'		=> 'Verified',
+
 ];

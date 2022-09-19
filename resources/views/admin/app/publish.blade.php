@@ -9,6 +9,8 @@ $append_breadcrumb = [
     'text'    => __('admin/apps.page_title.review_changes'),
   ]
 ];
+
+$show_changes = $app->has_committed;
 ?>
 
 @extends('admin.layouts.main')
@@ -57,7 +59,7 @@ $append_breadcrumb = [
           <h4 class="mb-0 text-primary">{{ $app->complete_name }}</h4>
           <span class="text-success">@lang('admin/apps.changes.version_x', ['x' => $app->version_number])</span>
         </div>
-        @include('admin.app.detail-inner', ['section_id' => 'new', 'is_snippet' => true, 'app' => $app, 'ori' => null, 'hide_status' => true])
+        @include('admin.app.detail-inner', ['section_id' => 'new', 'is_snippet' => true, 'app' => $app, 'ori' => null, 'hide_status' => true, 'hide_changes' => true, 'mark_changes' => $show_changes ? 'text-success' : false, 'mark_changes_mode' => 'old', 'version' => $summary])
         @yield('detail-content-new')
       </div>
     </div>
@@ -67,7 +69,7 @@ $append_breadcrumb = [
           <h4 class="mb-0 text-primary">{{ $ori->complete_name }}</h4>
           <span class="text-danger">@lang('admin/apps.changes.version_x', ['x' => $ori->version_number])</span>
         </div>
-        @include('admin.app.detail-inner', ['section_id' => 'old', 'is_snippet' => true, 'app' => $ori, 'ori' => null, 'hide_status' => true])
+        @include('admin.app.detail-inner', ['section_id' => 'old', 'is_snippet' => true, 'app' => $ori, 'ori' => null, 'hide_status' => true, 'hide_changes' => true, 'mark_changes' => $show_changes ? 'text-danger' : false, 'mark_changes_mode' => 'new', 'version' => $summary])
         @yield('detail-content-old')
       </div>
     </div>

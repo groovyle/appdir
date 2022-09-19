@@ -9,6 +9,9 @@ $is_self = $is_self ?? false;
 		<div class="col-12 col-md-4 col-xl-3">
 			<div class="card">
 				<div class="card-body">
+					<div class="user-logo-wrapper">
+						<img src="{{ asset('img/default-user-logo.png') }}" rel="TODO: user logo here">
+					</div>
 					<h3>{{ $user->name }}</h3>
 					TODO: show more information here, e.g logo?
 				</div>
