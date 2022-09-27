@@ -857,6 +857,7 @@ class AppController extends Controller
 			$rules['visuals_count'][] = function($attr, $value, $fail) use($max_visuals, $not_deleted, $new_images_hash, $viso_not_empty) {
 				$new_count = count($not_deleted) + count($new_images_hash) + count($viso_not_empty);
 				if($new_count > $max_visuals) {
+					// TODO: move message somewhere else
 					$fail('Max amount of visuals ($max_visuals) reached).');
 				}
 			};

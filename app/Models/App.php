@@ -213,6 +213,10 @@ class App extends Model
 		return $this->hasOne('App\Models\AppChangelog', 'app_id')->latest(AppVerification::CREATED_AT)->latest('id');
 	}
 
+	public function reports() {
+		return $this->hasMany('App\Models\AppReport', 'app_id');
+	}
+
 	public function lastVersionNumber() {
 		return ! $this->changelogs()->exists() ? 0 : $this->changelogs()->max('version');
 	}

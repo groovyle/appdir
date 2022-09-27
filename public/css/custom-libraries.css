@@ -103,3 +103,65 @@ textarea.auto-height-init-bypass {
 }
 
 /* END Textarea Length Indicator */
+
+/* Read More Handles */
+.read-more-wrapper {
+	display: inline-block;
+	position: relative;
+	overflow-y: hidden;
+}
+.read-more-wrapper.expanded {
+	height: auto !important;
+}
+.read-more-wrapper.with-indicator.collapsed::after {
+	content: "";
+	position: absolute;
+	z-index: 1;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	box-shadow: 0 0 3px rgba(0,123,255,0.5);
+}
+.read-more-wrapper .read-more-handle {
+	display: inline-block;
+	font-size: 0.9em;
+	/*line-height: 1;*/
+	padding: 0.1em 0.25em;
+	width: auto;
+	cursor: pointer;
+	background-color: #fff;
+	box-shadow: 0 1em 1em 1em rgba(255, 255, 255, 0.95);
+
+	-webkit-user-select: none;  /* Chrome all / Safari all */
+	-moz-user-select: none;     /* Firefox all */
+	-ms-user-select: none;      /* IE 10+ */
+	user-select: none;
+}
+.read-more-wrapper .read-more-handle.hidden {
+	display: none !important;
+}
+.read-more-wrapper .read-more-handle:hover,
+.read-more-wrapper .read-more-handle:focus,
+.read-more-wrapper .read-more-handle:active {
+	text-decoration: underline;
+}
+.read-more-wrapper.collapsed .read-more-handle {
+	position: absolute;
+	z-index: 2;
+	bottom: 2px; /* some space for focus outline styles */
+	right: 2px;
+}
+.read-more-wrapper.collapsed .read-more-handle.centered {
+	right: auto;
+	left: 50%;
+	transform: translateX(-50%);
+}
+.read-more-wrapper.expanded .read-more-handle {
+	position: static;
+	display: table; /* forces new line like block, but fits width to its content like inline-block */
+	margin-left: 0.25em;
+	margin-top: 0.25em;
+	box-shadow: none;
+}
+/* END Read More Handles */

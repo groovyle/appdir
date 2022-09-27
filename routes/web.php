@@ -43,6 +43,7 @@ Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
 
     // The route is reversed for ajax stuffs so that URL management is easy
     // (i.e put all parameters at the end).
+    // TODO: put these AJAX calls outside of login middleware
     Route::get('apps/changes/visuals/{app?}/{version?}', 'AppController@snippetVisualsComparison')->name('apps.changes.visuals');
     Route::get('apps/changes/details/{app?}/{version?}', 'AppController@snippetVersionDetail')->name('apps.changes.details');
     Route::get('apps/changes/pending/{app?}/{version?}', 'AppController@snippetPendingChanges')->name('apps.changes.pending');
@@ -56,6 +57,12 @@ Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
 
     Route::get('app_verifications/{app}/advanced_review', 'AppVerificationController@advancedReview')->name('app_verifications.advanced_review');
     Route::post('app_verifications/{app}/advanced_verify', 'AppVerificationController@advancedVerify')->name('app_verifications.advanced_verify');
+
+    Route::get('app_reports', 'AppReportController@index')->name('app_reports');
+    Route::get('app_reports/index', 'AppReportController@index')->name('app_reports.index');
+    Route::get('app_reports/{app}/review', 'AppReportController@review')->name('app_reports.review');
+    Route::post('app_reports/{app}/verify', 'AppReportController@verify')->name('app_reports.verify');
+    Route::get('app_reports/{app}/verdicts', 'AppReportController@verdicts')->name('app_reports.verdicts');
 });
 
 Route::group(['middleware' => config('filepond.middleware', ['web', 'auth'])], function() {

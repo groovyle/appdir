@@ -31,6 +31,7 @@ $.fn.tooltip.Constructor.Default.whiteList.img.push("style");
 $("body").tooltip({
 	'selector': '[data-toggle="tooltip"]',
 	'container': 'body',
+	'boundary': 'window',
 	// Use the .tooltip-adjust to adjust the tooltip (if needed)
 	'template': '<div class="tooltip tooltip-adjust" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>',
 	// In Bootstrap 4.6 this is possible through the 'customClass' option, but
@@ -51,7 +52,7 @@ $("body").tooltip({
 		// Return default behaviour
 		var placement = $elm.data("placement");
 		if(typeof placement == "function")
-			placement = placement(tip, elm);
+			placement = placement.apply(this, [tip, elm]);
 		return placement || "top";
 	},
 });

@@ -271,9 +271,9 @@ trait LoggedActions {
 			$actor = $this->actionsActor;
 		}
 
-		if($actor instanceof \App\Models\SystemUsers\Base) {
+		/*if($actor instanceof \App\Models\SystemUsers\Base) {
 			$actor = (string) $actor;
-		} elseif(is_object($actor)) {
+		} else*/if(is_object($actor)) {
 			$actor = $actor->getKey();
 		} elseif($actor === null) {
 			$actor = Auth::id();

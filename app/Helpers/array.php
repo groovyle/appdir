@@ -11,3 +11,9 @@
 function array_same_elements(array $a, array $b) {
 	return count($a) == count($b) && count(array_diff($a, $b)) == 0;
 }
+
+function query_in_bindstring($arr) {
+	if($arr instanceof \Illuminate\Contracts\Support\Arrayable)
+		$arr = $arr->toArray();
+	return '('.implode(', ', array_fill(0, count((array) $arr), '?')).')';
+}

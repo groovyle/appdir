@@ -24,7 +24,7 @@ class AppReportCategory extends Model
 		/*static::addGlobalScope('orderName', function (Builder $builder) {
 			$builder->orderBy('name', 'asc');
 		});*/
-		static::addGlobalScope('order', function (Builder $builder) {
+		static::addGlobalScope('_order', function (Builder $builder) {
 			$builder->orderBy('order', 'asc');
 		});
 	}

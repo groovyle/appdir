@@ -37,13 +37,16 @@ class LogAction extends Model
 
 	public static function logModel(Model $model, $action, $actor = null, $payload = NULL, $description = NULL, Model $related = NULL) {
 		$actor = $actor === null ? Auth::user() : User::find($actor);
+		/*if(!$user) {
+			$actor = \App\Models\SystemUsers\Guest::instance();
+		}*/
 		$data = [
 			'entity_id'		=> $model->getKey(),
 			'entity_type'	=> $model->getMorphClass(),
 			'action'		=> $action,
 			'description'	=> $description,
 			'data'			=> $payload ? json_encode($payload) : NULL,
-			'actor_id'		=> $actor->id,
+			'actor_id'		=> optional($actor)->id,
 			// 'actor_name'	=> $user->name,
 			'actor_name'	=> NULL,
 			'at'			=> $model->freshTimestampString(),

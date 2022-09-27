@@ -51,6 +51,14 @@
               </p>
             </a>
           </li>
+          <li class="nav-item">
+            <a href="{{ route('admin.app_reports.index') }}" class="nav-link">
+              <i class="nav-icon fas fa-exclamation-triangle"></i>
+              <p>
+                App Reports
+              </p>
+            </a>
+          </li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->

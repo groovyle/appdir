@@ -97,6 +97,18 @@ class AppChangelog extends Model
 		return $this->belongsToMany('App\Models\AppVerification', 'app_verification_changes', 'changes_id', 'verification_id');
 	}
 
+	public function reports() {
+		return $this->hasMany('App\Models\AppReport', 'version_id');
+	}
+
+	public function unresolved_reports() {
+		return $this->reports()->unresolved();
+	}
+
+	public function resolved_reports() {
+		return $this->reports()->resolved();
+	}
+
 	public function nextVersionNumber() {
 		return $this->version + 1;
 	}

@@ -73,12 +73,14 @@ $append_breadcrumb = [
         <div class="mb-2 text-center">
           @if($app->has_verifications)
           <a href="{{ route('admin.apps.verifications', ['app' => $app->id]) }}" class="btn btn-app text-dark">
+            <span class="badge badge-primary text-100">{{ count($app->verifications) }}</span>
             <span class="fas fa-clipboard-check"></span>
             {{ __('admin/apps.verifications') }}
           </a>
           @endif
           @if($app->has_history)
           <a href="{{ route('admin.apps.changes', ['app' => $app->id, 'current' => '']) }}" class="btn btn-app text-dark">
+            <span class="badge badge-primary text-100">{{ count($app->changelogs) }}</span>
             <span class="fas fa-history"></span>
             {{ __('admin/apps.history') }}
           </a>

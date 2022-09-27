@@ -663,7 +663,7 @@ if(jQuery) {
 
 			// Prevent submit when pressing [Enter]
 			function preventEnterFromSubmitting(e) {
-				if(e.keyCode == 13) {
+				if(e.keyCode == 13 && !e.isDefaultPrevented()) {
 					e.preventDefault();
 					Helpers.moveCursorToEnd(e.target);
 					if(options.triggerChange) {
@@ -943,6 +943,186 @@ if(jQuery) {
 
 				$ta.on("input", updateLength);
 				updateLength();
+			});
+		},
+
+		readMore: function(options) {
+			var defaultOptions = {
+				maxLines: 3,
+				expandText: "Read more",
+				collapseText: "Read less",
+				expandedClass: "expanded",
+				collapsedClass: "collapsed",
+				handleBaseClass: "read-more-handle",
+				handleClass: "",
+				// extraSpace is in px, mainly used to give extra breathing space
+				// for the underparts of letters like lowercase g or p, which cuts
+				// below the baseline. This space is also to ensure that those letters
+				// don't render/clip into the next element. For 16px (1rem), this was 3px
+				extraSpace: function(item) {
+					var $item = $(item);
+					var fontSize = parseFloat($item.css("fontSize"));
+					return fontSize / 16 * 3;
+				},
+				centeredHandle: false,
+				autoScroll: true,
+				indicatorLine: true,
+			};
+			options = $.extend({}, defaultOptions, options);
+			var $items = $(this);
+
+			var handleClass = options.handleBaseClass +" "+ options.handleClass;
+			// Use <a> instead of <span> so it can be focused
+			var $handleTemplate = $("<a>").prop("href", "#").addClass(handleClass);
+			if(options.centeredHandle) {
+				$handleTemplate.addClass("centered");
+			}
+			var autoScrollOptions = $.extend({
+				animate: true,
+			}, typeof options.autoScroll === "object" ? options.autoScroll : {});
+			$handleTemplate.on("click", function(e) {
+				e.preventDefault();
+
+				var $handle = $(this);
+				var $item = $handle.closest(".read-more-wrapper");
+				var expanded = isExpanded($item);
+				updateState($item, !expanded);
+				$item.focus();
+				if(/*!expanded && */options.autoScroll) {
+					Helpers.scrollTo($item, autoScrollOptions);
+				}
+			});
+
+			var getMaxLines = function(item) {
+				var $item = $(item);
+				return parseInt($item.data("maxLines") || options.maxLines);
+			}
+
+			var isOverflowing = function(element, height) {
+				if(element instanceof $) element = element[0];
+				if(height)
+					return element.scrollHeight > height;
+				else
+					return element.scrollHeight > element.offsetHeight;
+			}
+
+			var isExpanded = function(item) {
+				var $item = $(item);
+				return $item.is("."+ options.expandedClass);
+			}
+
+			var isStandby = function(item) {
+				var $item = $(item);
+				return !$item.is("."+ options.expandedClass) && !$item.is("."+ options.collapsedClass);
+			}
+
+			var getHandle = function(item) {
+				var $item = $(item);
+				var $handle = $item.find("."+ options.handleBaseClass);
+				if($handle.length == 0) {
+					$handle = $handleTemplate.clone(true).appendTo($item);
+				}
+
+				return $handle;
+			}
+
+			var initItem = function(item) {
+				var $item = $(item);
+				$item.addClass("read-more-wrapper");
+				if(options.indicatorLine) {
+					$item.addClass("with-indicator");
+				}
+
+				checkState(item);
+			}
+
+			var standbyItem = function(item) {
+				var $item = $(item);
+				var $handle = getHandle(item);
+
+				$handle.addClass("hidden");
+				$item.css("maxHeight", "");
+				$item.removeClass(options.expandedClass);
+				$item.removeClass(options.collapsedClass);
+			}
+
+			var checkState = function(item) {
+				var $item = $(item);
+				var $handle = getHandle(item);
+				var maxHeight = calculateMaxHeight(item);
+				if(isOverflowing(item, maxHeight)) {
+					$handle.removeClass("hidden");
+					if(isStandby(item)) {
+						// Init item
+						updateState(item, false);
+					} else {
+						// Refresh item state
+						updateState(item, isExpanded(item));
+					}
+				} else {
+					standbyItem(item);
+				}
+			}
+
+			var calculateMaxHeight = function(item) {
+				var $item = $(item);
+
+				var boxSizing = $item.css("boxSizing");
+				var paddingTop = parseFloat($item.css("paddingTop"));
+				var paddingBottom = parseFloat($item.css("paddingBottom"));
+				var borderTop = parseFloat($item.css("borderTopWidth"));
+				var borderBottom = parseFloat($item.css("borderBottomWidth"));
+				var lineHeight = parseFloat($item.css("lineHeight"));
+				var extraSpace = parseFloat(typeof options.extraSpace === "function" ? options.extraSpace(item) : options.extraSpace);
+
+				var maxHeight = lineHeight * getMaxLines(item);
+				if(boxSizing == "border-box") {
+					maxHeight += paddingTop + paddingBottom + borderTop + borderBottom;
+				}
+				maxHeight += extraSpace;
+
+				return maxHeight;
+			}
+
+			var updateState = function(item, state) {
+				// state = true means to expand it
+
+				var $item = $(item);
+				var $handle = getHandle(item);
+
+				$item.toggleClass(options.expandedClass, state);
+				$item.toggleClass(options.collapsedClass, !state);
+				$handle.html(!state ? options.expandText : options.collapseText);
+
+				if(state) {
+					// to expand
+					$item.css("maxHeight", "");
+				} else {
+					// to collapse
+					// Calculate the proper height
+					var targetHeight = calculateMaxHeight(item);
+					$item.css("maxHeight", targetHeight);
+				}
+			}
+
+			var _resizeHandler = function() {
+				// $items.trigger("change");
+				$items.each(function(i, item) {
+					checkState(item);
+				});
+			}
+			var resizeHandler = Helpers.debounce(_resizeHandler, 100, false);
+
+			$(window).on("resize", function(e) {
+				resizeHandler();
+			});
+			return $items.each(function(i, item) {
+				initItem(item);
+
+				var debouncedCheckState = Helpers.debounce(checkState, 100, false);
+				$(item).on("change", function(e) {
+					debouncedCheckState(item);
+				});
 			});
 		},
 

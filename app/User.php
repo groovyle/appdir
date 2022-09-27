@@ -47,7 +47,8 @@ class User extends Authenticatable
 	 * @var array
 	 */
 	protected $casts = [
-		'email_verified_at' => 'datetime',
+		'email_verified_at'	=> 'datetime',
+		'is_blocked'		=> 'boolean',
 	];
 
 	public static function boot() {
@@ -79,6 +80,20 @@ class User extends Authenticatable
 
 	public function apps() {
 		return $this->hasMany('App\Models\App', 'owner_id');
+	}
+
+	public function blocks() {
+		return $this->hasMany('App\Models\UserBlock', 'user_id');
+	}
+
+	public function all_blocks() {
+		return $this->blocks()->withTrashed();
+	}
+
+	public function getIsBlockedAttribute() {
+		return $this->attributes['is_blocked'] == 0
+			&& $this->blocks_count == 0
+		;
 	}
 
 	public function __toString() {

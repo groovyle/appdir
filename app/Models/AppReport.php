@@ -10,10 +10,10 @@ class AppReport extends Model
 {
 	protected $table = 'app_reports';
 
-	use Concerns\HasCudActors;
+	use SoftDeletes,
+		Concerns\HasCudActors;
 
 	const CREATED_BY = null;
-	const DELETED_BY = null;
 
 	const STATUS_SUBMITTED		= 'submitted'; // for new submitted reports
 	const STATUS_VALIDATED		= 'validated'; // for validated/accepted reports
@@ -23,12 +23,58 @@ class AppReport extends Model
 		'details' => 'array',
 	];
 
+	protected $with = [
+		'version',
+		'user',
+		'categories',
+	];
+
+	public function scopeUnresolved($query) {
+		$query->whereIn('status', static::statusUnresolved());
+	}
+
+	public function scopeResolved($query) {
+		$query->whereIn('status', static::statusResolved());
+	}
+
+	public function scopeRegistered($query, $invert = false) {
+		if(!$invert) {
+			$query->whereNotNull('user_id');
+		} else {
+			$query->whereNull('user_id');
+		}
+	}
+
+	public static function statusUnresolved() {
+		return [static::STATUS_SUBMITTED];
+	}
+
+	public static function statusResolved() {
+		return [static::STATUS_VALIDATED, static::STATUS_DROPPED];
+	}
+
+	public function getIsUnresolvedAttribute() {
+		return in_array($this->attributes['status'], static::statusUnresolved());
+	}
+
+	public function getIsResolvedAttribute() {
+		return in_array($this->attributes['status'], static::statusResolved());
+	}
+
+	public function getRegisteredSenderAttribute() {
+		return $this->attributes['user_id'] != null;
+	}
+
 	public function app() {
 		return $this->belongsTo('App\Models\App', 'app_id');
 	}
 
 	public function version() {
 		return $this->belongsTo('App\Models\AppChangelog', 'version_id');
+	}
+
+	public function verdict() {
+		return $this->belongsTo('App\Models\AppVerdict', 'verdict_id');
 	}
 
 	public function user() {

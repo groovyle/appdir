@@ -7,6 +7,7 @@ use App\Models\AppCategory;
 use App\Models\AppTag;
 use App\Models\AppReport;
 use App\Models\AppReportCategory;
+use App\Models\SystemUsers\Guest;
 
 use App\DataManagers\AppManager;
 
@@ -188,6 +189,7 @@ class AppController extends Controller
 					$report->user_id = $user->id;
 				} else {
 					$report->email = $request->report_email;
+					$report->setActionsActor(Guest::instance());
 				}
 				$report->reason = $request->report_reason;
 				$result = $report->save();
