@@ -11,7 +11,7 @@ use App\Models\AppVerdict;
 use App\Models\UserBlock;
 use App\User;
 
-use App\DataManagers\AppManager;
+use App\DataManagers\AppReportManager;
 
 use App\Http\Controllers\Controller;
 
@@ -59,6 +59,9 @@ class AppReportController extends Controller
 			$query->on('a.id', '=', 'rr.app_id');
 			$query->whereIn('rr.status', $report_status_resolved);
 		});
+		$query->leftJoin('app_verdicts as vd', function($query) {
+			$query->on('a.id', '=', 'vd.app_id');
+		});
 
 		$query->select('a.*');
 		$query->selectRaw('count(distinct r.id) as num_reports');
@@ -67,6 +70,8 @@ class AppReportController extends Controller
 		$query->selectRaw('max(rur.updated_at) as last_unresolved_report');
 		$query->selectRaw('count(distinct rr.id) as num_resolved_reports');
 		$query->selectRaw('max(rr.updated_at) as last_resolved_report');
+
+		$query->selectRaw('count(distinct vd.id) as num_verdicts');
 
 		$query->groupBy('a.id');
 
@@ -82,6 +87,7 @@ class AppReportController extends Controller
 			$filter_count++;
 		} else {
 			// $query->orderBy('last_report', 'desc');
+			$query->orderBy('num_unresolved_reports', 'desc');
 			$query->orderBy('num_reports', 'desc');
 			if($opt_filters['status'] == 'all') {
 				$filter_count++;
@@ -98,11 +104,14 @@ class AppReportController extends Controller
 			});
 		}
 
+		$query->orderBy('num_verdicts', 'desc');
 		$query->orderBy('a.name', 'asc');
 		$query->orderBy('a.id', 'desc');
 
 		$items = $query->paginate(10);
 		$items->appends($filters);
+
+		// dump_db();
 
 		$data['items'] = $items;
 		$data['filters'] = $opt_filters;
@@ -116,30 +125,9 @@ class AppReportController extends Controller
 		//
 		$data = [];
 
-		$ori = $app;
-
-		$versions = $app->changelogs()
-			->whereHas('reports')
-			->withCount(['reports', 'unresolved_reports'])
-			->latest()
-			->latest('id')
-			->get()
-		;
-
-		$version = null;
-		if($request->has('version')) {
-			$version = $app->changelogs()->where('version', $request->input('version'))->first();
-		}
-		if($version) {
-			$app = AppManager::getMockItem($app->id, $version->version);
-
-		}
-
-		$reports = $ori->reports()->unresolved()->orderByRaw('user_id is not null desc')->latest()->get();
+		$reports = $app->reports()->unresolved()->defaultOrder()->get();
 		// $reports = collect();
 		$reports_data = collect();
-		$all_categories = collect();
-		$all_versions = collect();
 		foreach($reports as $r) {
 			$reports_data[$r->id] = [
 				'id'		=> $r->id,
@@ -150,48 +138,16 @@ class AppReportController extends Controller
 				'email'		=> $r->user_id ? $r->user->email : $r->email,
 				'category'	=> $r->categories->pluck('id')->all(),
 			];
-			foreach($r->categories as $rc) {
-				if(!isset($all_categories[$rc->id])) {
-					$rc->reports_count = 0;
-					$rc->setRelation('reports', collect());
-					$all_categories[$rc->id] = $rc;
-				}
-				$all_categories[$rc->id]->reports_count++;
-				$all_categories[$rc->id]->reports->push($r);
-			}
-
-			$version_id = $r->version_id ?: '__none';
-			if($r->version) {
-				$v = $r->version;
-				$v->display_name = __('admin/app_verifications.version_x', ['x' => $v->version]);
-			} else {
-				$v = new AppChangelog;
-				$v->id = '__none';
-				$v->version = '__none';
-				$v->display_name = __('admin/app_reports.version__none');
-				$r->setRelation('version', $v);
-			}
-			if(!isset($all_versions[$v->id])) {
-				$v->reports_count = 0;
-				$v->setRelation('reports', collect());
-				$all_versions[$v->id] = $v;
-			}
-			$all_versions[$v->id]->reports_count++;
-			$all_versions[$v->id]->reports->push($r);
 		}
+		$compiled_relations = AppReportManager::compileRelationsFromReports($reports);
+		$all_categories = $compiled_relations['categories'];
+		$all_versions = $compiled_relations['versions'];
 
-		$all_categories = $all_categories->sortBy('id')->sortBy('order');
-		$all_versions = $all_versions->sortByDesc('version');
-
-		$data['ori'] = $ori;
 		$data['app'] = $app;
-
-		$data['version'] = $version;
 		$data['reports'] = $reports;
 		$data['reports_data'] = $reports_data;
 		$data['all_categories'] = $all_categories;
 		$data['all_versions'] = $all_versions;
-		$data['versions'] = $versions;
 
 		return view('admin/app_report/review', $data);
 	}
@@ -247,10 +203,13 @@ class AppReportController extends Controller
 		$error = [];
 		DB::beginTransaction();
 		try {
+			$input_final_comments = $request->input('final_comments');
+
 			// Make verdict first
 			$verdict = new AppVerdict;
 			$verdict->app_id = $app->id;
 			$verdict->version_id = $app->version_id;
+			$verdict->comments = $input_final_comments;
 
 			$details = [];
 			$details_block_user = $request->input('block_user') == 1;
@@ -260,12 +219,31 @@ class AppReportController extends Controller
 				$verdict->status = $verdict_status;
 
 				$details['block_user'] = $details_block_user;
+
+				// Flag the app
+				$app->setToReported();
+				$result = $result && $app->save();
+
+				// TODO: generate verification entry
+				$verif = new AppVerification;
+				$verif->app_id = $app->id;
+				$verif->base_changes_id = $app->version_id;
+				$verif->verifier_id = $request->user()->id;
+				$verif->concern = AppVerification::CONCERN_REPORT;
+				$verif->status_id = 'unlisted';
+				$verif->comment = $input_final_comments;
+				/*$verif->details = [
+					'_cause'		=> 'reported',
+					'_verdict_id'	=> $verdict->id,
+				];*/
+				$result = $result && $verif->save();
+
+				$verdict->verification_id = $verif->id;
 			}
 
 			$verdict->details = $details;
-			$verdict->comments = $request->input('final_comments');
 
-			$result = $verdict->save();
+			$result = $result && $verdict->save();
 
 			if($result) {
 				// Update reports' status and add them into our verdict
@@ -329,8 +307,22 @@ class AppReportController extends Controller
 				'type'		=> 'success'
 			]);
 
-			return redirect()->route('admin.app_reports.review', ['app' => $app->id, 'show_history' => 1]);
+			return redirect()->route('admin.app_reports.verdicts', ['app' => $app->id, 'show_recent' => 1]);
 		}
+	}
+
+	public function verdicts(Request $request, App $app)
+	{
+		//
+		$data = [];
+
+		$verdicts = $app->verdicts()->latest()->get();
+
+		$data['app'] = $app;
+		$data['verdicts'] = $verdicts;
+		$data['show_recent'] = $request->input('show_recent', 0) == 1;
+
+		return view('admin/app_report/verdicts', $data);
 	}
 
 }

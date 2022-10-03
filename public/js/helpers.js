@@ -619,6 +619,115 @@ if(jQuery) {
 			return num;
 		}
 
+		var handleToggledParents = function(elm, callbackShown, callbackHidden) {
+			var $elm = $(elm),
+				$toggledParents = $elm.closest(".tab-pane, .modal-dialog"),
+				$collapseTarget = $elm.closest(".collapse"),
+				$cardCollapseTarget = $elm.closest(".card")
+			;
+
+			// If inside a tab pane, find the toggle first
+			var id = $toggledParents.prop("id");
+			if($toggledParents.is(".tab-pane") && id) {
+				$toggledParents = $('.nav-link[href="#'+id+'"], .nav-link[data-target="#'+id+'"]');
+			}
+
+			if(callbackHidden === true) {
+				callbackHidden = callbackShown;
+			}
+
+			var useShown = typeof callbackShown == "function";
+			var useHidden = typeof callbackHidden == "function";
+
+			if(useShown) {
+				// NOTE: please mirror to useHidden below
+				var handlerShown = function(e) {
+					callbackShown.apply(elm, [e]);
+				}
+				var collapseHandlerShown = function(e) {
+					// Have to check whether the event occurred on the element
+					// itself, to guard from descendant collapse elements' event
+					// bubbling up
+					if(e.target != e.currentTarget)
+						return;
+					handlerShown(e);
+				}
+				var cardCollapseHandlerShown = function(e) {
+					// Have to check whether the event occurred on the element
+					// itself, to guard from descendant collapse elements' event
+					// bubbling up
+					var collapsedCard = $(e.target).closest(".card").get(0);
+					if(collapsedCard != e.currentTarget)
+						return;
+
+					// AdminLTE widget does not provide an event for when the animation
+					// completes, i.e it only triggers an event when the animation
+					// is starting (before the collapse slide animation completes).
+					// So use timeout, default jquery slide duration is 400
+					setTimeout(function() {
+						handlerShown(e);
+					}, 400);
+				}
+
+				if($toggledParents.length > 0) {
+					// Using 'shown' events instead of 'show' because when 'show'
+					// is triggered, the element is not visible yet, thus height
+					// calculation will still miss. May be weird because 'shown'
+					// waits for the transition to complete and the layout might
+					// jerk out a bit, but that's just how it is
+					$toggledParents.off("shown.bs.tab shown.bs.modal", handlerShown)
+									.on("shown.bs.tab shown.bs.modal", handlerShown)
+					;
+				}
+				if($collapseTarget.length > 0) {
+					$collapseTarget.off("shown.bs.collapse", collapseHandlerShown)
+									.on("shown.bs.collapse", collapseHandlerShown)
+					;
+				}
+				if($cardCollapseTarget.length > 0) {
+					$cardCollapseTarget.off("expanded.lte.cardwidget", cardCollapseHandlerShown)
+										.on("expanded.lte.cardwidget", cardCollapseHandlerShown)
+					;
+				}
+			}
+			if(useHidden) {
+				// NOTE: please mirror from useShown above
+				var handlerHidden = function(e) {
+					callbackHidden.apply(elm, [e]);
+				}
+				var collapseHandlerHidden = function(e) {
+					if(e.target != e.currentTarget)
+						return;
+					handlerHidden(e);
+				}
+				var cardCollapseHandlerHidden = function(e) {
+					var collapsedCard = $(e.target).closest(".card").get(0);
+					if(collapsedCard != e.currentTarget)
+						return;
+
+					setTimeout(function() {
+						handlerHidden(e);
+					}, 400);
+				}
+
+				if($toggledParents.length > 0) {
+					$toggledParents.off("hidden.bs.tab hidden.bs.modal", handlerHidden)
+									.on("hidden.bs.tab hidden.bs.modal", handlerHidden)
+					;
+				}
+				if($collapseTarget.length > 0) {
+					$collapseTarget.off("hidden.bs.collapse", collapseHandlerHidden)
+									.on("hidden.bs.collapse", collapseHandlerHidden)
+					;
+				}
+				if($cardCollapseTarget.length > 0) {
+					$cardCollapseTarget.off("collapsed.lte.cardwidget", cardCollapseHandlerHidden)
+										.on("collapsed.lte.cardwidget", cardCollapseHandlerHidden)
+					;
+				}
+			}
+		}
+
 		return {
 			fillDataString,
 			fillDataClasses,
@@ -644,6 +753,7 @@ if(jQuery) {
 			removeClassStartingWith,
 			isNumberKey,
 			clamp,
+			handleToggledParents,
 		};
 	}();
 
@@ -946,13 +1056,14 @@ if(jQuery) {
 			});
 		},
 
-		readMore: function(options) {
+		readMore: function(passedOptions) {
 			var defaultOptions = {
 				maxLines: 3,
 				expandText: "Read more",
-				collapseText: "Read less",
+				collapseText: "Hide",
 				expandedClass: "expanded",
 				collapsedClass: "collapsed",
+				notVisibleClass: "not-visible",
 				handleBaseClass: "read-more-handle",
 				handleClass: "",
 				// extraSpace is in px, mainly used to give extra breathing space
@@ -968,148 +1079,170 @@ if(jQuery) {
 				autoScroll: true,
 				indicatorLine: true,
 			};
-			options = $.extend({}, defaultOptions, options);
+
 			var $items = $(this);
-
-			var handleClass = options.handleBaseClass +" "+ options.handleClass;
-			// Use <a> instead of <span> so it can be focused
-			var $handleTemplate = $("<a>").prop("href", "#").addClass(handleClass);
-			if(options.centeredHandle) {
-				$handleTemplate.addClass("centered");
-			}
-			var autoScrollOptions = $.extend({
-				animate: true,
-			}, typeof options.autoScroll === "object" ? options.autoScroll : {});
-			$handleTemplate.on("click", function(e) {
-				e.preventDefault();
-
-				var $handle = $(this);
-				var $item = $handle.closest(".read-more-wrapper");
-				var expanded = isExpanded($item);
-				updateState($item, !expanded);
-				$item.focus();
-				if(/*!expanded && */options.autoScroll) {
-					Helpers.scrollTo($item, autoScrollOptions);
-				}
-			});
-
-			var getMaxLines = function(item) {
-				var $item = $(item);
-				return parseInt($item.data("maxLines") || options.maxLines);
-			}
-
-			var isOverflowing = function(element, height) {
-				if(element instanceof $) element = element[0];
-				if(height)
-					return element.scrollHeight > height;
-				else
-					return element.scrollHeight > element.offsetHeight;
-			}
-
-			var isExpanded = function(item) {
-				var $item = $(item);
-				return $item.is("."+ options.expandedClass);
-			}
-
-			var isStandby = function(item) {
-				var $item = $(item);
-				return !$item.is("."+ options.expandedClass) && !$item.is("."+ options.collapsedClass);
-			}
-
-			var getHandle = function(item) {
-				var $item = $(item);
-				var $handle = $item.find("."+ options.handleBaseClass);
-				if($handle.length == 0) {
-					$handle = $handleTemplate.clone(true).appendTo($item);
-				}
-
-				return $handle;
-			}
-
 			var initItem = function(item) {
-				var $item = $(item);
-				$item.addClass("read-more-wrapper");
-				if(options.indicatorLine) {
-					$item.addClass("with-indicator");
+				var options = $.extend({}, defaultOptions, passedOptions, $(item).data());
+
+				var handleClass = options.handleBaseClass +" "+ options.handleClass;
+				// Use <a> instead of <span> so it can be focused
+				var $handleTemplate = $("<a>").prop("href", "#").addClass(handleClass);
+				if(options.centeredHandle) {
+					$handleTemplate.addClass("centered");
 				}
+				var autoScrollOptions = $.extend({
+					animate: true,
+				}, typeof options.autoScroll === "object" ? options.autoScroll : {});
+				$handleTemplate.on("click", function(e) {
+					e.preventDefault();
 
-				checkState(item);
-			}
-
-			var standbyItem = function(item) {
-				var $item = $(item);
-				var $handle = getHandle(item);
-
-				$handle.addClass("hidden");
-				$item.css("maxHeight", "");
-				$item.removeClass(options.expandedClass);
-				$item.removeClass(options.collapsedClass);
-			}
-
-			var checkState = function(item) {
-				var $item = $(item);
-				var $handle = getHandle(item);
-				var maxHeight = calculateMaxHeight(item);
-				if(isOverflowing(item, maxHeight)) {
-					$handle.removeClass("hidden");
-					if(isStandby(item)) {
-						// Init item
-						updateState(item, false);
-					} else {
-						// Refresh item state
-						updateState(item, isExpanded(item));
+					var $handle = $(this);
+					var $item = $handle.closest(".read-more-wrapper");
+					var expanded = isExpanded($item);
+					updateState($item, !expanded);
+					$item.focus();
+					if(/*!expanded && */options.autoScroll) {
+						Helpers.scrollTo($item, autoScrollOptions);
 					}
-				} else {
-					standbyItem(item);
+				});
+
+				var getMaxLines = function(item) {
+					var $item = $(item);
+					return parseInt($item.data("maxLines") || options.maxLines);
 				}
-			}
 
-			var calculateMaxHeight = function(item) {
-				var $item = $(item);
-
-				var boxSizing = $item.css("boxSizing");
-				var paddingTop = parseFloat($item.css("paddingTop"));
-				var paddingBottom = parseFloat($item.css("paddingBottom"));
-				var borderTop = parseFloat($item.css("borderTopWidth"));
-				var borderBottom = parseFloat($item.css("borderBottomWidth"));
-				var lineHeight = parseFloat($item.css("lineHeight"));
-				var extraSpace = parseFloat(typeof options.extraSpace === "function" ? options.extraSpace(item) : options.extraSpace);
-
-				var maxHeight = lineHeight * getMaxLines(item);
-				if(boxSizing == "border-box") {
-					maxHeight += paddingTop + paddingBottom + borderTop + borderBottom;
+				var isOverflowing = function(element, height) {
+					if(element instanceof $) element = element[0];
+					if(height)
+						return element.scrollHeight > height;
+					else
+						return element.scrollHeight > element.offsetHeight;
 				}
-				maxHeight += extraSpace;
 
-				return maxHeight;
-			}
+				var isExpanded = function(item) {
+					var $item = $(item);
+					return $item.is("."+ options.expandedClass);
+				}
 
-			var updateState = function(item, state) {
-				// state = true means to expand it
+				var isStandby = function(item) {
+					var $item = $(item);
+					return !$item.is("."+ options.expandedClass) && !$item.is("."+ options.collapsedClass);
+				}
 
-				var $item = $(item);
-				var $handle = getHandle(item);
+				var getHandle = function(item) {
+					var $item = $(item);
+					var $handle = $item.find("."+ options.handleBaseClass);
+					if($handle.length == 0) {
+						$handle = $handleTemplate.clone(true).appendTo($item);
+					}
 
-				$item.toggleClass(options.expandedClass, state);
-				$item.toggleClass(options.collapsedClass, !state);
-				$handle.html(!state ? options.expandText : options.collapseText);
+					return $handle;
+				}
 
-				if(state) {
-					// to expand
+				var _initItem = function(item) {
+					var $item = $(item);
+					$item.addClass("read-more-wrapper");
+					if(options.indicatorLine) {
+						$item.addClass("with-indicator");
+					}
+
+					checkState(item);
+				}
+
+				var standbyItem = function(item) {
+					var $item = $(item);
+					var $handle = getHandle(item);
+
+					$handle.addClass("hidden");
 					$item.css("maxHeight", "");
-				} else {
-					// to collapse
-					// Calculate the proper height
-					var targetHeight = calculateMaxHeight(item);
-					$item.css("maxHeight", targetHeight);
+					$item.removeClass(options.expandedClass);
+					$item.removeClass(options.collapsedClass);
 				}
+
+				var checkState = function(item) {
+					var $item = $(item);
+
+					if($item.is(":hidden")) {
+						$item.addClass(options.notVisibleClass);
+						// Do nothing else
+						return;
+					} else {
+						$item.removeClass(options.notVisibleClass);
+					}
+
+					var $handle = getHandle(item);
+					var maxHeight = calculateMaxHeight(item);
+					if(isOverflowing(item, maxHeight)) {
+						$handle.removeClass("hidden");
+						if(isStandby(item)) {
+							// Init item
+							updateState(item, false);
+						} else {
+							// Refresh item state
+							updateState(item, isExpanded(item));
+						}
+					} else {
+						standbyItem(item);
+					}
+				}
+
+				var calculateMaxHeight = function(item) {
+					var $item = $(item);
+
+					var boxSizing = $item.css("boxSizing");
+					var paddingTop = parseFloat($item.css("paddingTop"));
+					var paddingBottom = parseFloat($item.css("paddingBottom"));
+					var borderTop = parseFloat($item.css("borderTopWidth"));
+					var borderBottom = parseFloat($item.css("borderBottomWidth"));
+					var lineHeight = parseFloat($item.css("lineHeight"));
+					var extraSpace = parseFloat(typeof options.extraSpace === "function" ? options.extraSpace(item) : options.extraSpace);
+
+					var maxHeight = lineHeight * getMaxLines(item);
+					if(boxSizing == "border-box") {
+						maxHeight += paddingTop + paddingBottom + borderTop + borderBottom;
+					}
+					maxHeight += extraSpace;
+
+					return maxHeight;
+				}
+
+				var updateState = function(item, state) {
+					// state = true means to expand it
+
+					var $item = $(item);
+					var $handle = getHandle(item);
+
+					$item.toggleClass(options.expandedClass, state);
+					$item.toggleClass(options.collapsedClass, !state);
+					$handle.html(!state ? options.expandText : options.collapseText);
+
+					if(state) {
+						// to expand
+						$item.css("maxHeight", "");
+					} else {
+						// to collapse
+						// Calculate the proper height
+						var targetHeight = calculateMaxHeight(item);
+						$item.css("maxHeight", targetHeight);
+					}
+				}
+
+				_initItem(item);
+				$(item).on("check.readmore", function(e) {
+					checkState(item);
+				});
+				var debouncedCheckState = Helpers.debounce(checkState, 100, false);
+				$(item).on("change", function(e) {
+					debouncedCheckState(item);
+				});
+				Helpers.handleToggledParents(item, function(e) {
+					$(this).trigger("check.readmore");
+				}, true);
 			}
 
 			var _resizeHandler = function() {
 				// $items.trigger("change");
-				$items.each(function(i, item) {
-					checkState(item);
-				});
+				$items.trigger("check.readmore");
 			}
 			var resizeHandler = Helpers.debounce(_resizeHandler, 100, false);
 
@@ -1118,11 +1251,6 @@ if(jQuery) {
 			});
 			return $items.each(function(i, item) {
 				initItem(item);
-
-				var debouncedCheckState = Helpers.debounce(checkState, 100, false);
-				$(item).on("change", function(e) {
-					debouncedCheckState(item);
-				});
 			});
 		},
 

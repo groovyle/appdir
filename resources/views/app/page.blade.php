@@ -90,7 +90,7 @@ $show_report_form = $is_report_form ? 'show' : '';
 									<label class="d-block mb-0">@lang('frontend.apps.fields.report_categories'):</label>
 									<div class="d-flex flex-row flex-wrap">
 										@foreach($report_categories as $rc)
-										<div class="form-check form-check-inline" title="{{ $rc->description }}" data-toggle="tooltip" data-placement="bottom" data-custom-class="text-r090 tooltip-wider">
+										<div class="form-check form-check-inline" title="{{ $rc->description }}" data-toggle="tooltip" data-placement="top" data-custom-class="text-r090 tooltip-wider">
 											<input type="checkbox" name="report_categories[]" value="{{ $rc->id }}" id="reportCategory-{{ $rc->id }}" class="form-check-input" {!! old_checked('report_categories', NULL, $rc->id) !!}>
 											<label class="form-check-label" for="reportCategory-{{ $rc->id }}">{{ $rc->name }}</label>
 										</div>

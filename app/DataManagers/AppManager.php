@@ -936,6 +936,9 @@ class AppManager {
 		if($publish) {
 			$model->setToPublished();
 		}
+		if($model->is_reported) {
+			$model->setToReported(false);
+		}
 		$compiled = AppManager::applyVersionsChanges($model, $changelogs);
 
 		// Verification

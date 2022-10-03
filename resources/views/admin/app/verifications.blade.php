@@ -38,7 +38,7 @@ if(($count = $app->verifications->count()) > 0) {
       <div class="mb-1 text-secondary"><em>(@lang('common.sorted_from_newest_to_oldest'))</em></div>
       <div class="verif-list verif-conversation">
       @foreach($app->verifications->reverse() as $verif)
-        @include('admin.app_verification.components.verif-list-item', ['other_comments' => true, 'item_class' => ($verif->status->by == 'editor' ? 'left blue' : 'left green')])
+        @include('admin.app_verification.components.verif-list-item', ['other_comments' => true, 'item_side' => 'left'])
       @endforeach
       </div>
     @else

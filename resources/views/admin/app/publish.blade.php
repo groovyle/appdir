@@ -36,6 +36,14 @@ $show_changes = $app->has_committed;
 
 <input type="hidden" name="verif_ids" value="{{ $verifs->pluck('id')->implode(',') }}" readonly>
 
+@if($app->is_reported)
+<div class="callout callout-danger mb-2">
+  {{ __('admin/apps.messages.app_was_unlisted_for_inappropriate_contents') }}
+  <br>
+  <strong>{{ __('admin/apps.messages.app_ban_will_be_lifted_after_publish') }}</strong>
+</div>
+@endif
+
 <!-- Card -->
 <div class="card card-primary card-outline card-outline-tabs">
   <div class="card-header p-0 border-bottom-0">

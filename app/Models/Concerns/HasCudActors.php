@@ -354,15 +354,15 @@ trait HasCudActors {
 
 	// Relationships
 	public function createdBy() {
-		return $this->belongsTo('App\User', $this->getQualifiedCreatedByColumn());
+		return $this->belongsTo('App\User', $this->getCreatedByColumn());
 	}
 
 	public function updatedBy() {
-		return $this->belongsTo('App\User', $this->getQualifiedUpdatedByColumn());
+		return $this->belongsTo('App\User', $this->getUpdatedByColumn());
 	}
 
 	public function deletedBy() {
-		return $this->belongsTo('App\User', $this->getQualifiedDeletedByColumn());
+		return $this->belongsTo('App\User', $this->getDeletedByColumn());
 	}
 
 }

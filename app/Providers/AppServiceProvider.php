@@ -77,5 +77,8 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('nl2br', function($expression) {
             return "<?php echo nl2br({$expression}); ?>";
         });
+        Blade::directive('langraw', function($expression) {
+            return "<?php echo lang_or_raw({$expression}); ?>";
+        });
     }
 }

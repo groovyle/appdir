@@ -19,15 +19,23 @@ if(isset($section_id))
         <br>
         @if(!$hide_header_extras)
           @if($app->is_published)
-          <span class="badge badge-soft badge-success align-middle text-080">
-            <span class="fas fa-check-circle mr-1"></span>
-            @lang('admin/apps.app_is_public')
-          </span>
-          @else
-          <span class="badge badge-soft badge-warning align-middle text-080">
-            <span class="fas fa-exclamation-circle mr-1"></span>
-            @lang('admin/apps.app_is_not_public')
-          </span>
+            @if($app->is_public)
+            <span class="badge badge-soft badge-success align-middle text-080">
+              <span class="fas fa-check-circle mr-1"></span>
+              @lang('admin/apps.app_is_public')
+            </span>
+            @else
+            <span class="badge badge-soft badge-warning align-middle text-080">
+              <span class="fas fa-exclamation-circle mr-1"></span>
+              @lang('admin/apps.app_is_not_public')
+            </span>
+            @endif
+          @endif
+          @if($app->is_reported)
+            <span class="badge badge-soft badge-danger align-middle text-080">
+              <span class="fas fa-exclamation-triangle text-090 mr-1"></span>
+              @lang('admin/apps.app_was_reported')
+            </span>
           @endif
         @endif
         <a href="{{ $app->get_public_url(['version' => $app->version_number]) }}" class="btn btn-xs btn-secondary px-2" target="_blank">

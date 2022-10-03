@@ -28,18 +28,16 @@ class AppVerificationController extends Controller
 		$this->middleware('auth');
 	}
 
-	/**
-	 * Display a listing of the resource.
-	 *
-	 * @return \Illuminate\Http\Response
-	 */
-	public function index()
-	{
-		//
-		$data = [];
-		$filters = get_filters(['keyword', 'status'], [
+	public static function listQuery($filters = null) {
+
+		$default_filters = [
 			'status'	=> 'unverified',
-		]);
+		];
+		if($filters) {
+			$filters = get_filters($filters, $default_filters);
+		} else {
+			$filters = $default_filters;
+		}
 
 		$query = (new App)->newQueryWithoutScopes();
 		$query->from('apps as a');
@@ -49,10 +47,10 @@ class AppVerificationController extends Controller
 			$query->where('cl.status', AppChangelog::STATUS_PENDING);
 			$query->whereRaw('if(cv.id is not null, cl.created_at >= cv.created_at and cl.id > cv.id, 1)');
 		});
+		$query->select('a.*');
 		$query->groupBy('a.id');
 		$query->orderBy('a.updated_at', 'desc');
 		$query->orderBy('a.id', 'desc');
-		$query->select('a.*');
 
 		if($keyword = trim(optional($filters)['keyword'])) {
 			$str = escape_mysql_like_str($keyword);
@@ -69,6 +67,21 @@ class AppVerificationController extends Controller
 		} elseif($filters['status'] == 'verified') {
 			$query->whereNull('cl.id');
 		}
+
+		return [$query, $filters];
+	}
+
+	/**
+	 * Display a listing of the resource.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function index()
+	{
+		//
+		$data = [];
+
+		list($query, $filters) = static::listQuery(['keyword', 'status']);
 
 		$items = $query->paginate(10);
 		$items->appends($filters);
@@ -144,6 +157,12 @@ class AppVerificationController extends Controller
 		$data['versions'] = $versions;
 		$data['versions_range'] = new AppChangelogCollection($versions->all());
 		// dd($versions, $versions->pluck('version')->implode(','));
+
+		$verif_report = null;
+		if($ori->is_reported) {
+			$verif_report = $ori->report_verification;
+		}
+		$data['verif_report'] = $verif_report;
 
 		$data['vstatus'] = VVStatus::all()->keyBy('id');
 

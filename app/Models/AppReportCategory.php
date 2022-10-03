@@ -42,8 +42,7 @@ class AppReportCategory extends Model
 	}
 
 	protected function getTranslation($value) {
-		$key = 'common.app_report_categories.'.$value;
-		return \Lang::has($key) ? \Lang::get($key) : $value;
+		return lang_or_raw($value, 'common.app_report_categories.');
 	}
 
 	public function __toString() {

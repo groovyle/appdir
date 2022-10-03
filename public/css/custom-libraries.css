@@ -109,9 +109,22 @@ textarea.auto-height-init-bypass {
 	display: inline-block;
 	position: relative;
 	overflow-y: hidden;
+
+	/**
+	 * Somehow elements with overflow:hidden interacts weirdly with other inline
+	 * elements, i.e as if the vertical-align gets set to something else automatically.
+	 * So set this.
+	 */
+	vertical-align: top;
 }
 .read-more-wrapper.expanded {
 	height: auto !important;
+}
+.read-more-wrapper.not-visible {
+	max-width: 100% !important;
+	overflow: hidden !important;
+	white-space: nowrap !important;
+	text-overflow: ellipsis !important;
 }
 .read-more-wrapper.with-indicator.collapsed::after {
 	content: "";

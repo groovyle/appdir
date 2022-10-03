@@ -70,6 +70,15 @@ function status_badge($text, $style, $attrs = '') {
 	return sprintf('<span class="badge cursor-default badge-%s"%s>%s</span>', $style, $attrs, $text);
 }
 
+function badge_number($value, $max = 99, $no_zero = true) {
+	$num = intval($value);
+	if($num > $max)
+		$num = $max.'+';
+	elseif($num == 0 && $no_zero)
+		$num = '';
+	return $num;
+}
+
 function description_text($text) {
 	return nl2br(e(trim($text)), false);
 }
@@ -192,4 +201,11 @@ function pretty_username($user, $is_an_owner = false) {
 	$atts['class'] = implode(' ', $atts['class']);
 	$text = sprintf('<span %s>%s</span>', html_attributes($atts), $user);
 	return $text;
+}
+
+function lang_or_raw($value, $prefix = '') {
+	$key = $prefix.$value;
+	$additional_params = array_slice(func_get_args(), 2);
+	$params = array_merge([$key], $additional_params);
+	return \Lang::has($key) ? call_user_func_array(['\\Lang', 'get'], $params) : $value;
 }

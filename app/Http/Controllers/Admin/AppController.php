@@ -87,6 +87,7 @@ class AppController extends Controller
 			}
 		});
 		$query->groupBy('a.id');
+		$query->orderBy('a.is_reported', 'desc'); // bring reported apps into attention
 		$query->orderBy('a.name', 'asc');
 		$query->orderBy('a.updated_at', 'desc');
 		$query->orderBy('a.id', 'desc');
@@ -1081,7 +1082,6 @@ class AppController extends Controller
 	public function reviewChanges(Request $request, App $app)
 	{
 		// Review the approved changes and compare between old and new item
-		// dd($app->approved_changes);
 		$approved_changes = $app->approved_changes;
 		$verifs = $app->latest_approved_verifications;
 		list($ori, $app, $changes) = AppManager::getPendingVersion($app, $approved_changes);
@@ -1119,7 +1119,7 @@ class AppController extends Controller
 
 		$rules = [
 			// 'versionb'			=> ['required'],
-			'verif_ids'	=> [
+			'verif_ids'	=> [ // TODO: message for if this fails (e.g going back to page or manually entering the address to bypass reports)
 				'required',
 				new ModelExists(AppVerification::class, 'id', ',', function($query) use($app) {
 					$query->where('app_id', $app->id);

@@ -59,6 +59,8 @@ $("body").tooltip({
 
 $(".init-popover").popover();
 
+$(".init-readmore").readMore();
+
 
 var $mainContent = $(".main-content").first();
 if($mainContent.length > 0 && $mainContent.is(".scroll-to-me")) {

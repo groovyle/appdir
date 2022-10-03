@@ -35,6 +35,7 @@ if($tab_review_active
 }
 
 $lverif = $ori->last_verification;
+$lverif_callout = $lverif->is_reported_guilty ? 'callout-danger' : 'callout-info';
 
 $rand = random_alpha(5);
 ?>
@@ -88,21 +89,24 @@ $rand = random_alpha(5);
               </div>
               @endif
 
-              <div class="callout callout-info py-2">
+              <div class="callout {{ $lverif_callout }} last-verif-preview py-2">
                 <strong>@lang('admin/app_verifications.last_verification')</strong>
                 <div class="text-090">
                   @include('admin.app_verification.components.verif-list-item', ['verif' => $lverif, 'hide_edit' => false, 'other_comments' => true])
                 </div>
               </div>
 
-              @if(!$ori->has_pending_changes && !$is_edit)
+              @if(!($ori->has_pending_changes || $is_edit))
               <div class="callout callout-warning py-2 text-110">
                 @lang('admin/app_verifications.this_app_does_not_have_any_pending_changes_to_be_reviewed')
+                {{--
                 <br>
                 <button type="button" class="btn btn-warning" data-toggle="collapse" data-target="#reviewDetails">@lang('admin/app_verifications.review_anyway')</button>
+                --}}
               </div>
               @endif
             </div>
+            @if($ori->has_pending_changes || $is_edit)
             <div id="reviewDetails" class="collapse {{ $review_form_show }}">
               <div class="list-group-item verif-form-fields">
                 <h4>
@@ -128,6 +132,23 @@ $rand = random_alpha(5);
                 @else
                 <div class="callout callout-warning py-2">
                   @lang('admin/app_verifications.this_form_shows_version_x_the_app\'s_current_version', ['x' => $app->version_number])
+                </div>
+                @endif
+
+                @if($ori->is_reported)
+                <div class="alert alert-danger py-2">
+                  <div class="icon-text-pair icon-2x icon-color-reset">
+                    <span class="fas fa-exclamation-triangle icon"></span>
+                    <div>
+                      @lang('admin/app_verifications.this_app_was_recently_found_guilty_for_inappropriate_content')
+                      <br>
+                      @lang('admin/app_verifications.please_make_sure_the_offending_contents_have_been_removed')
+                      @if($verif_report)
+                      <br>
+                      <a href="#" class="text-white btn-view-verif" data-app-id="{{ $ori->id }}" data-verif-id="{{ $verif_report->id }}">@lang('admin/common.check_details')</a>
+                      @endif
+                    </div>
+                  </div>
                 </div>
                 @endif
 
@@ -341,7 +362,13 @@ $rand = random_alpha(5);
                           <span class="media-icon mr-3 fa-fw {{ $vstatus['approved']->icon }}"></span>
                           <div class="media-body">
                             <p class="lead">{{ __($vstatus['approved']->name) }}</p>
-                            <p>{{ __('admin/app_verifications.status.approved_consequence') }}</p>
+                            <p>
+                              {{ __('admin/app_verifications.status.approved_consequence') }}
+                              @if($ori->is_reported)
+                              <br>
+                              {{ __('admin/app_verifications.status.approved_reported_consequence') }}
+                              @endif
+                            </p>
                             <input type="radio" name="verif_status" value="{{ $vstatus['approved']->id }}" class="btn-group-input vstatus-radio vstatus-radio-{{ $vstatus['approved']->id }}" {!! old_checked('verif_status', $verif->status_id, $vstatus['approved']->id) !!} >
                           </div>
                         </label>
@@ -385,6 +412,7 @@ $rand = random_alpha(5);
                 </div>
               </div>
             </div>
+            @endif
           </div>
         </form>
       </div>
@@ -395,7 +423,7 @@ $rand = random_alpha(5);
         <div class="pt-3 px-3 pb-1 text-secondary"><em>(@lang('common.sorted_from_newest_to_oldest'))</em></div>
         <div class="verif-list verif-conversation">
           @foreach($app->verifications->reverse() as $verif)
-            @include('admin.app_verification.components.verif-list-item', ['hide_edit' => false, 'other_comments' => true, 'item_class' => ($verif->status->by == 'editor' ? 'right blue' : 'left green')])
+            @include('admin.app_verification.components.verif-list-item', ['hide_edit' => false, 'other_comments' => true])
           @endforeach
         </div>
         @endif

@@ -25,6 +25,7 @@ return [
 'last_verification'		=> 'Last verification',
 'review_public_page'	=> 'Review public page',
 
+'related_version'		=> 'Related version',
 'related_versions'		=> 'Related versions',
 'this_form_shows_the_app\'s_pending_changes'	=> 'This form shows data from the app\'s pending changes.',
 'this_app_does_not_have_any_pending_changes_to_be_reviewed'	=> 'This app does not have any pending changes to be reviewed.',
@@ -38,6 +39,9 @@ return [
 'pending_changes_applied'	=> 'Pending data applied',
 'item_published'		=> 'Item published',
 'changes_verified'		=> 'Changes verified',
+'this_app_was_unlisted_because_of_reports'	=> 'This app was unlisted because of reports of inappropriate content',
+'this_app_was_recently_found_guilty_for_inappropriate_content'	=> 'This app was recently found guilty for having inappropriate contents.',
+'please_make_sure_the_offending_contents_have_been_removed'	=> 'Please make sure the offending contents have been removed.',
 
 'titles'		=> [
 	'verification'					=> 'Verification',
@@ -52,6 +56,19 @@ return [
 	'overall_comments'				=> 'Verification Notes',
 	'overall_comments_hint'			=> 'Comments on presented data overall, or additional notes',
 	'verification_result'			=> 'Verification Result',
+],
+
+'status'		=> [
+	'approved_consequence'			=> 'The app owner will be able to publish any proposed changes.',
+	'approved_reported_consequence'	=> 'The existing ban/block for the app will be lifted as well.',
+	'rejected_consequence'			=> 'All the proposed changes will be rejected and dropped, and the app owner will have to propose different changes.',
+	'revision-needed_consequence'	=> 'The app as well as the proposed changes will be unaffected. Choose this to communicate with the app owner about additional, necessary changes.',
+],
+
+'messages'		=> [
+	'app_verification_after_approved'			=> 'The app\'s proposed changes have been approved!',
+	'app_verification_after_rejected'			=> 'The app\'s proposed changes have been rejected and dropped.',
+	'app_verification_after_revision-needed '	=> 'The app and its proposed changes were unaffected. Wait for further changes by the app\'s owner.',
 ],
 
 'status_unverified'		=> 'Unverified',

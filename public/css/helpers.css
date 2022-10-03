@@ -38,8 +38,12 @@ p:last-child {
 	align-items: baseline;
 	column-gap: 0.35rem;
 }
-.icon-text-pair:not(.icon-color-reset) > .icon {
+.icon-text-pair > .icon {
 	color: var(--gray);
+}
+.icon-text-pair.icon-color-reset > .icon,
+.icon-text-pair > .icon.icon-color-reset {
+	color: inherit !important;
 }
 .icon-text-pair.icon-2x {
 	align-items: flex-start;

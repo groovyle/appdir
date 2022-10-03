@@ -37,8 +37,8 @@ $hide_filters = !$show_filters;
           <div class="col-sm-8 col-lg-5">
             <select class="form-control" name="status" id="fStatus" autocomplete="off">
               <option value="">&ndash; {{ __('admin/common.all') }} &ndash;</option>
-              <option value="unverified" {!! old_selected('', $filters['status'], 'unverified') !!}>{{ __('admin/app_verifications.status_unverified') }}</option>
-              <option value="verified" {!! old_selected('', $filters['status'], 'verified') !!}>{{ __('admin/app_verifications.status_verified') }}</option>
+              <option value="unverified" {!! old_selected('', $filters['status'], 'unverified') !!}>{{ __('admin/apps.status.is_unverified') }}</option>
+              <option value="verified" {!! old_selected('', $filters['status'], 'verified') !!}>{{ __('admin/apps.status.is_verified') }}</option>
             </select>
           </div>
         </div>
@@ -105,7 +105,7 @@ $hide_filters = !$show_filters;
             <tr>
               <th style="width: 50px;">{{ __('common.#') }}</th>
               <th>{{ __('admin/apps.fields.name') }}</th>
-              <th style="width: 20%;">{{ __('admin/apps.fields.is_published') }}</th>
+              <th style="width: 20%;">{{ __('admin/common.status') }}</th>
               <th style="width: 20%;">{{ __('admin/apps.fields.categories') }}</th>
               <th style="width: 20%;">{{ __('admin/apps.fields.tags') }}</th>
               <th style="width: 1%;">{{ __('common.actions') }}</th>
@@ -141,13 +141,24 @@ $hide_filters = !$show_filters;
                 @include('components.app-logo', ['logo' => $app->logo, 'exact' => '60x60', 'none' => false, 'img_class' => 'mini-app-logo'])
               </td>
               <td>
-                @if($app->is_published)
-                {{ __('common.yes') }}
-                <a href="{{ $app->public_url }}" target="_blank" class="text-success ml-2" title="@lang('admin/apps.app_had_been_verified')" data-toggle="tooltip">
-                  <span class="fas fa-check-circle"></span>
-                </a>
+                @if($app->is_verified)
+                <div>
+                  @if($app->is_published)
+                  {{ __('admin/apps.status.is_published') }}
+                  @if($app->is_public)
+                  <a href="{{ $app->public_url }}" target="_blank" class="text-success ml-2" title="@lang('admin/apps.app_had_been_verified')" data-toggle="tooltip">
+                    <span class="fas fa-check-circle"></span>
+                  </a>
+                  @endif
+                  @else
+                  {{ __('admin/apps.status.is_private') }}
+                  @endif
+                </div>
+                @if($app->is_reported)
+                <div class="text-danger">{{ __('admin/apps.status.is_reported') }}</div>
+                @endif
                 @else
-                {{ __('common.no') }}
+                {{ __('admin/apps.status.is_unverified') }}
                 @endif
               </td>
               <td>

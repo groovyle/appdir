@@ -39,13 +39,17 @@ $append_breadcrumb = [
     <div class="d-flex flex-wrap align-items-center">
       <div class="mr-auto">
         <h4 class="mb-0 text-primary d-inline-block">{{ $app->complete_name }}</h4>
-        @if($app->is_verified)
         <br>
+        @if($app->is_reported)
+          <span class="badge badge-soft badge-danger align-middle text-080">
+            <span class="fas fa-exclamation-triangle text-090 mr-1"></span>
+            @lang('admin/apps.app_was_reported')
+          </span>
+        @endif
         <a href="{{ $app->public_url }}" class="btn btn-xs btn-default px-2" target="_blank">
           @lang('admin/apps.view_public_page')
           <span class="fas fa-globe-americas ml-1"></span>
         </a>
-        @endif
       </div>
       <div class="text-right ml-auto">
         @if($app->has_committed)
@@ -96,6 +100,22 @@ $append_breadcrumb = [
       </div>
 
       <div class="col-12 col-md-8 content-panel">
+        @if($app->is_reported)
+        <div class="alert alert-danger">
+          <div class="icon-text-pair icon-2x icon-color-reset">
+            <span class="fas fa-exclamation-triangle icon"></span>
+            <div>
+              {{ __('admin/apps.messages.app_was_unlisted_for_inappropriate_contents') }}
+              <br>
+              {{ __('admin/apps.messages.to_unblock_app_please_remove_inappropriate_contents') }}
+              @if($app->report_verification)
+              <br>
+              <a href="#" class="text-white btn-view-verif" data-app-id="{{ $app->id }}" data-verif-id="{{ $app->report_verification->id }}">@lang('admin/common.check_details')</a>
+              @endif
+            </div>
+          </div>
+        </div>
+        @endif
         @if($app->last_verification->status->by == 'verifier')
         @if($app->last_verification->status_id == 'revision-needed')
         <div class="alert alert-warning">
@@ -122,6 +142,10 @@ $append_breadcrumb = [
         @elseif($app->last_verification->status_id == 'approved' && $app->has_approved_changes)
         <div class="callout callout-success py-2">
           @lang('admin/apps.your_app\'s_edits_version_x_has_been_approved', ['x' => $app->approved_changes->last()->version])
+          @if($app->is_reported)
+          <br>
+          <strong>{{ __('common.note') }}: {{ __('admin/apps.messages.app_ban_will_be_lifted_after_publish') }}</strong>
+          @endif
           <br>
           <a href="{{ route('admin.apps.publish', ['app' => $app->id]) }}" class="btn btn-success text-white btn-sm mt-1">@lang('admin/apps.publish_edits') &raquo;</a>
         </div>

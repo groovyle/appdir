@@ -16,5 +16,6 @@ return [
 'showing_x_items_of_y_total'	=> 'Showing :x items of :y total',
 'clear_all_filters'		=> 'Clear all filters',
 'clear_all'				=> 'Clear all',
+'check_details'			=> 'Check details',
 
 ];

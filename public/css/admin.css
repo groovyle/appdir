@@ -159,6 +159,10 @@
 	font-size: 3rem;
 	align-self: center;
 }
+.media-btn .media-icon.top-aligned {
+	align-self: flex-start;
+	margin-top: 0.25rem;
+}
 .media-btn .media-icon:first-child {
 	margin-right: 0.75rem;
 }
@@ -531,6 +535,10 @@
 	background-color: #e6ffd9;
 	border-color: #89ca65;
 }
+.verif-conversation > .verif-content.red {
+	background-color: #ffe6e9;
+	border-color: #ffacb5;
+}
 .verif-conversation > .verif-content.yellow {
 	background-color: #fff3cd;
 	border-color: #f7d30e;
@@ -569,6 +577,12 @@
 
 .btn[class*="btn-outline-"].focus:not(.disabled):not(:disabled) {
 	box-shadow: 0 0 0 4px rgba(0,0,0,0.25);
+}
+
+.btn-outline-warning:not(.not-improved):not(:hover) {
+	/* Improved visibility for text inside this button */
+	color: #aea100;
+	/*border-color: #aea100;*/
 }
 
 .btn-tool-inline {

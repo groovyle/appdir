@@ -135,6 +135,13 @@ class AppController extends Controller
 			} else {
 				$query->where('email', $email);
 			}
+
+			// NOTE: no unresolved checks, consider the following:
+			// A user reported, but then it got dropped because it's false. The user
+			// won't be able to report again if the unresolved check is ignored, and
+			// it should stay this way.
+			// $query->unresolved();
+
 			$existing_report = $query->first();
 			if($existing_report) {
 				$msg = __('frontend.apps.message.you_have_reported_this_app_in_the_current_version_x', ['x' => $app->version_number]);

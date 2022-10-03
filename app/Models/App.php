@@ -76,10 +76,15 @@ class App extends Model
 			'visuals',
 		]);
 
-		$query->where('is_verified', 1);
-		$query->where('is_published', 1);
-		// $query->where('is_reported', 0); // TODO
+		$query->isListed();
+
 		// $query->where('id', 0); // dummy
+	}
+
+	public function scopeIsListed($query, $invert = false) {
+		$query->where('is_verified', !$invert ? 1 : 0);
+		$query->where('is_published', !$invert ? 1 : 0);
+		$query->where('is_reported', !$invert ? 0 : 1);
 	}
 
 	public static function getFrontendItem($slug) {
@@ -164,6 +169,10 @@ class App extends Model
 		;
 	}
 
+	public function report_verification() {
+		return $this->last_verification()->where('concern', AppVerification::CONCERN_REPORT);
+	}
+
 	public function latest_approved_verifications() {
 		// Get latest sequential approvals
 		return $this->hasMany('App\Models\AppVerification', 'app_id')->latestSequence('approved');
@@ -215,6 +224,10 @@ class App extends Model
 
 	public function reports() {
 		return $this->hasMany('App\Models\AppReport', 'app_id');
+	}
+
+	public function verdicts() {
+		return $this->hasMany('App\Models\AppVerdict', 'app_id');
 	}
 
 	public function lastVersionNumber() {
@@ -298,9 +311,23 @@ class App extends Model
 		return route('apps.page', $params);
 	}
 
+	public function getIsListedAttribute() {
+		return $this->is_verified
+			&& $this->is_published
+			&& ! $this->is_reported
+		;
+	}
+
 	public function setToPublished($state = true) {
 		$this->is_published = $state;
 		$this->published_at = $state ? now() : null;
+		return $this;
+	}
+
+	public function setToReported($state = true) {
+		$this->is_reported = $state;
+		$this->reported_at = $state ? now() : null;
+		return $this;
 	}
 
 	public function increasePageViews($save = true) {

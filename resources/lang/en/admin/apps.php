@@ -44,10 +44,19 @@ return [
 'app_changes_needs_revision_to_be_approved'	=> 'This app needs revision to be approved',
 'app_is_public'				=> 'App is public',
 'app_is_not_public'			=> 'App is not public',
+'app_was_reported'			=> 'App was reported',
 'your_app\'s_edits_version_x_has_been_approved'	=> 'Your app\'s edits (up to Version :x) has been approved! <br>You can now publish your edits.',
 'publish_edits'			=> 'Publish edits now',
 'compare'				=> 'Compare',
 'view_your_app'			=> 'View your app',
+
+'status'	=> [
+	'is_published'		=> 'Published',
+	'is_private'		=> 'Private',
+	'is_reported'		=> 'Reported',
+	'is_verified'		=> 'Verified',
+	'is_unverified'		=> 'Unverified',
+],
 
 'fields'	=> [
 	'name'						=> 'Name',
@@ -148,6 +157,10 @@ return [
 	'form_showing_pending_changes'			=> 'This form shows your pending changes',
 	'new_items_will_be_staged'				=> 'Apps will not become public immediately, and has to go through verification first',
 	'edits_will_be_staged'					=> 'Any edits will be staged for verification and won\'t take immediate effect',
+
+	'app_was_unlisted_for_inappropriate_contents'	=> 'This app had been unlisted for having inappropriate content.',
+	'to_unblock_app_please_remove_inappropriate_contents'	=> 'To unblock this app, please remove the inappropriate contents and wait for further verification processes.',
+	'app_ban_will_be_lifted_after_publish'	=> 'The ban/block on the app will be removed after publishing the approved changes.',
 
 	'last_verification_revision-needed'		=> 'Your pending changes need some adjustments to be approved.',
 	'last_verification_rejected'			=> 'The pending changes you requested were rejected.',

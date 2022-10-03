@@ -7,8 +7,6 @@ $form_show = $show_form ? 'show' : '';
 @section('page-title', __('admin/app_reports.page-title'))
 
 @section('content')
-<div class="mb-2">
-</div>
 
 <div class="d-flex flex-wrap text-nowrap mb-1">
 	<div class="details-nav-left mr-auto mb-1">
@@ -17,12 +15,12 @@ $form_show = $show_form ? 'show' : '';
 	<div class="details-nav-right ml-auto mb-1">
 		<a href="{{ route('admin.app_reports.verdicts', ['app' => $app->id]) }}" class="btn btn-sm bg-purple">
 			<span class="fas fa-list mr-1"></span>
-			{{ __('admin/app_reports.history') }}
+			{{ __('admin/app_reports.verdicts_history') }}
 		</a>
 	</div>
 </div>
 
-@include('admin.app.detail-card', ['app' => $ori, 'hide_changes' => true, 'is_snippet' => true, 'show_pending_changes' => false, 'section_id' => 'ori'])
+@include('admin.app.detail-card', ['app' => $app, 'hide_changes' => true, 'is_snippet' => true, 'show_pending_changes' => false, 'section_id' => 'ori'])
 
 <hr>
 
@@ -43,10 +41,11 @@ $form_show = $show_form ? 'show' : '';
 			</button>
 		</span>
 		<span class="icon ml-4">✨</span>
+	</span>
 </h4>
 @endif
 
-<form id="reportReviewForm" method="POST" action="{{ route('admin.app_reports.verify', ['app' => $ori->id]) }}" class="report-management collapse {{ $form_show }} collapse-scrollto">
+<form id="reportReviewForm" method="POST" action="{{ route('admin.app_reports.verify', ['app' => $app->id]) }}" class="report-management collapse {{ $form_show }} collapse-scrollto">
 	@csrf
 	@method('POST')
 
@@ -149,14 +148,14 @@ $form_show = $show_form ? 'show' : '';
 										<div class="text-080 d-flex">
 											<span class="text-secondary mr-2">@include('components.date-with-tooltip', ['date' => $r->updated_at])</span>
 											<span class="text-secondary mr-2 d-inline-block">
-												@if($rv->version == $ori->version_number)
+												@if($rv->version == $app->version_number)
 												<strong>{{ $r->version->display_name }}</strong>
 												@else
 												<span>{{ $r->version->display_name }}</span>
 												<span class="far fa-clock text-090 text-warning ml-1" title="@lang('admin/app_reports.take_care_when_reviewing_older_version_reports')" data-toggle="tooltip" data-custom-class="tooltip-wider"></span>
 												@endif
 												@if($rv->version != '__none')
-												<button type="button" class="btn btn-tool btn-tool-inline btn-view-version ml-1" data-toggle="tooltip" title="@lang('admin/apps.changes.view_this_version')" data-app-id="{{ $ori->id }}" data-version="{{ $rv->version }}"><span class="fas fa-expand"></span></button>
+												<button type="button" class="btn btn-tool btn-tool-inline btn-view-version ml-1" data-toggle="tooltip" title="@lang('admin/apps.changes.view_this_version')" data-app-id="{{ $app->id }}" data-version="{{ $rv->version }}"><span class="fas fa-expand"></span></button>
 												@endif
 											</span>
 										</div>

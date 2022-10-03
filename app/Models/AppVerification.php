@@ -16,9 +16,10 @@ class AppVerification extends Model
 
 	const CONCERN_NEW_ITEM		= 'new'; // for new items
 	const CONCERN_EDIT_ITEM		= 'edit'; // for pending changes
-	const CONCERN_VERIFICATION	= 'verification'; // else
 	const CONCERN_COMMIT		= 'commit'; // for applying approved changes
 	const CONCERN_PUBLISH_ITEM	= 'publish'; // for publishing item, usually also applying changes
+	const CONCERN_REPORT		= 'report'; // for verifications concerning reports
+	const CONCERN_VERIFICATION	= 'verification'; // else
 
 	protected $attributes = [
 		'concern'		=> self::CONCERN_VERIFICATION,
@@ -38,6 +39,12 @@ class AppVerification extends Model
 		'categories',
 		'tags',
 		'visuals',
+	];
+
+	public $with = [
+		'verifier',
+		'status',
+		'verdict',
 	];
 
 	public function scopeLatestSequence($query, $status = 'approved') {
@@ -84,6 +91,10 @@ class AppVerification extends Model
 		return $this->belongsToMany('App\Models\AppChangelog', 'app_verification_changes', 'verification_id', 'changes_id');
 	}
 
+	public function verdict() {
+		return $this->hasOne('App\Models\AppVerdict', 'verification_id')->latest();
+	}
+
 	public function getChangelogRangeAttribute() {
 		$changes = $this->changelogs->reverse()->values();
 		// unset($changes[1]);
@@ -101,13 +112,21 @@ class AppVerification extends Model
 		})->all();
 	}
 
+	public function getIsReportedGuiltyAttribute() {
+		return !!optional($this->verdict)->is_guilty;
+	}
+
 	public function getCanEditAttribute() {
 		// TODO: can only be edited by the verifier themself?
 		if(Auth::user()->id != $this->verifier_id) {
 			return false;
 		}
 
-		if($this->id == $this->app->last_verification->id && $this->status->by == 'verifier') {
+		// TODO: add a time restriction (e.g only 24 hours after last update?)
+		if($this->id == $this->app->last_verification->id
+			&& $this->status->by == 'verifier'
+			&& $this->concern == static::CONCERN_VERIFICATION
+		) {
 			// Is the last verification
 			if($this->status_id == 'approved') {
 				// Can only edit approved ones if the changes were not committed yet

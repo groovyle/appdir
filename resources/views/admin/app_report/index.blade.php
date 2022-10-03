@@ -29,8 +29,8 @@
           <div class="col-sm-8 col-lg-5">
             <select class="form-control" name="status" id="fStatus" autocomplete="off">
               <option value="">&ndash; {{ __('admin/common.all') }} &ndash;</option>
-              <option value="unverified" {!! old_selected('', $filters['status'], 'unverified') !!}>{{ __('admin/app_reports.status_unverified') }}</option>
-              <option value="verified" {!! old_selected('', $filters['status'], 'verified') !!}>{{ __('admin/app_reports.status_verified') }}</option>
+              <option value="unresolved" {!! old_selected('', $filters['status'], 'unresolved') !!}>{{ __('admin/app_reports.status_unresolved') }}</option>
+              <option value="resolved" {!! old_selected('', $filters['status'], 'resolved') !!}>{{ __('admin/app_reports.status_resolved') }}</option>
             </select>
           </div>
         </div>
@@ -62,6 +62,7 @@
               <th style="width: 50px;">{{ __('common.#') }}</th>
               <th>{{ __('admin/apps.fields.name') }}</th>
               <th>{{ __('admin/app_reports.fields.reports') }}</th>
+              <th>{{ __('admin/app_reports.verdicts_history') }}</th>
               <th style="width: 1%;">{{ __('common.actions') }}</th>
             </tr>
           </thead>
@@ -77,18 +78,33 @@
                 @include('components.app-logo', ['logo' => $app->logo, 'exact' => '40x40', 'none' => false, 'img_class' => 'mini-app-logo'])
               </td>
               <td>
-                reported {{ $app->num_reports }} times
-                <br>
-                with {{ $app->num_resolved_reports }} reports resolved
-                <br>
-                <br>
-                TODO: excessive reports info here
+                @if($app->num_unresolved_reports > 0)
+                @lang('admin/app_reports.x_unresolved_reports', ['x' => $app->num_unresolved_reports])
+                <!-- TODO: excessive reports info here -->
+                @else
+                @von
+                @endif
               </td>
-              <td class="text-nowrap">
-                <a href="{{ route('admin.app_reports.review', ['app' => $app->id]) }}" class="btn btn-primary btn-sm">
+              <td>
+                @if($app->num_verdicts > 0)
+                @lang('admin/app_reports.x_past_verdicts', ['x' => $app->num_verdicts])
+                @else
+                @von
+                @endif
+              </td>
+              <td>
+                @if($app->num_unresolved_reports > 0)
+                <a href="{{ route('admin.app_reports.review', ['app' => $app->id]) }}" class="btn btn-primary btn-sm text-nowrap mb-1">
                   <span class="fas fa-clipboard-check mr-1"></span>
                   {{ __('admin/app_reports.review') }}
                 </a>
+                @endif
+                @if($app->num_verdicts > 0)
+                <a href="{{ route('admin.app_reports.verdicts', ['app' => $app->id]) }}" class="btn btn-sm bg-purple text-nowrap mb-1">
+                  <span class="fas fa-list mr-1"></span>
+                  {{ __('admin/app_reports.view_verdicts') }}
+                </a>
+                @endif
               </td>
             </tr>
             @endforeach

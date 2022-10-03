@@ -39,6 +39,7 @@ return [
 'submit'			=> 'Submit',
 'clear'				=> 'Clear',
 'search'			=> 'Search',
+'note'				=> 'Note',
 
 
 
@@ -46,7 +47,7 @@ return [
 'app_report_categories'		=> [
 	'racist/discrimination'					=> 'Racist/Discrimination',
 	'racist/discrimination_description'		=>
-		'The content contains racist, discrimination, or any other form of negative divisive remarks or elements.',
+		'The content contains racist, discrimination, or any other forms of negative divisive remarks or elements.',
 	'spam'									=> 'Spam',
 	'spam_description'						=>
 		'The content was generated automatically, and/or was posted multiple times without any essences to it.',
@@ -61,7 +62,7 @@ return [
 		'Malicious content which suggests the readers to do something, or to interact in any way. Usually contains links to external, shady websites.',
 	'others'								=> 'Others',
 	'others_description'					=>
-		'Other types of inappropriate content. Please explain in the reasons section on how the content may be inappropriate.',
+		'Other types of inappropriate content. The report reasons should explain about how the content may be inappropriate.',
 ],
 
 ];

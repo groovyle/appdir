@@ -45,6 +45,13 @@ class AppReport extends Model
 		}
 	}
 
+	public function scopeDefaultOrder($query) {
+		$query->orderByRaw('status = ? desc', [static::STATUS_VALIDATED]);
+		$query->orderByRaw('status = ? desc', [static::STATUS_DROPPED]);
+		$query->orderByRaw('user_id is not null desc');
+		$query->latest();
+	}
+
 	public static function statusUnresolved() {
 		return [static::STATUS_SUBMITTED];
 	}
@@ -59,6 +66,22 @@ class AppReport extends Model
 
 	public function getIsResolvedAttribute() {
 		return in_array($this->attributes['status'], static::statusResolved());
+	}
+
+	public function getIsValidatedAttribute() {
+		return $this->attributes['status'] == static::STATUS_VALIDATED;
+	}
+
+	public function getIsValidAttribute() {
+		return $this->is_validated;
+	}
+
+	public function getIsDroppedAttribute() {
+		return $this->attributes['status'] == static::STATUS_DROPPED;
+	}
+
+	public function getIsInvalidAttribute() {
+		return $this->is_dropped;
 	}
 
 	public function getRegisteredSenderAttribute() {
