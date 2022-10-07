@@ -1155,7 +1155,12 @@ class AppController extends Controller
 			}
 
 			// Only publish if it's new, otherwise don't change the status
-			$publish = $app->is_unverified_new;
+			$apply_only = $request->input('apply_only', 0) == 1;
+			if($apply_only) {
+				$publish = false;
+			} else {
+				$publish = $app->is_unverified_new;
+			}
 			$result = AppManager::verifyAndApplyChanges($app, $changelogs, $publish, $user);
 		} catch(\Exception $e) {
 			$result = FALSE;
@@ -1180,7 +1185,7 @@ class AppController extends Controller
 			// Pass a message
 			// TODO: maybe different messages for when it's an edit/new thing?
 			$request->session()->flash('flash_message', [
-				'message'	=> __('admin.app_verification.message.app_has_been_published'),
+				'message'	=> __('admin.app_verification.message.changes_have_been_applied'),
 				'type'		=> 'success'
 			]);
 			$request->session()->flash('post_publish', true);

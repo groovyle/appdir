@@ -24,7 +24,11 @@ if(!$is_edit) {
 @extends('admin.layouts.main')
 
 @section('title')
-{{ __('admin/apps.tab_title') }} - @parent
+@if($is_edit)
+{{ __('admin/apps.tab_title.edit', ['x' => text_truncate($titler->name, 20)]) }} - @parent
+@else
+{{ __('admin/apps.page_title.add') }} - @parent
+@endif
 @endsection
 
 @section('page-title', __('admin/apps.page_title.'. ($is_edit ? 'edit' : 'add')) )
@@ -68,15 +72,7 @@ if(!$is_edit) {
   </div>
   @endif
 
-  @if($errors->any())
-  <div class="alert alert-danger">
-    <ul>
-      @foreach($errors->all() as $errmsg)
-      <li>{{ $errmsg }}</li>
-      @endforeach
-    </ul>
-  </div>
-  @endif
+  @include('components.page-message', ['show_errors' => true])
 
   <!-- Card -->
   <div class="card">
@@ -226,7 +222,7 @@ if(!$is_edit) {
       </li>
       <li class="list-group-item">
         <div class="text-center">
-          @if ($is_edit)
+          @if($is_edit)
           <button type="submit" class="btn btn-primary btn-min-100">{{ __('common.save') }}</button>
           @else
           <button type="submit" class="btn btn-primary btn-min-100">{{ __('admin/apps.submit_app') }}</button>

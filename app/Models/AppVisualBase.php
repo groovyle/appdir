@@ -9,8 +9,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AppVisualBase extends Model
 {
-	use SoftDeletes;
-	use Concerns\HasCudActors;
+	use SoftDeletes, Concerns\HasCudActors {
+		Concerns\HasCudActors::runSoftDelete insteadof SoftDeletes;
+	}
 	use Concerns\HasFilteredAttributes;
 
 	protected $table = 'app_visual_media';

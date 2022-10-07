@@ -10,8 +10,9 @@ class AppReport extends Model
 {
 	protected $table = 'app_reports';
 
-	use SoftDeletes,
-		Concerns\HasCudActors;
+	use SoftDeletes, Concerns\HasCudActors {
+		Concerns\HasCudActors::runSoftDelete insteadof SoftDeletes;
+	}
 
 	const CREATED_BY = null;
 

@@ -16,7 +16,7 @@ $append_breadcrumb = [
 @extends('admin.layouts.main')
 
 @section('title')
-{{ __('admin.app.tab_title') }} - @parent
+{{ __('admin/apps.tab_title.visuals', ['x' => text_truncate($titler->name, 20)]) }} - @parent
 @endsection
 
 @section('page-title', __('admin/apps.page_title.visuals'))
@@ -64,7 +64,7 @@ $append_breadcrumb = [
         <span class="fas fa-info-circle ml-1 mr-2"></span> @lang('admin/apps.max_visuals'): {{ $max_visuals }}
       </p>
 
-      @include('components.alert-box', ['show_errors' => true, 'errors' => $cerrors])
+      @include('components.page-message', ['show_errors' => true, 'errors' => $cerrors])
 
       <div class="row">
       <div class="col-lg-6 col-md-6 col-12">

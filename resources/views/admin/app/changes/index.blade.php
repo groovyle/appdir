@@ -19,10 +19,13 @@ if(($count = $app->changelogs()->count()) > 0) {
 @extends('admin.layouts.main')
 
 @section('title')
-{{ __('admin/apps.changes.tab_title') }} - @parent
+{{ __('admin/apps.tab_title.changes', ['x' => text_truncate($app->name, 20)]) }} - @parent
 @endsection
 
-@section('page-title', $page_title)
+@section('page-title')
+{{ $page_title }}
+<br><small class="text-primary">{{ $app->name }}</small>
+@endsection
 
 @section('content')
 <div class="mb-2">

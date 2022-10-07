@@ -7,6 +7,7 @@ return [
 'reset'					=> 'Reset',
 'keyword'				=> 'Keyword',
 'all'					=> 'All',
+'choose'				=> 'Choose',
 'status'				=> 'Status',
 'yes'					=> 'Yes',
 'no'					=> 'No',
@@ -17,5 +18,30 @@ return [
 'clear_all_filters'		=> 'Clear all filters',
 'clear_all'				=> 'Clear all',
 'check_details'			=> 'Check details',
+'sort_by'				=> 'Sort by',
+'default'				=> 'default',
+'yes_im_sure'			=> 'Yes, I\'m sure',
+
+'fields'	=> [
+	'id'				=> 'ID',
+	'name'				=> 'Name',
+	'description'		=> 'Description',
+	'number_of_apps'	=> 'Number of Apps',
+	'last_updated'		=> 'Last Updated',
+],
+
+'ofamodal'	=> [
+	'default_title'			=> 'Content Dialog',
+	'loading_text'			=> 'Loading...',
+	'error_text'			=> 'Error fetching content',
+],
+
+'aysmodal'	=> [
+	'default_title'			=> 'Action Confirmation',
+	'error_text'			=> 'Error while trying to submit data',
+	'default_prompt'		=> 'Are you sure to do this action?',
+	'prompt_edit'			=> 'You are about to modify some data. Are you sure?',
+	'prompt_delete'			=> 'Are you sure to <strong class="text-danger">delete</strong> this data?',
+],
 
 ];

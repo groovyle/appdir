@@ -2,16 +2,28 @@
 
 return [
 
-'tab_title'		=> 'Apps',
-
 'page_title'	=> [
-	'index'				=> 'App List',
-	'detail'			=> 'Detailed View',
+	'index'				=> 'Apps List',
+	'detail'			=> 'View & Manage App',
 	'add'				=> 'Add a New App',
 	'edit'				=> 'Edit App',
-	'visuals'			=> 'Visual Media',
+	'visuals'			=> 'Edit Visuals',
 	'changes'			=> 'App Changes History',
 	'verifications'		=> 'App Verifications History',
+	'review_changes'	=> 'Review Changes',
+	'publish_changes'	=> 'Publish Changes',
+	'publish_app'		=> 'Publish App',
+],
+
+'tab_title'		=> [
+	'detail'			=> 'Manage :x',
+	'edit'				=> 'Edit App - :x',
+	'visuals'			=> 'Edit Visuals - :x',
+	'changes'			=> 'Changes History - :x',
+	'verifications'		=> 'Verifications History - :x',
+	'review_changes'	=> 'Review Changes - :x',
+	'publish_changes'	=> 'Publish Changes - :x',
+	'publish_app'		=> 'Publish App - :x',
 ],
 
 'titles'		=> [
@@ -49,6 +61,7 @@ return [
 'publish_edits'			=> 'Publish edits now',
 'compare'				=> 'Compare',
 'view_your_app'			=> 'View your app',
+'back_to_app_details'	=> 'Back to app details',
 
 'status'	=> [
 	'is_published'		=> 'Published',
@@ -124,6 +137,8 @@ return [
 	'version_status'				=> 'Version status',
 	'version_x_status'				=> 'Version :x status',
 	'publish_changes_now'			=> 'Publish changes now',
+	'publish_item'					=> 'Publish item',
+	'apply_changes_without_publishing'	=> 'Apply changes without publishing',
 
 	'statuses'	=> [
 		'pending'	=> 'Pending',

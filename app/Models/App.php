@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class App extends Model
 {
-	use SoftDeletes;
-	use Concerns\HasCudActors;
+	use SoftDeletes, Concerns\HasCudActors {
+		Concerns\HasCudActors::runSoftDelete insteadof SoftDeletes;
+	}
 	use Concerns\HasFilteredAttributes;
 
 	const CREATED_BY = NULL;

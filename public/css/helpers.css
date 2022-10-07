@@ -57,12 +57,24 @@ p:last-child {
 	margin-right: 0; /* decided by gap property */
 }
 
+.flash-element, [class*="flash-element-"],
+.flash-element > td, [class*="flash-element-"] > td {
+	animation: flash-element 2s linear 0.25s;
+	animation-fill-mode: forwards;
+}
+.flash-element {
+	box-shadow: 0 0 0 0.5rem rgba(255, 152, 26, 0.9);
+}
 .flash-element,
 .flash-element > td {
 	background-color: rgba(255, 152, 26, 0.9);
-	box-shadow: 0 0 0 0.5rem rgba(255, 152, 26, 0.9);
-	animation: flash-element 2s linear 0.25s;
-	animation-fill-mode: forwards;
+}
+.flash-element-blue {
+	box-shadow: 0 0 0 0.5rem rgba(153, 203, 255, 0.9);
+}
+.flash-element-blue,
+.flash-element-blue > td {
+	background-color: rgba(153, 203, 255, 0.9);
 }
 
 @keyframes flash-element {
@@ -117,6 +129,10 @@ p:last-child {
 .text-080 { font-size: 80% !important; }
 .text-075 { font-size: 75% !important; }
 .text-070 { font-size: 70% !important; }
+.text-065 { font-size: 65% !important; }
+.text-060 { font-size: 60% !important; }
+.text-055 { font-size: 55% !important; }
+.text-050 { font-size: 50% !important; }
 
 .text-r150 { font-size: 1.5rem !important; }
 .text-r140 { font-size: 1.4rem !important; }
@@ -129,6 +145,10 @@ p:last-child {
 .text-r080 { font-size: 0.8rem !important; }
 .text-r075 { font-size: 0.75rem !important; }
 .text-r070 { font-size: 0.7rem !important; }
+.text-r065 { font-size: 0.65rem !important; }
+.text-r060 { font-size: 0.6rem !important; }
+.text-r055 { font-size: 0.55rem !important; }
+.text-r050 { font-size: 0.5rem !important; }
 
 .form-check.checkbox-lg {
 	padding-left: 1.5rem;

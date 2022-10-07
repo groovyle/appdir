@@ -57,15 +57,19 @@ $("body").tooltip({
 	},
 });
 
-$(".init-popover").popover();
+$(".init-popover").popover().removeClass(".init-popover");
 
-$(".init-readmore").readMore();
+$(".init-readmore").readMore().removeClass(".init-readmore");
 
 
 var $mainContent = $(".main-content").first();
 if($mainContent.length > 0 && $mainContent.is(".scroll-to-me")) {
-	Helpers.scrollTo($mainContent, { animate: false });
-	$mainContent.removeClass("scroll-to-me");
+	// Wait for the DOM to finish updating, like e.g select[multiple] with Select2
+	// will change its height
+	setTimeout(function() {
+		Helpers.scrollTo($mainContent, { animate: false });
+		$mainContent.removeClass("scroll-to-me");
+	}, 100);
 }
 
 });

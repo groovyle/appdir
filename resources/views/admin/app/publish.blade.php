@@ -1,4 +1,7 @@
 <?php
+$_title = !$app->is_unverified_new ? 'review_changes' : 'publish_app';
+$page_title = __('admin/apps.page_title.'.$_title);
+$tab_title = 'admin/apps.tab_title.'.$_title;
 $append_breadcrumb = [
   [
     'text'    => text_truncate($ori->name, 50),
@@ -6,7 +9,7 @@ $append_breadcrumb = [
     'active'  => false,
   ],
   [
-    'text'    => __('admin/apps.page_title.review_changes'),
+    'text'    => $page_title,
   ]
 ];
 
@@ -16,10 +19,13 @@ $show_changes = $app->has_committed;
 @extends('admin.layouts.main')
 
 @section('title')
-{{ __('admin.app.tab_title') }} - @parent
+{{ __($tab_title, ['x' => text_truncate($app->name, 20)]) }} - @parent
 @endsection
 
-@section('page-title', __('admin/apps.page_title.review_changes'))
+@section('page-title')
+{{ $page_title }}
+<br><small class="text-primary">{{ $app->name }}</small>
+@endsection
 
 @section('content')
 <div class="d-flex flex-wrap text-nowrap mb-1">
@@ -35,6 +41,7 @@ $show_changes = $app->has_committed;
 @method('POST')
 
 <input type="hidden" name="verif_ids" value="{{ $verifs->pluck('id')->implode(',') }}" readonly>
+<input type="hidden" name="apply_only" value="0" id="input-apply-only" autocomplete="off">
 
 @if($app->is_reported)
 <div class="callout callout-danger mb-2">
@@ -46,6 +53,7 @@ $show_changes = $app->has_committed;
 
 <!-- Card -->
 <div class="card card-primary card-outline card-outline-tabs">
+  @if(!$app->is_unverified_new)
   <div class="card-header p-0 border-bottom-0">
     <ul class="nav nav-tabs" role="tablist">
       <li class="pt-2 px-3 mt-1"><h3 class="card-title">@lang('admin/apps.compare'):</h3></li>
@@ -60,6 +68,7 @@ $show_changes = $app->has_committed;
       </li>
     </ul>
   </div>
+  @endif
   <div class="tab-content" id="app-comparison-tabpanes">
     <div class="tab-pane fade show active" role="tabpanel" id="app-comparison-new">
       <div class="card-body">
@@ -71,6 +80,7 @@ $show_changes = $app->has_committed;
         @yield('detail-content-new')
       </div>
     </div>
+    @if(!$app->is_unverified_new)
     <div class="tab-pane fade" role="tabpanel" id="app-comparison-old">
       <div class="card-body">
         <div class="mb-2">
@@ -127,10 +137,19 @@ $show_changes = $app->has_committed;
       </ul>
       @endif
     </div>
+    @endif
   </div>
   <div class="card-footer">
     <div class="text-center">
+      @if(!$app->is_unverified_new)
       <button type="submit" class="btn btn-primary btn-min-100">@lang('admin/apps.changes.publish_changes_now')</button>
+      @else
+      <button type="submit" class="btn btn-primary btn-min-100">@lang('admin/apps.changes.publish_item')</button>
+      <br>
+      <span class="d-inline-block my-2">@lang('common.or')</span>
+      <br>
+      <button type="submit" class="btn btn-default btn-min-100 btn-sm btn-on-submit" data-target="#input-apply-only" data-value="1">@lang('admin/apps.changes.apply_changes_without_publishing')</button>
+      @endif
     </div>
   </div>
 </div>
@@ -145,6 +164,18 @@ $show_changes = $app->has_committed;
 @push('scripts')
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+  var $form = $("#formPublishChanges");
+
+  $form.on("click", ".btn-on-submit[type=submit]", function(e) {
+    var target = $(this).data("target"),
+        $target = $(target),
+        value = $(this).data("value")
+    ;
+
+    if(target && $target.length > 0) {
+      $target.val(value);
+    }
+  });
 });
 </script>
 @endpush

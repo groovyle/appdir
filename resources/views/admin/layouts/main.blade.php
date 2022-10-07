@@ -8,7 +8,7 @@
   <!-- CSRF Token -->
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
-  @section('title', config('app.name'))
+  @section('title', config('app.admin_name'))
   <title>@yield('title')</title>
 
   <!-- Fonts -->
@@ -50,7 +50,7 @@
             @include('admin.layouts.main-breadcrumb')
           </div>
           <div class="col-12">
-            <h1 class="mt-3 mt-md-2">@yield('page-title')</h1>
+            <h1 class="mt-3 mt-md-2 page-title">@yield('page-title')</h1>
           </div>
         </div>
       </div><!-- /.container-fluid -->
@@ -77,6 +77,9 @@
   </footer>
 
 </div>
+
+@include('admin.layouts.one-for-all-modal')
+@include('admin.layouts.confirmator-modal')
 
 <!-- Scripts -->
 <script>

@@ -1,3 +1,4 @@
+@if(isset($date))
 <?php
 $format = $format ?? 'j F Y, H:i';
 $tip_classes = $tip_classes ?? '';
@@ -11,3 +12,8 @@ if($reverse) {
 }
 ?>
 <span class="pr-2" title="{{ $date->longRelativeToNowDiffForHumans() }}" data-toggle="tooltip" data-placement="right" data-trigger="hover click" data-custom-class="{{ $tip_classes }}">{{ $text }}</span>
+@elseif(isset($default))
+{!! $default !!}
+@else
+@vo_
+@endif

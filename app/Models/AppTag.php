@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AppTag extends Model
 {
-	use SoftDeletes;
-	use Concerns\HasCudActors;
+	use SoftDeletes, Concerns\HasCudActors {
+		Concerns\HasCudActors::runSoftDelete insteadof SoftDeletes;
+	}
+
 	//
 	protected $table = 'ref_app_tags';
 	protected $primaryKey = 'name';
@@ -26,6 +28,9 @@ class AppTag extends Model
 
 		static::addGlobalScope('orderName', function (Builder $builder) {
 			$builder->orderBy('name', 'asc');
+		});
+		static::addGlobalScope('withTrashed', function (Builder $builder) {
+			$builder->withTrashed();
 		});
 	}
 

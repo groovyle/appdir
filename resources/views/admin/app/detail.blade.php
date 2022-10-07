@@ -9,7 +9,7 @@ $append_breadcrumb = [
 @extends('admin.layouts.main')
 
 @section('title')
-{{ __('admin.app.tab_title') }} - @parent
+{{ __('admin/apps.tab_title.detail', ['x' => text_truncate($app->name, 20)]) }} - @parent
 @endsection
 
 @section('page-title', __('admin/apps.page_title.detail'))
@@ -124,7 +124,7 @@ $append_breadcrumb = [
             <div>
               @nl2br(__('admin/apps.messages.last_verification_revision-needed'))
               <br>
-              <a href="#" class="text-black btn-flash-elm" data-flash-target=".last-verif-info">@lang('admin/apps.messages.check_verification_details')</a>
+              <a href="#" class="text-reset btn-flash-elm" data-flash-target=".last-verif-info">@lang('admin/apps.messages.check_verification_details')</a>
             </div>
           </div>
         </div>

@@ -40,6 +40,8 @@ return [
 'clear'				=> 'Clear',
 'search'			=> 'Search',
 'note'				=> 'Note',
+'or'				=> 'or',
+'and'				=> 'and',
 
 
 

@@ -1,8 +1,10 @@
 <?php
 $is_reported_guilty = $verif->is_reported_guilty;
 $item_side = $item_side ?? 'auto';
-if($item_side == 'auto') {
-  $item_side = $verif->status->by == 'editor' ? 'right' : 'left';
+if($item_side == 'auto' || $item_side == 'reversed') {
+  $item_side_state = $verif->status->by == 'editor';
+  if($item_side == 'reversed') $item_side_state = !$item_side_state;
+  $item_side = $item_side_state ? 'right' : 'left';
 }
 $item_class = $is_reported_guilty ? 'red' : ($item_class ?? 'auto');
 if($item_class == 'auto') {
@@ -18,7 +20,7 @@ $hide_edit = !!($hide_edit ?? true);
       @if($verif->status->by == 'verifier')
       <span class="fas fa-user-check icon"></span>
       @else
-      <span class="fas fa-user-edit icon"></span>
+      <span class="fas fa-pencil-alt icon"></span>
       @endif
       @puser($verif->verifier)
     </div>

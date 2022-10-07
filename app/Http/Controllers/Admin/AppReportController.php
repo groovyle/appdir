@@ -30,18 +30,16 @@ class AppReportController extends Controller
 		$this->middleware('auth');
 	}
 
-	/**
-	 * Display a listing of the resource.
-	 *
-	 * @return \Illuminate\Http\Response
-	 */
-	public function index()
-	{
-		//
-		$data = [];
-		$filters = get_filters(['keyword', 'status'], [
+	public static function listQuery($filters = null) {
+
+		$default_filters = [
 			'status'	=> 'unresolved',
-		]);
+		];
+		if($filters) {
+			$filters = get_filters($filters, $default_filters);
+		} else {
+			$filters = $default_filters;
+		}
 		$opt_filters = optional($filters);
 		$filter_count = 0;
 
@@ -108,13 +106,26 @@ class AppReportController extends Controller
 		$query->orderBy('a.name', 'asc');
 		$query->orderBy('a.id', 'desc');
 
+		return [$query, $filters, $filter_count];
+	}
+
+	/**
+	 * Display a listing of the resource.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function index()
+	{
+		//
+		$data = [];
+
+		list($query, $filters, $filter_count) = static::listQuery(['keyword', 'status']);
+
 		$items = $query->paginate(10);
 		$items->appends($filters);
 
-		// dump_db();
-
 		$data['items'] = $items;
-		$data['filters'] = $opt_filters;
+		$data['filters'] = optional($filters);
 		$data['filter_count'] = $filter_count;
 
 		return view('admin/app_report/index', $data);

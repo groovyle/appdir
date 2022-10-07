@@ -12,10 +12,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AppVerdict extends Model
 {
-	protected $table = 'app_verdicts';
+	use SoftDeletes, Concerns\HasCudActors {
+		Concerns\HasCudActors::runSoftDelete insteadof SoftDeletes;
+	}
 
-	use SoftDeletes,
-		Concerns\HasCudActors;
+	protected $table = 'app_verdicts';
 
 	const STATUS_INNOCENT		= 'innocent';
 	const STATUS_GUILTY			= 'guilty';

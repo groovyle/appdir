@@ -5,7 +5,7 @@ $hide_filters = !$show_filters;
 @extends('admin.layouts.main')
 
 @section('title')
-{{ __('admin/apps.tab_title') }} - @parent
+{{ __('admin/apps.page_title.index') }} - @parent
 @endsection
 
 @section('page-title', __('admin/apps.page_title.index'))
@@ -118,29 +118,11 @@ $hide_filters = !$show_filters;
               <td>
                 <div>
                   {{ $app->complete_name }}
-                  @if(optional($app->last_verification)->status_id == 'revision-needed')
-                  <a href="{{ route('admin.apps.show', ['app' => $app->id, 'show_verification' => '']) }}" class="text-info ml-2" title="@lang('admin/apps.app_changes_needs_revision_to_be_approved')" data-toggle="tooltip">
-                    <span class="fas fa-question-circle"></span>
-                  </a>
-                  @elseif($app->has_pending)
-                  <a href="{{ route('admin.apps.show', ['app' => $app->id, 'show_pending' => '']) }}" class="text-warning ml-2" title="@lang('admin/apps.app_has_pending_changes')" data-toggle="tooltip">
-                    <span class="fas fa-question-circle"></span>
-                  </a>
-                  @endif
-                  @if($app->has_approved)
-                  <a href="{{ route('admin.apps.show', ['app' => $app->id, 'show_verification' => '']) }}" class="text-info ml-2" title="@lang('admin/apps.app_has_approved_changes')" data-toggle="tooltip">
-                    <span class="fas fa-question-circle"></span>
-                  </a>
-                  @endif
-                  @if(optional($app->last_changes)->is_rejected)
-                  <a href="{{ route('admin.apps.show', ['app' => $app->id, 'show_verification' => '']) }}" class="text-danger ml-2" title="@lang('admin/apps.app_has_rejected_changes')" data-toggle="tooltip">
-                    <span class="fas fa-times-circle"></span>
-                  </a>
-                  @endif
                 </div>
                 @include('components.app-logo', ['logo' => $app->logo, 'exact' => '60x60', 'none' => false, 'img_class' => 'mini-app-logo'])
               </td>
               <td>
+                <div class="d-inline-block">
                 @if($app->is_verified)
                 <div>
                   @if($app->is_published)
@@ -160,6 +142,28 @@ $hide_filters = !$show_filters;
                 @else
                 {{ __('admin/apps.status.is_unverified') }}
                 @endif
+                </div>
+                <div class="d-inline-block">
+                  @if(optional($app->last_verification)->status_id == 'revision-needed')
+                  <a href="{{ route('admin.apps.show', ['app' => $app->id, 'show_verification' => '']) }}" class="text-info ml-2" title="@lang('admin/apps.app_changes_needs_revision_to_be_approved')" data-toggle="tooltip">
+                    <span class="fas fa-question-circle"></span>
+                  </a>
+                  @elseif($app->has_pending)
+                  <a href="{{ route('admin.apps.show', ['app' => $app->id, 'show_pending' => '']) }}" class="text-warning ml-2" title="@lang('admin/apps.app_has_pending_changes')" data-toggle="tooltip">
+                    <span class="fas fa-question-circle"></span>
+                  </a>
+                  @endif
+                  @if($app->has_approved)
+                  <a href="{{ route('admin.apps.show', ['app' => $app->id, 'show_verification' => '']) }}" class="text-success ml-2" title="@lang('admin/apps.app_has_approved_changes')" data-toggle="tooltip">
+                    <span class="fas fa-question-circle"></span>
+                  </a>
+                  @endif
+                  @if(optional($app->last_changes)->is_rejected)
+                  <a href="{{ route('admin.apps.show', ['app' => $app->id, 'show_verification' => '']) }}" class="text-danger ml-2" title="@lang('admin/apps.app_has_rejected_changes')" data-toggle="tooltip">
+                    <span class="fas fa-times-circle"></span>
+                  </a>
+                  @endif
+                </div>
               </td>
               <td>
                 @if($app->categories->isNotEmpty())

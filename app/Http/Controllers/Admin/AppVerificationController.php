@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
+
 use App\Models\App;
 use App\Models\AppChangelog;
 use App\Models\AppChangelogCollection;
@@ -12,7 +14,6 @@ use App\Models\EditorVerificationStatus as EVStatus;
 
 use App\DataManagers\AppManager;
 
-use App\Http\Controllers\Controller;
 
 use App\Rules\ModelExists;
 

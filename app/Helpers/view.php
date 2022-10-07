@@ -209,3 +209,28 @@ function lang_or_raw($value, $prefix = '') {
 	$params = array_merge([$key], $additional_params);
 	return \Lang::has($key) ? call_user_func_array(['\\Lang', 'get'], $params) : $value;
 }
+
+function active_menu_by_route($route, $exact = false) {
+	if($route == null)
+		return false;
+
+	$current = Route::currentRouteName();
+	$route = (array) $route;
+	if($exact) {
+		foreach($route as $r) {
+			if($r == $current)
+				return true;
+		}
+	} else {
+		foreach($route as $r) {
+			if(Str::startsWith($current, $r))
+				return true;
+		}
+	}
+
+	return false;
+}
+
+function menu_active($state) {
+	return $state ? 'active' : '';
+}

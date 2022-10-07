@@ -186,6 +186,49 @@ trait HasCudActors {
 	}
 
 	/**
+	 * Override the SoftDeletes delete query to include our column.
+	 * Use the following when using SoftDeletes in a class:
+		use SoftDeletes, Concerns\HasCudActors {
+			Concerns\HasCudActors::runSoftDelete insteadof SoftDeletes;
+		}
+	 *
+	 * @see Illuminate\Database\Eloquent\SoftDeletes::runSoftDelete()
+	 * @return void
+	 */
+	protected function runSoftDelete()
+	{
+		$query = $this->setKeysForSaveQuery($this->newModelQuery());
+
+		$time = $this->freshTimestamp();
+
+		$columns = [$this->getDeletedAtColumn() => $this->fromDateTime($time)];
+
+		$this->{$this->getDeletedAtColumn()} = $time;
+
+		// addition
+		if($this->deletersTracked()) {
+			$user_id = $this->getCudActorId();
+			$deletedByColumn = $this->getDeletedByColumn();
+
+			if (! is_null($deletedByColumn) ) {
+				$this->{$this->getDeletedByColumn()} = $user_id;
+				$columns[$this->getDeletedByColumn()] = $user_id;
+			}
+		}
+		// end addition
+
+		if ($this->timestamps && ! is_null($this->getUpdatedAtColumn())) {
+			$this->{$this->getUpdatedAtColumn()} = $time;
+
+			$columns[$this->getUpdatedAtColumn()] = $this->fromDateTime($time);
+		}
+
+		$query->update($columns);
+
+		$this->syncOriginalAttributes(array_keys($columns));
+	}
+
+	/**
 	 * Set the actor who restored the model.
 	 *
 	 * @return void

@@ -103,6 +103,36 @@ function get_filters(array $only = null, array $defaults = []) {
 	return $filters;
 }
 
+function get_count_from_list_query($query, $count_column = 'id', $without = null, $callback = null) {
+	$without = $without === null ? ['columns', 'groups', 'orders'] : (array) $without;
+	$query = $query->getQuery()->cloneWithout($without);
+	if($callback) {
+		$callback($query);
+	}
+	$count = $query->selectRaw('count(distinct '.$count_column.') as count_col')->value('count_col');
+	return $count;
+}
+
+function find_item_offset_from_list_query($query, $id) {
+	$offset_query = (clone $query)->applyScopes();
+	$orders = $offset_query->getQuery()->orders;
+	$item = $query->getModel()->find($id);
+	if($orders && $item) {
+		foreach($orders as $order) {
+			$offset_query->where(
+				$order['column'],
+				$order['direction'] == 'asc' ? '<=' : '>=',
+				$item->{$order['column']}
+			);
+		}
+		$offset = $offset_query->count();
+	} else {
+		$offset = $offset_query->where($query->getModel()->getKeyName(), '<=', $id)->count();
+	}
+
+	return $offset;
+}
+
 
 // NOTE: per the docs, a value of 0 means unlimited
 function ini_max_post_size() {

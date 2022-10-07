@@ -931,7 +931,7 @@ class AppManager {
 		}
 
 		// Apply the thing
-		$base_version = optional($model->version);
+		$base_version = optional($model->version ?? $model->changelogs()->oldest()->get());
 		$model->is_verified = 1;
 		if($publish) {
 			$model->setToPublished();

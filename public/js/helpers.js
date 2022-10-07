@@ -359,12 +359,20 @@ if(jQuery) {
 			}
 		};
 
-		var flashElement = function(element) {
+		var flashElement = function(element, options) {
+			var defaultOptions = {
+				variant: null,
+			};
+			var options = $.extend({}, defaultOptions, options);
+
+			var flashClass = "flash-element";
+			if(options.variant) flashClass += "-"+ options.variant;
+
 			var $elm = $(element);
-			$elm.removeClass("flash-element").addClass("flash-element");
+			$elm.removeClass(flashClass).addClass(flashClass);
 			$elm.trigger("flashing.flashelement");
 			setTimeout(function() {
-				$elm.removeClass("flash-element");
+				$elm.removeClass(flashClass);
 				$elm.trigger("flashed.flashelement");
 			}, 3000);
 		};
@@ -761,7 +769,7 @@ if(jQuery) {
 	$.fn.extend({
 		noEnterSubmit: function(options) {
 			if( ! this.is("form") ) {
-				console.log("Cannot prevent [Enter] key submission because the specified element is not a form element.", this);
+				console.debug("Cannot prevent [Enter] key submission because the specified element is not a form element.", this);
 				return this;
 			}
 
@@ -779,7 +787,7 @@ if(jQuery) {
 					if(options.triggerChange) {
 						$(e.target).trigger("change");
 					}
-					console.log("Prevented [Enter] key submission.", e.target);
+					console.debug("Prevented [Enter] key submission.", e.target);
 				}
 			}
 
@@ -825,7 +833,7 @@ if(jQuery) {
 		// ... with some customizations
 		textareaAutoHeight: function (options) {
 			var defaultOptions = {
-				bypassHeight: true,
+				bypassHeight: false,
 				selector: null, // "textarea.auto-height"
 				extraSpaceCounteraction: 0.5,
 			}
@@ -833,7 +841,7 @@ if(jQuery) {
 
 			function _autoHeight(element) {
 				if($(element).attr("wrap") == "off") {
-					console.log("Wrapping is not allowed for this element by the use of [wrap=\"off\"] attribute", element);
+					console.debug("Wrapping is not allowed for this element by the use of [wrap=\"off\"] attribute", element);
 					return $(element);
 				}
 
@@ -847,7 +855,7 @@ if(jQuery) {
 					resizable = ["vertical", "both"].indexOf($element.css("resize")) !== -1,
 					targetHeight;
 
-				// console.log(boxSizing, paddingTop, paddingBottom);
+				// console.debug(boxSizing, paddingTop, paddingBottom);
 
 				if(!options.bypassHeight) {
 					$element.css({ "height": "auto" }).addClass("auto-height-init");
@@ -1324,6 +1332,13 @@ if(jQuery) {
 	});
 
 
+	// Prepare Laravel specific stuff
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content"),
+		}
+	});
+
 	// Flash an element
 	$(document).on("click", ".btn-flash-elm", function(e) {
 		var target = $(this).data("flashTarget"),
@@ -1372,5 +1387,436 @@ if(jQuery) {
 			$target.val(compiled);
 		}
 	});
+
+
+	// One-for-all modal, for all-purpose remote content fetch
+	var $ofaModal = $("#ofaModal.modal");
+	if($ofaModal.length > 0) {
+		(function() {
+			var $dialog = $ofaModal.find(".modal-dialog"),
+				$body = $ofaModal.find(".modal-body"),
+				$loading = $body.find(".loading-wrapper").remove(),
+				$error = $body.find(".error-wrapper").remove(),
+				defaultError = $error.find(".error-header").html(),
+				$title = $ofaModal.find(".modal-title"),
+				defaultTitle = $title.html(),
+				$footer = $ofaModal.find(".modal-footer"),
+				ajaxRequest
+			;
+
+			var defaultOptions = {
+				cache: true,
+				title: defaultTitle,
+				header: true,
+				footer: true,
+				scroll: false,
+				errorText: defaultError,
+				errorDetails: true,
+				pluck: true,
+				size: null,
+				callback: null,
+			};
+
+			$title.empty();
+			$body.empty();
+
+			var showTitle = function(title) {
+				if(title === false)
+					$title.addClass("d-none").empty();
+				else
+					$title.removeClass("d-none").html(title);
+			}
+			var showFooter = function(state) {
+				if(typeof state === "undefined") state = true;
+				$footer.toggleClass("d-none", !state);
+			}
+			var showError = function(error, desc) {
+				$error.find(".error-header").html(error);
+				$error.find(".error-description").html(desc || null);
+				$body.empty().append($error);
+			}
+			var showLoading = function() {
+				$body.empty().append($loading);
+			}
+			var showContent = function(content) {
+				$body.empty();
+				if(content instanceof jQuery)
+					$body.append(content);
+				else
+					$body.html(content);
+			}
+			var resetModal = function() {
+				if(ajaxRequest) {
+					ajaxRequest.abort();
+				}
+				showTitle(defaultOptions.title);
+				showContent(null);
+				showFooter(defaultOptions.footer);
+				$body.scrollTop(0);
+				$dialog.attr("class", "modal-dialog"); // reset all the classes
+			}
+			var showModal = function(url, options) {
+				resetModal();
+				showLoading();
+				showTitle(options.header ? options.title : false);
+				showFooter(options.footer);
+				$dialog.toggleClass("modal-dialog-scrollable", options.scroll);
+				if(options.size) {
+					$dialog.addClass(".modal-"+ options.size);
+				}
+				$ofaModal.modal("show");
+
+				// Start fetching content
+				ajaxRequest = $.ajax({
+					url: url,
+					cache: options.cache,
+					dataType: "html",
+					method: "GET",
+					error: function(xhr, status, error) {
+						if(status == "abort") return;
+						var errdetails = "Error occurred while trying to load content. "+ status +": "+ error;
+						console.error(errdetails);
+						showError(options.errorText, options.errorDetails ? errdetails : null);
+					},
+					complete: function() {
+						if(typeof options.callback == "function") {
+							options.callback();
+						}
+					},
+					success: function(data, status, xhr) {
+						var content = data;
+						if(options.pluck) {
+							content = $(data).find(".main-content");
+						}
+						showContent(content);
+					},
+				});
+			}
+
+			var collectOptions = function(elm) {
+				var $elm = $(elm),
+					elmData = $elm.data()
+				;
+				var options = $.extend({}, defaultOptions, elmData);
+				var ofaOptions = $elm.data("ofaOptions");
+				if(ofaOptions) {
+					ofaOptions = ofaOptions.split(",").map((x) => x.toLowerCase());
+					for(var key in defaultOptions) {
+						key = key.toLowerCase();
+						if(ofaOptions.indexOf(key) !== -1) options = true;
+						else if((ofaOptions.indexOf("no"+key) !== -1)) options = false;
+					}
+				}
+
+				if(elmData.ofaCallback)
+					options.callback = elmData.ofaCallback;
+
+				return options;
+			}
+
+			$ofaModal.on("hidden.bs.modal", function(e) {
+				resetModal();
+			});
+
+			$(document).on("click", ".btn-ofa-modal", function(e) {
+				var $btn = $(this);
+
+				// Don't trigger if the click action was accompanied by
+				// [Ctrl], [Shift], [Alt] - they're alternate actions
+				var force = !!$btn.data("force");
+				if(!force) {
+					var isAltAction = e.originalEvent.ctrlKey
+						|| e.originalEvent.shiftKey
+						|| e.originalEvent.altKey // is this one needed?
+					;
+					if(isAltAction) {
+						return;
+					}
+				}
+
+				var url = $btn.prop("href") || $btn.data("url");
+				if(!url || String(url)[0] == "#") return;
+
+				e.preventDefault();
+				showModal(url, collectOptions($btn));
+			});
+		})();
+	}
+
+	// Are-you-sure modal, for all-purpose remote data posting
+	var $aysModal = $("#aysModal.modal");
+	if($aysModal.length > 0) {
+		(function() {
+			var $dialog = $aysModal.find(".modal-dialog"),
+				$body = $aysModal.find(".modal-body"),
+				$content = $body.find(".prompt-wrapper").remove(),
+				$contentPrompt = $content.find(".prompt").remove(),
+				$contentDescription = $content.find(".description").remove(),
+				$error = $body.find(".error-wrapper").remove(),
+				defaultError = $error.find(".error-header").html(),
+				$title = $aysModal.find(".modal-title"),
+				defaultTitle = $title.html(),
+				$footer = $aysModal.find(".modal-footer"),
+				$btnApprove = $footer.find(".btn-approve"),
+				$btnCancel = $footer.find(".btn-cancel"),
+				ajaxRequest
+			;
+
+			var templatePrompts = {},
+				$templatePrompts = $content.find(".template-prompt").remove()
+			;
+			$templatePrompts.each(function() {
+				var type = $(this).data("type");
+				if(!type) return;
+				templatePrompts[type] = $(this).html();
+			});
+
+			var prepareButton = function($btn) {
+				$btn.data("originalContent", $btn.html());
+				$btn.data("originalClasses", $btn.attr("class"));
+			}
+
+			prepareButton($btnApprove);
+			prepareButton($btnCancel);
+
+			var defaultOptions = {
+				method: "POST",
+				postData: {},
+				title: defaultTitle,
+				header: true,
+				scroll: false,
+				errorText: defaultError,
+				errorDetails: true,
+				size: null,
+				content: "_default",
+				prompt: $contentPrompt.html(),
+				description: $contentDescription.html(),
+				approveText: $btnApprove.html(),
+				approveClass: "btn-primary",
+				cancelText: $btnCancel.html(),
+				cancelClass: "btn-secondary",
+				onApprove: null,
+				onCancel: null,
+				onSuccess: "_reload",
+				onError: null,
+				callback: null,
+			};
+
+			$title.empty();
+			$body.empty();
+			$content.empty();
+
+			var showTitle = function(title) {
+				if(title === false)
+					$title.addClass("d-none").empty();
+				else
+					$title.removeClass("d-none").html(title);
+			}
+			var showError = function(error, desc) {
+				$error.find(".error-header").html(error);
+				$error.find(".error-description").html(desc || null);
+				$body.append($error);
+			}
+			var showContent = function(content) {
+				$body.empty();
+				var $tmp;
+				if(content === "_default") {
+					$tmp = $content;
+					$content.append($contentPrompt).append($contentDescription);
+				} else {
+					$tmp = $content.clone().empty();
+					if(content instanceof jQuery)
+						$tmp.append(content);
+					else
+						$tmp.html(content);
+				}
+				$body.append($tmp);
+			}
+			var resetModal = function() {
+				if(ajaxRequest) {
+					ajaxRequest.abort();
+				}
+				showTitle(defaultOptions.title);
+				showContent(null);
+				$body.scrollTop(0);
+
+				// Reset all the dynamic classes
+				$dialog.attr("class", "modal-dialog");
+				$btnApprove.attr("class", $btnApprove.data("originalClasses"));
+				$btnApprove.html(defaultOptions.approveText);
+				$btnApprove.prop("disabled", false);
+
+				$btnCancel.attr("class", $btnCancel.data("originalClasses"));
+				$btnCancel.html(defaultOptions.cancelText);
+			}
+			var initElements = function(options) {
+				showTitle(options.header ? options.title : false);
+				$dialog.toggleClass("modal-dialog-scrollable", options.scroll);
+				if(options.size) {
+					$dialog.addClass(".modal-"+ options.size);
+				}
+
+				var promptKey = String(options.prompt).substring(1);
+				if(typeof options.prompt == "string"
+					&& options.prompt[0] == "_"
+					&& templatePrompts.hasOwnProperty(promptKey) )
+				{
+					$contentPrompt.html(templatePrompts[promptKey]);
+				} else {
+					$contentPrompt.html(options.prompt);
+				}
+				$contentDescription.html(options.description);
+				showContent(options.content);
+
+				$btnApprove.addClass(options.approveClass).html(options.approveText);
+				$btnApprove.off("click", hideModalHandler);
+
+				$btnCancel.addClass(options.cancelClass).html(options.cancelText);
+				$btnCancel.off("click", hideModalHandler);
+			}
+			var toggleLoading = function(btn, state) {
+				if(typeof state === "undefined") state = true;
+				var $btn = $(btn);
+				$btn.toggleClass("disabled loading", state).prop("disabled", state);
+				if(state) {
+					$btn.html('<span class="spinner-border spinner-border-sm mr-1"></span> loading...');
+				} else {
+					$btn.html( $btn.data("originalContent") );
+				}
+			}
+			var hideModalHandler = function(e) {
+				if(e) e.preventDefault();
+				if(this instanceof window.Element && $(this).is(".disabled")) return;
+				$aysModal.modal("hide");
+			}
+			var showModal = function(url, options) {
+				resetModal();
+				initElements(options);
+
+				var btnApproveHandler;
+				if(typeof options.onApprove == "function") {
+					btnApproveHandler = function(e) {
+						e.preventDefault();
+						if($(this).is(".disabled")) return;
+						var result = options.onApprove(e, $btnApprove, $aysModal);
+						if(result === false) return;
+						postData();
+						return result;
+					}
+				} else {
+					btnApproveHandler = function(e) {
+						postData();
+					}
+				}
+				$btnApprove.on("click", btnApproveHandler);
+
+				var btnCancelHandler;
+				if(typeof options.onCancel == "function") {
+					btnCancelHandler = function(e) {
+						e.preventDefault();
+						var result = options.onCancel(e, $btnCancel, $aysModal);
+						if(result === false) return;
+						hideModalHandler();
+						return result;
+					}
+				} else {
+					btnCancelHandler = hideModalHandler;
+				}
+				$btnCancel.on("click", btnCancelHandler);
+
+				$aysModal.one("hide.bs.modal", function(e) {
+					$btnApprove.off("click", btnApproveHandler);
+					$btnCancel.off("click", btnCancelHandler);
+				});
+
+
+				var postData = function() {
+					// Start posting data
+					toggleLoading($btnApprove, true);
+					ajaxRequest = $.ajax({
+						url: url,
+						data: options.postData,
+						method: options.method.toUpperCase(),
+						cache: false,
+						error: function(xhr, status, error) {
+							if(status == "abort") return;
+							var errdetails = "Error occurred while trying to submit data. "+ status +": "+ error;
+							console.error(errdetails);
+							showError(options.errorText, options.errorDetails ? errdetails : null);
+							if(typeof options.onError == "function") {
+								options.onError(xhr, status, error, $aysModal);
+							}
+						},
+						complete: function() {
+							toggleLoading($btnApprove, false);
+							if(typeof options.callback == "function") {
+								options.callback();
+							}
+						},
+						success: function(data, status, xhr) {
+							if(typeof options.onSuccess == "function") {
+								options.onSuccess(data, status, xhr, $aysModal);
+							} else {
+								$aysModal.modal("hide");
+								if(options.onSuccess == "_reload") {
+									window.location.reload();
+								}
+							}
+						},
+					});
+				}
+
+				$aysModal.modal("show");
+			}
+
+			var collectOptions = function(elm) {
+				var $elm = $(elm),
+					elmData = $elm.data()
+				;
+				var options = $.extend({}, defaultOptions, elmData);
+				var aysOptions = $elm.data("aysOptions");
+				if(aysOptions) {
+					aysOptions = aysOptions.split(",").map((x) => x.toLowerCase());
+					for(var key in defaultOptions) {
+						key = key.toLowerCase();
+						if(aysOptions.indexOf(key) !== -1) options = true;
+						else if((aysOptions.indexOf("no"+key) !== -1)) options = false;
+					}
+				}
+
+				if(elmData.ofaCallback)
+					options.callback = elmData.ofaCallback;
+
+				return options;
+			}
+
+			$aysModal.on("hidden.bs.modal", function(e) {
+				resetModal();
+			});
+
+			$(document).on("click", ".btn-ays-modal", function(e) {
+				var $btn = $(this);
+
+				// Don't trigger if the click action was accompanied by
+				// [Ctrl], [Shift], [Alt] - they're alternate actions
+				var force = !!$btn.data("force");
+				if(!force) {
+					var isAltAction = e.originalEvent.ctrlKey
+						|| e.originalEvent.shiftKey
+						|| e.originalEvent.altKey // is this one needed?
+					;
+					if(isAltAction) {
+						return;
+					}
+				}
+
+				var url = $btn.prop("href") || $btn.data("url");
+				if(!url || String(url)[0] == "#") return;
+
+				e.preventDefault();
+				showModal(url, collectOptions($btn));
+			});
+		})();
+	}
 
 }

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class AppCategory extends Model
 {
 	use SoftDeletes;
+	use Concerns\LoggedActions;
 	//
 	protected $table = 'ref_app_categories';
 
@@ -22,6 +23,9 @@ class AppCategory extends Model
 
 		static::addGlobalScope('orderName', function (Builder $builder) {
 			$builder->orderBy('name', 'asc');
+		});
+		static::addGlobalScope('withTrashed', function (Builder $builder) {
+			$builder->withTrashed();
 		});
 	}
 

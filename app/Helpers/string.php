@@ -224,7 +224,7 @@ function bytes_to_text($bytes, $decimals = 2) {
 }
 
 function text_truncate($text, $maxlen, $ellipsis = '…', $with_title = false) {
-	$truncated = strlen($text) <= $maxlen ? $text : substr($text, 0, $maxlen).$ellipsis;
+	$truncated = strlen($text) <= $maxlen ? $text : rtrim(substr($text, 0, $maxlen)).$ellipsis;
 	if($with_title) {
 		$truncated = sprintf('<span title="%s">%s</span>', e($text), e($truncated));
 	}

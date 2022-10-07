@@ -16,6 +16,9 @@ return [
     'name' => env('APP_NAME', 'Laravel'),
     'short_name' => env('APP_SHORT_NAME', 'Laravel'),
 
+    'admin_name' => env('APP_ADMIN_NAME', 'Laravel Admin'),
+    'short_admin_name' => env('APP_ADMIN_SHORT_NAME', 'Laravel Admin'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
