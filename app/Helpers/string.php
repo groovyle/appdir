@@ -230,3 +230,28 @@ function text_truncate($text, $maxlen, $ellipsis = '…', $with_title = false) {
 	}
 	return $truncated;
 }
+
+function truthy($value) {
+	return in_array($value, [true, 'true', '', null, 0, '0', 'yes', 'on'], true);
+}
+function falsy($value) {
+	return in_array($value, [false, 'false', '', null, 0, '0', 'no', 'off'], true);
+}
+
+function url_query_except($except, $data = []) {
+	return $data + collect(request()->query())->except('goto_item')->all();
+}
+
+function make_url_query($url = null, $params = []) {
+	if(!$url) $url = request()->route()->uri;
+
+	$parsed = parse_url($url);
+
+	// Build parameters
+	$queries = $parsed['query'] ?? '';
+	$queries = parse_str($queries, $queries) ?? [];
+	$queries = $params + $queries;
+	$parsed['query'] = http_build_query($queries);
+
+	return unparse_url($parsed);
+}

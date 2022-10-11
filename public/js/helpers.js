@@ -250,6 +250,9 @@ if(jQuery) {
 				if(typeof percentOffset == "string")
 					percentOffset = parseFloat(percentOffset); // ignore the percent sign
 				scrollTo -= $parent.height() * percentOffset / 100;
+
+				// Consider the element's half own height for it to appear centered
+				scrollTo += $element.outerHeight() / 2;
 			}
 
 			progressEvent();
@@ -777,33 +780,43 @@ if(jQuery) {
 				triggerChange: true,
 				inputSelector: null,
 			}
-			options = $.extend(defaultOptions, options);
+			var paramOptions = $.extend({}, defaultOptions, options);
 
-			// Prevent submit when pressing [Enter]
-			function preventEnterFromSubmitting(e) {
-				if(e.keyCode == 13 && !e.isDefaultPrevented()) {
-					e.preventDefault();
-					Helpers.moveCursorToEnd(e.target);
-					if(options.triggerChange) {
-						$(e.target).trigger("change");
+			this.each(function(i, elm) {
+				var inited = $(elm).data("noEnterSubmit");
+				if(inited) return;
+
+				var options = $.extend({}, defaultOptions, options, $(elm).data());
+
+				// Prevent submit when pressing [Enter]
+				function preventEnterFromSubmitting(e) {
+					if(e.keyCode == 13 && !e.isDefaultPrevented()) {
+						e.preventDefault();
+						Helpers.moveCursorToEnd(e.target);
+						if(options.triggerChange) {
+							$(e.target).trigger("change");
+						}
+						console.debug("Prevented [Enter] key submission.", e.target, elm);
 					}
-					console.debug("Prevented [Enter] key submission.", e.target);
 				}
-			}
 
-			var ignoredTypes = [
-				"hidden",
-				"checkbox", "radio",
-				"file", "image",
-				"range",
-				"button", "reset", "submit",
-			];
-			var selectors = ignoredTypes.map(function(item) {
-				return ':not([type="'+ item +'"])';
+				var ignoredTypes = [
+					"hidden",
+					"checkbox", "radio",
+					"file", "image",
+					"range",
+					"button", "reset", "submit",
+				];
+				var selectors = ignoredTypes.map(function(item) {
+					return ':not([type="'+ item +'"])';
+				});
+				var selector = options.inputSelector || "input"+ selectors.join("");
+
+				$(elm).off("keypress", selector, preventEnterFromSubmitting)
+					.on("keypress", selector, preventEnterFromSubmitting);
+				$(elm).data("noEnterSubmit", true);
 			});
-			var selector = options.inputSelector || "input"+ selectors.join("");
 
-			this.on("keypress", selector, preventEnterFromSubmitting);
 			return this;
 		},
 		onlyNumbers: function(options) {
@@ -1380,11 +1393,37 @@ if(jQuery) {
 
 	$(document).on("change", "select[multiple].compile-values", function(e) {
 		var target = $(this).data("compileTo"),
-				$target = $(target)
+			$target = $(target)
 		;
 		if(target && $target.length > 0) {
 			var compiled = $(this).val().filter(x => !!(String(x).trim())).join(",");
 			$target.val(compiled);
+		}
+	});
+
+	$(document).on("click", ".password-wrapper .btn-see-password", function(e) {
+		var $this = $(this),
+			$wrapper = $this.closest(".password-wrapper"),
+			targets = $this.data("targets"),
+			$targets = $(targets),
+			$target = $targets.first()
+		;
+		if($targets.length == 0) {
+			$target = $wrapper.find("input[type=password], input[data-see-password]").first();
+			$targets = $target;
+		}
+		if($targets.length > 0) {
+			if(!$targets.attr("data-see-password"))
+				$targets.attr("data-see-password", true);
+
+			var toVisible = $target.prop("type") == "password";
+			if(toVisible) {
+				$targets.prop("type", "text");
+			} else {
+				$targets.prop("type", "password");
+			}
+			$target.focus();
+			Helpers.moveCursorToEnd($target);
 		}
 	});
 
@@ -1462,7 +1501,7 @@ if(jQuery) {
 				showFooter(options.footer);
 				$dialog.toggleClass("modal-dialog-scrollable", options.scroll);
 				if(options.size) {
-					$dialog.addClass(".modal-"+ options.size);
+					$dialog.addClass("modal-"+ options.size);
 				}
 				$ofaModal.modal("show");
 
@@ -1486,7 +1525,10 @@ if(jQuery) {
 					success: function(data, status, xhr) {
 						var content = data;
 						if(options.pluck) {
-							content = $(data).find(".main-content");
+							var $main = $("<div>").append(data).find(".main-content");
+							if($main.length > 0) {
+								content = $main;
+							}
 						}
 						showContent(content);
 					},
@@ -1653,7 +1695,7 @@ if(jQuery) {
 				showTitle(options.header ? options.title : false);
 				$dialog.toggleClass("modal-dialog-scrollable", options.scroll);
 				if(options.size) {
-					$dialog.addClass(".modal-"+ options.size);
+					$dialog.addClass("modal-"+ options.size);
 				}
 
 				var promptKey = String(options.prompt).substring(1);

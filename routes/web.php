@@ -71,6 +71,16 @@ Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
 	Route::resource('app_tags', 'AppTagController')->parameters([
 		'app_tags'	=> 'tag',
 	]);
+
+	Route::resource('prodi', 'ProdiController');
+
+	Route::get('users/lookup/{keyword?}', 'UserController@lookup')->name('users.lookup');
+	Route::resource('users', 'UserController');
+
+	Route::resource('roles', 'RoleController');
+	Route::resource('abilities', 'AbilityController')->parameters([
+		'abilities'	=> 'abl',
+	]);
 });
 
 Route::group(['middleware' => config('filepond.middleware', ['web', 'auth'])], function() {

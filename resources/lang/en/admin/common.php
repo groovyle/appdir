@@ -12,6 +12,7 @@ return [
 'yes'					=> 'Yes',
 'no'					=> 'No',
 'select_all'			=> 'Select all',
+'check_all'				=> 'Check all',
 'for_selected_items'	=> 'For selected items...',
 'x_items'				=> ':x items',
 'showing_x_items_of_y_total'	=> 'Showing :x items of :y total',
@@ -25,8 +26,10 @@ return [
 'fields'	=> [
 	'id'				=> 'ID',
 	'name'				=> 'Name',
+	'short_name'		=> 'Short Name',
 	'description'		=> 'Description',
 	'number_of_apps'	=> 'Number of Apps',
+	'number_of_users'	=> 'Number of Users',
 	'last_updated'		=> 'Last Updated',
 ],
 

@@ -10,10 +10,13 @@
 			</div>
 			<div class="modal-body">
 				<div class="loading-wrapper text-center my-5">
-					<div class="spinners mb-2">
-						<div class="spinner-grow" role="status"></div>
-						<div class="spinner-grow" role="status"></div>
-						<div class="spinner-grow" role="status"></div>
+					<div class="spinners mb-2 d-none">
+						<div class="spinner-grow text-primary" role="status"></div>
+						<div class="spinner-grow text-primary" role="status"></div>
+						<div class="spinner-grow text-primary" role="status"></div>
+					</div>
+					<div class="mb-2">
+						<div class="spinner-border text-primary" role="status"></div>
 					</div>
 					<h4 class="loading-title">{{ __('admin/common.ofamodal.loading_text') }}</h4>
 				</div>

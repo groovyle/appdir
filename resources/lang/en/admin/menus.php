@@ -4,15 +4,21 @@ return [
 
 	'dashboard'				=> 'Dashboard',
 
-	'app_management'		=> 'App Management',
+	'header_app_management'	=> 'App Management',
 	'app_list'				=> 'Apps List',
 	'app_verifications'		=> 'App Verifications',
 	'app_reports'			=> 'App Reports',
 	'app_moderation'		=> 'App Moderation',
 
-	'master_data'			=> 'Master Data',
-	'base_data'				=> 'Base Data',
+	'header_master_data'	=> 'Master Data',
+	'header_base_data'		=> 'Base Data',
 	'app_categories'		=> 'Categories',
 	'app_tags'				=> 'Tags',
+
+	'header_system'			=> 'System',
+	'users'					=> 'Users',
+	'user_roles'			=> 'User Roles',
+	'system_abilities'		=> 'Permissions',
+	'prodi'					=> 'Study Programs',
 
 ];

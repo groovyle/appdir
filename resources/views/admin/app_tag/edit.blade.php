@@ -55,13 +55,13 @@ if(!$is_edit) {
       <div class="row gutter-lg">
         <div class="col-12 col-md-8 col-xl-6 mx-auto">
           <div class="form-group">
-            <label for="inputCatName">{{ __('admin/common.fields.name') }}</label>
-            <input type="text" name="name" class="form-control" id="inputCatName" placeholder="{{ __('admin/app_tags.fields.name_placeholder') }}" value="{{ old('name', $tag->name) }}" maxlength="100" required>
+            <label for="inputTagName">{{ __('admin/common.fields.name') }}</label>
+            <input type="text" name="name" class="form-control" id="inputTagName" placeholder="{{ __('admin/app_tags.fields.name_placeholder') }}" value="{{ old('name', $tag->name) }}" maxlength="100" required>
           </div>
 
           <div class="form-group">
-            <label for="inputCatDescription">{{ __('admin/common.fields.description') }}</label>
-            <textarea name="description" class="form-control" id="inputCatDescription" placeholder="{{ __('admin/app_tags.fields.description_placeholder') }}" rows="3" maxlength="500" style="max-height: 300px;">{{ old('description', $tag->description) }}</textarea>
+            <label for="inputTagDescription">{{ __('admin/common.fields.description') }}</label>
+            <textarea name="description" class="form-control" id="inputTagDescription" placeholder="{{ __('admin/app_tags.fields.description_placeholder') }}" rows="3" maxlength="500" style="max-height: 300px;">{{ old('description', $tag->description) }}</textarea>
           </div>
         </div>
         <div class="col-12">
@@ -87,7 +87,7 @@ if(!$is_edit) {
 <script>
 jQuery(document).ready(function($) {
 
-  $("#inputCatDescription").textareaAutoHeight().textareaShowLength();
+  $("#inputTagDescription").textareaAutoHeight().textareaShowLength();
 
   $("#formInputTag").noEnterSubmit();
 });

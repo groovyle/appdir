@@ -51,6 +51,10 @@ class User extends Authenticatable
 		'is_blocked'		=> 'boolean',
 	];
 
+	protected $with = [
+		'prodi',
+	];
+
 	public static function boot() {
 		parent::boot();
 
@@ -58,6 +62,14 @@ class User extends Authenticatable
 			// Set to always able to select trashed items
 			$builder->withTrashed();
 		});
+	}
+
+	public function scopeRegular($query) {
+		$query->where('entity', 'user');
+	}
+
+	public function scopeSystem($query) {
+		$query->where('entity', 'system');
 	}
 
 	public function getIsSystemAttribute() {
@@ -69,17 +81,32 @@ class User extends Authenticatable
 	}
 
 	public function getNameAttribute() {
+		if(!isset($this->attributes['name']))
+			return null;
+
 		$name = $this->attributes['name'];
 		if(!$this->is_system) {
 			return $name;
 		} else {
 			$key = 'users.'.$name;
-			return \Lang::has($key) ? \Lang::get($key) : $name;
+			return lang_or_raw($name, 'users.');
 		}
+	}
+
+	public function getRawNameAttribute() {
+		return $this->attributes['name'] ?? null;
+	}
+
+	public function getEntityTypeAttribute() {
+		return lang_or_raw($this->attributes['entity'], 'users.entity.');
 	}
 
 	public function apps() {
 		return $this->hasMany('App\Models\App', 'owner_id');
+	}
+
+	public function prodi() {
+		return $this->belongsTo('App\Models\Prodi', 'prodi_id')->withDefault();
 	}
 
 	public function blocks() {
@@ -94,6 +121,19 @@ class User extends Authenticatable
 		return $this->attributes['is_blocked'] == 0
 			&& $this->blocks_count == 0
 		;
+	}
+
+	public function getRolesTextAttribute() {
+		$roles = $this->roles;
+		$text = '';
+		if(count($roles) > 0) {
+			$text = $roles->pluck('name')->implode(', ');
+		} else {
+			// $text = vo_();
+			$text = null;
+		}
+
+		return $text;
 	}
 
 	public function __toString() {

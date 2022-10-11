@@ -80,7 +80,7 @@ class ModelExists implements Rule
 	{
 		// TODO: what about just using the validation.exists message?
 		return trans('validation.model_exists', [
-			'attribute' => trans('validation.attributes.'.$this->attribute),
+			'attribute' => lang_or_raw($this->attribute, 'validation.attributes.'),
 			'model'     => $this->model
 		]).' | '.implode(', ', [$this->key_name, $this->attribute, $this->value]); // TODO: fix message
 	}

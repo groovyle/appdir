@@ -65,7 +65,11 @@ $hide_filters = !$show_filters;
 		</div>
 		@if($list->isEmpty())
 		<div class="card-body">
-			<h4 class="text-left">{{ __('admin/app_categories.no_categories_yet') }}</h4>
+			@if($total == 0)
+			<h4 class="text-left">&ndash; {{ __('admin/app_categories.no_categories_yet') }} &ndash;</h4>
+			@else
+			<h5 class="text-left">&ndash; {{ __('admin/app_categories.no_categories_matches') }} &ndash;</h5>
+			@endif
 		</div>
 		@else
 		<div class="card-body p-0 pb-1">
@@ -86,7 +90,7 @@ $hide_filters = !$show_filters;
 							<td>{{ $item->name }}</td>
 							<td class="text-center @if($item->apps_count == 0) text-muted @endif">{{ $item->apps_count }}</td>
 							<td class="text-nowrap">
-								<a href="{{ route('admin.app_categories.show', ['cat' => $item->id]) }}" class="btn btn-default btn-xs text-nowrap btn-ofa-modal" data-title="{{ __('admin/app_categories.page_title.detail') }}: {{ text_truncate($item->name, 30) }}" data-size="sm" data-footer="false">
+								<a href="{{ route('admin.app_categories.show', ['cat' => $item->id]) }}" class="btn btn-default btn-xs text-nowrap btn-ofa-modal" data-title="{{ __('admin/app_categories.page_title.detail') }}: {{ text_truncate($item->name, 30) }}" data-footer="false">
 									<span class="fas fa-search mr-1"></span>
 									{{ __('common.view') }}
 								</a>

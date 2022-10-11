@@ -41,7 +41,6 @@ class AppServiceProvider extends ServiceProvider
             $expression = implode(',', $params);
             return "<?php echo value_or_empty($expression); ?>";
         });
-
         // alias for call_user_func and its array variant
         Blade::directive('cuf', function($expression) {
             return "<?php echo e(call_user_func({$expression})); ?>";

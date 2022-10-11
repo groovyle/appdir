@@ -1,4 +1,23 @@
 
+.nav-sidebar .nav-header.tight:not(:first-of-type) {
+	padding-top: 1.25rem;
+}
+
+.nav-sidebar.nav-treeview-lined .nav-treeview {
+	padding-left: 0.5rem;
+	position: relative;
+}
+.nav-sidebar.nav-treeview-lined .nav-treeview::before {
+	content: "";
+	position: absolute;
+	top: -0.25rem;
+	left: 0.15rem;
+	bottom: 0;
+	border-left: 0.25rem solid var(--primary);
+	border-bottom-left-radius: 0.15rem;
+	z-index: -1;
+}
+
 .content-wrapper {
 	position: relative;
 }
@@ -580,14 +599,17 @@
 }
 
 
-.ofamodal .spinners > .spinner-grow {
+.ofamodal .loading-wrapper .spinners > .spinner-grow {
 	margin-left: 0.15rem;
 	margin-right: 0.15rem;
 }
-.ofamodal .spinners > .spinner-grow:nth-child(n+2) {
+.ofamodal .loading-wrapper .spinners > .spinner-grow {
+	animation-duration: 0.75s;
+}
+.ofamodal .loading-wrapper .spinners > .spinner-grow:nth-of-type(n+2) {
 	animation-delay: 0.15s;
 }
-.ofamodal .spinners > .spinner-grow:nth-child(n+3) {
+.ofamodal .loading-wrapper .spinners > .spinner-grow:nth-of-type(n+3) {
 	animation-delay: 0.3s;
 }
 
@@ -644,4 +666,16 @@
 }
 .callout a.btn-tool:hover {
 	color: #495057;
+}
+
+.input-group .input-group-prepend .input-group-text.plain,
+.input-group .input-group-append .input-group-text.plain {
+	background-color: var(--white);
+	z-index: 1;
+}
+.input-group .input-group-prepend .input-group-text.plain {
+	border-right-color: var(--white);
+}
+.input-group .input-group-append .input-group-text.plain {
+	border-left-color: var(--white);
 }

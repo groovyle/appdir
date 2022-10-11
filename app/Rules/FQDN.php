@@ -65,7 +65,7 @@ class FQDN implements Rule
 	public function message()
 	{
 		return trans('validation.fqdn', [
-			'attribute' => trans('validation.attributes.'.$this->attribute)
+			'attribute' => lang_or_raw($this->attribute, 'validation.attributes.')
 		]);
 	}
 }

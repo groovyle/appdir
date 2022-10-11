@@ -18,6 +18,7 @@ return [
 'add_new_tag'			=> 'Add a New Tag',
 'tags_list'				=> 'Tags List',
 'no_tags_yet'			=> 'There are no tags yet',
+'no_tags_matches'		=> 'No tags match your search',
 'edit_tag'				=> 'Edit tag',
 'see_apps_in_this_tag'	=> 'See apps in this tag',
 'add_tag'				=> 'Add tag',

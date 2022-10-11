@@ -19,12 +19,34 @@ textarea.form-control-sm {
 	min-height: calc(1em * 1.5 + 0.5rem + 2px);
 }
 
+.form-control-xs {
+	height: calc(1.1875rem + 2px);
+	padding: .125rem .25rem;
+	font-size: .75rem;
+	line-height: 1.25;
+	border-radius: .2rem;
+}
+
 .alert > p {
 	margin-bottom: 0.25rem;
 }
 
 p:last-child {
 	margin-bottom: 0;
+}
+
+.row.gutter-lg {
+	/* In AdminLTE the grid gutter got cut to half (7.5px)
+	 * which can make some layouts awkward
+	 */
+	margin-left: -15px;
+	margin-right: -15px;
+}
+.row.gutter-lg > .col,
+.row.gutter-lg > [class^="col-"],
+.row.gutter-lg > [class *=" col-"] {
+	padding-left: 15px;
+	padding-right: 15px;
 }
 
 .btn-flex-row {
@@ -98,6 +120,8 @@ p:last-child {
 
 .text-bold { font-weight: bold !important; }
 .text-unbold { font-weight: normal !important; }
+.text-italic { font-style: italic !important; }
+.text-unitalic { font-style: normal !important; }
 
 .w-100 { width: 100%; }
 .maxw-100 { max-width: 100%; }
@@ -169,6 +193,24 @@ input.checkbox-xl, .form-check.checkbox-xl .form-check-input {
 }
 .form-check.checkbox-xl .form-check-input {
 	margin-left: -1.75rem;
+}
+
+.valign-top,
+.valign-top th,
+.valign-top td {
+	vertical-align: top;
+}
+
+.valign-middle,
+.valign-middle th,
+.valign-middle td {
+	vertical-align: middle;
+}
+
+.valign-bottom,
+.valign-bottom th,
+.valign-bottom td {
+	vertical-align: bottom;
 }
 
 .lh-150 { line-height: 1.5 !important; }

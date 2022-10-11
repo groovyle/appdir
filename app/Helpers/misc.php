@@ -119,11 +119,24 @@ function find_item_offset_from_list_query($query, $id) {
 	$item = $query->getModel()->find($id);
 	if($orders && $item) {
 		foreach($orders as $order) {
-			$offset_query->where(
-				$order['column'],
-				$order['direction'] == 'asc' ? '<=' : '>=',
-				$item->{$order['column']}
-			);
+			if($item->{$order['column']} !== null) {
+				$offset_query->where(
+					$order['column'],
+					$order['direction'] == 'asc' ? '<=' : '>=',
+					$item->{$order['column']}
+				);
+			} else {
+				/**
+				 * Special case when the ordered thingy is null.
+				 * I think when ordering in db, NULL string values are considered
+				 * even less than ''.
+				 * Thus, we can think of it like this: NULL = 0, non-NULL = 1.
+				 * When order is ASC, it means earlier items are also NULL,
+				 * and later items are non-NULL. Vice-versa when order is DESC.
+				 */
+				$fn = $order['direction'] == 'asc' ? 'whereNull' : 'whereNotNull';
+				$offset_query->$fn($order['column']);
+			}
 		}
 		$offset = $offset_query->count();
 	} else {
@@ -131,6 +144,15 @@ function find_item_offset_from_list_query($query, $id) {
 	}
 
 	return $offset;
+}
+
+function self_redirect($query_except = [], $data = []) {
+	return redirect(
+		make_url_query(
+			null,
+			url_query_except($query_except, $data)
+		)
+	);
 }
 
 

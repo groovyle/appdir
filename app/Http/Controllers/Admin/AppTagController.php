@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\App;
 use App\Models\AppTag;
 
+use App\Rules\NoSpaces;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -55,7 +57,7 @@ class AppTagController extends Controller
 				// Don't need to worry about default order since it's added last
 				// (apparently global scopes are added last)
 				$query->orderBy('apps_count', 'desc');
-				$filter_count++;
+				// $filter_count++;
 				break;
 			case 'name':
 			default:
@@ -86,7 +88,7 @@ class AppTagController extends Controller
 		}
 
 		$data['list']			= $list;
-		$data['total']			= AppTag::count();
+		$data['total']			= AppTag::withoutTrashed()->count();
 		$data['filters']		= $opt_filters;
 		$data['filter_count']	= $filter_count;
 		$data['goto_flash']		= $goto_flash;
@@ -273,6 +275,7 @@ class AppTagController extends Controller
 			'name'			=> [
 				'required',
 				'max:100',
+				new NoSpaces,
 				Rule::unique(AppTag::class, 'name')->ignore($tag),
 			],
 			'description'	=> ['nullable', 'string', 'max:500'],

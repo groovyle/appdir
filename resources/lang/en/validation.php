@@ -119,6 +119,8 @@ return [
     'uuid' => 'The :attribute must be a valid UUID.',
 
     'model_exists' => 'The :attribute must exist using the :model model.',
+    'no_spaces' => 'The :attribute must not contain any spaces.',
+    'no_whitespaces' => 'The :attribute must not contain any spaces nor newlines.',
 
     /*
     |--------------------------------------------------------------------------

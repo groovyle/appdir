@@ -61,6 +61,8 @@ $(".init-popover").popover().removeClass(".init-popover");
 
 $(".init-readmore").readMore().removeClass(".init-readmore");
 
+$("form.no-enter-submit").noEnterSubmit();
+
 
 var $mainContent = $(".main-content").first();
 if($mainContent.length > 0 && $mainContent.is(".scroll-to-me")) {
@@ -70,6 +72,19 @@ if($mainContent.length > 0 && $mainContent.is(".scroll-to-me")) {
 		Helpers.scrollTo($mainContent, { animate: false });
 		$mainContent.removeClass("scroll-to-me");
 	}, 100);
+}
+
+if($("body").is(".layout-fixed")) {
+	// Auto-center the last active menu item in the sidebar.
+	// Why last? In case of a treeview menu, get to the last one.
+	var $activeMenuItems = $(".nav-sidebar .nav-link.active").last();
+	if($activeMenuItems.length > 0) {
+		Helpers.parentScrollTo($activeMenuItems, {
+			animate: false,
+			offset: 0,
+			percentageOffset: 50,
+		});
+	}
 }
 
 });

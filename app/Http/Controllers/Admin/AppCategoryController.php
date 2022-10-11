@@ -55,7 +55,7 @@ class AppCategoryController extends Controller
 				// Don't need to worry about default order since it's added last
 				// (apparently global scopes are added last)
 				$query->orderBy('apps_count', 'desc');
-				$filter_count++;
+				// $filter_count++;
 				break;
 			case 'name':
 			default:
@@ -86,7 +86,7 @@ class AppCategoryController extends Controller
 		}
 
 		$data['list']			= $list;
-		$data['total']			= AppCategory::count();
+		$data['total']			= AppCategory::withoutTrashed()->count();
 		$data['filters']		= $opt_filters;
 		$data['filter_count']	= $filter_count;
 		$data['goto_flash']		= $goto_flash;

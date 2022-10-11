@@ -1,3 +1,4 @@
+@if(!request()->ajax())
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -34,7 +35,7 @@
 
   @stack('head-additional')
 </head>
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper" id="app">
   @include('admin.layouts.main-navbar')
 
@@ -103,3 +104,10 @@ window.AppGlobals = {
 
 </body>
 </html>
+@else
+  @stack('styles')
+  @section('content-outer')
+    @yield('content')
+  @show
+  @stack('scripts')
+@endif

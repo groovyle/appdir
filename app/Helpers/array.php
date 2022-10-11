@@ -17,3 +17,24 @@ function query_in_bindstring($arr) {
 		$arr = $arr->toArray();
 	return '('.implode(', ', array_fill(0, count((array) $arr), '?')).')';
 }
+
+// Useful for sorting search results, sorts by how early the keyword is found
+function sort_strpos($collection, $keyword = '', $keys = [], $case_sensitive = false) {
+	if($keyword == '' || !$keys)
+		return $collection;
+
+	$fn = $case_sensitive ? 'strpos' : 'stripos';
+	$collection = collect($collection);
+	$collection = $collection->sort(function($a, $b) use ($fn, $keyword, $keys) {
+		foreach($keys as $key) {
+			$pos1 = call_user_func_array($fn, [$a->$key, $keyword]);
+			$pos2 = call_user_func_array($fn, [$b->$key, $keyword]);
+			if($pos1 != $pos2) {
+				return $pos1 <=> $pos2;
+			}
+		}
+
+		return 0;
+	});
+	return $collection;
+}

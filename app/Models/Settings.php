@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Settings extends Model
 {
+	use Concerns\LoggedActions;
 	//
 	protected $table = 'settings';
 	protected $primaryKey = 'key';

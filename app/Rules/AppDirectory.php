@@ -97,7 +97,7 @@ class AppDirectory implements Rule
 	public function message()
 	{
 		return trans('validation.app_directory', [
-			'attribute' => trans('validation.attributes.'.$this->attribute)
+			'attribute' => lang_or_raw($this->attribute, 'validation.attributes.')
 		]);
 	}
 }

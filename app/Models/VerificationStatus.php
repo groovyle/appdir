@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class VerificationStatus extends Model
 {
 	use SoftDeletes;
+	use Concerns\LoggedActions;
 	//
 	protected $table = 'ref_verification_status';
 	protected $primaryKey = 'id';
