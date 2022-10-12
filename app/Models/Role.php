@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use Bouncer;
+
 use Silber\Bouncer\Database\Role as BaseRole;
 use Silber\Bouncer\Database\Titles\RoleTitle;
+use Silber\Bouncer\Database\Models as BouncerModels;
 
 class Role extends BaseRole
 {
@@ -47,4 +50,33 @@ class Role extends BaseRole
 	public function allowed_abilities() {
 		return $this->abilities()->wherePivot('forbidden', 0);
 	}
+
+
+	public function syncUsers($users, $refresh_cache = true) {
+		$user_ids = [];
+		if($users instanceof EloCollection) {
+			// $user_ids = $users->modelKeys();
+		} elseif($users instanceof Collection) {
+			$users = new EloCollection($users->all());
+		} else {
+			$user_ids = (array) $users;
+			$users = BouncerModels::user()->findMany($user_ids);
+		}
+
+		$current_users = $this->users;
+
+		$users_to_remove = $current_users->diff($users);
+		$users_to_add = $users->diff($current_users);
+
+		Bouncer::retract($this)->from($users_to_remove->modelKeys());
+		Bouncer::assign($this)->to($users_to_add->modelKeys());
+
+		if($refresh_cache) {
+			// Refresh users authorization cache
+			foreach($users_to_remove->concat($users_to_add) as $u) {
+				Bouncer::refreshFor($u);
+			}
+		}
+	}
+
 }

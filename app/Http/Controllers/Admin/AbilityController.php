@@ -10,6 +10,8 @@ use App\User;
 use App\Models\Role;
 use App\Models\Ability;
 
+use Bouncer;
+
 use App\Rules\ModelExists;
 
 use Illuminate\Http\Request;
@@ -308,6 +310,7 @@ class AbilityController extends Controller
 			'roles'			=> ['nullable', 'array'],
 			'roles.*.id'	=> ['nullable', new ModelExists(Role::class)],
 			'roles.*.mode'	=> ['nullable', Rule::in(['allow', 'forbid']) ],
+			'roles.*.check'	=> ['nullable'],
 			'users'			=> ['nullable', 'array'],
 			'users.*'		=> [new ModelExists(User::class, null, null, function($query) {
 				$query->regular();
@@ -336,16 +339,41 @@ class AbilityController extends Controller
 			$result = $abl->save();
 
 			// Roles
-			$input_roles = $request->input('roles');
-			$roles = [];
-			foreach($input_roles as $irole) {
-				if(!isset($irole['id'])) continue;
-				$roles[$irole['id']] = ['forbidden' => ($irole['mode'] ?? null) == 'forbid' ? 1 : 0];
+			$input_role_ids = $request->input('roles', []);
+			$role_ids_used = [];
+			$role_ids_unused = [];
+			foreach($input_role_ids as $irole) {
+				if(!isset($irole['check'])) {
+					$role_ids_unused[] = $irole['id'];
+				} else {
+					$role_ids_used[$irole['id']] = ['forbidden' => ($irole['mode'] ?? null) == 'forbid' ? 1 : 0];
+				}
 			}
-			$abl->roles()->sync($roles);
+			// Can't do the following because it discards the forbidden attribute
+			// $abl->roles()->sync($role_ids);
+
+			// Manually do each role
+			$current_roles = $abl->roles;
+			$roles_unused = Role::findMany($role_ids_unused);
+			foreach($current_roles->intersect($roles_unused) as $r) {
+				Bouncer::disallow($r)->to($abl);
+				Bouncer::unforbid($r)->to($abl);
+			}
+			$roles_used = Role::findMany(array_keys($role_ids_used));
+			foreach($roles_used as $r) {
+				Bouncer::disallow($r)->to($abl);
+				Bouncer::unforbid($r)->to($abl);
+				if($role_ids_used[$r->id]['forbidden']) {
+					Bouncer::forbid($r)->to($abl);
+				} else {
+					Bouncer::allow($r)->to($abl);
+				}
+			}
+
 
 			// Users
-			$abl->users()->sync($request->input('users'));
+			$user_ids = $request->input('users', []);
+			$abl->syncUsers($user_ids);
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = false;
 			$messages[] = $e->getMessage();

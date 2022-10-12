@@ -12,6 +12,8 @@ use App\Models\Ability;
 
 use App\Rules\ModelExists;
 
+use Bouncer;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -284,6 +286,7 @@ class RoleController extends Controller
 
 		// Validation rules
 		request_replace_nl($request);
+		// dd($request->all());
 		$rules = [
 			// 'dummy'			=> ['required'],
 			'name'			=> [
@@ -293,8 +296,9 @@ class RoleController extends Controller
 			],
 			'title'			=> ['nullable', 'string', 'max:200'],
 			'abilities'		=> ['nullable', 'array'],
-			'abilities.*.id'	=> ['nullable', new ModelExists(Ability::class)],
+			'abilities.*.id'	=> ['required', new ModelExists(Ability::class)],
 			'abilities.*.mode'	=> ['nullable', Rule::in(['allow', 'forbid']) ],
+			'abilities.*.check'	=> ['nullable'],
 			'users'			=> ['nullable', 'array'],
 			'users.*'		=> [new ModelExists(User::class, null, null, function($query) {
 				$query->regular();
@@ -318,17 +322,27 @@ class RoleController extends Controller
 
 			$result = $role->save();
 
+
 			// Abilities
-			$input_abilities = $request->input('abilities');
-			$abilities = [];
+			$input_abilities = $request->input('abilities', []);
+			$abilities_allowed = [];
+			$abilities_forbidden = [];
 			foreach($input_abilities as $iabl) {
-				if(!isset($iabl['id'])) continue;
-				$abilities[$iabl['id']] = ['forbidden' => ($iabl['mode'] ?? null) == 'forbid' ? 1 : 0];
+				if(!isset($iabl['check'])) continue;
+				$forbid = ($iabl['mode'] ?? null) == 'forbid';
+				if($forbid) {
+					$abilities_forbidden[] = $iabl['id'];
+				} else {
+					$abilities_allowed[] = $iabl['id'];
+				}
 			}
-			$role->abilities()->sync($abilities);
+			Bouncer::sync($role)->abilities($abilities_allowed);
+			Bouncer::sync($role)->forbiddenAbilities($abilities_forbidden);
+
 
 			// Users
-			$role->users()->sync($request->input('users'));
+			$input_user_ids = $request->input('users', []);
+			$role->syncUsers($input_user_ids);
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = false;
 			$messages[] = $e->getMessage();

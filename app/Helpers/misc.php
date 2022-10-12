@@ -116,26 +116,56 @@ function get_count_from_list_query($query, $count_column = 'id', $without = null
 function find_item_offset_from_list_query($query, $id) {
 	$offset_query = (clone $query)->applyScopes();
 	$orders = $offset_query->getQuery()->orders;
+	$orders_bindings = $offset_query->getQuery()->bindings['order'];
 	$item = $query->getModel()->find($id);
+	$binding_i = 0;
 	if($orders && $item) {
 		foreach($orders as $order) {
-			if($item->{$order['column']} !== null) {
-				$offset_query->where(
-					$order['column'],
-					$order['direction'] == 'asc' ? '<=' : '>=',
-					$item->{$order['column']}
-				);
+			if(($order['type'] ?? null) == 'Raw') {
+				// NOTE: opt to not support this, because there's no way to know
+				// what column or derived value is being sorted from here.
+				// Skipping is not an option because then the offset would be
+				// inaccurate
+				throw new \UnexpectedValueException('Finding offset from a list query does not support Raw order clauses, because there\'s no way to extract the expression and put it into the WHERE clause.');
+				return;
+
+				// Kinda tricky...
+				// Attempt to get order
+				$tmp = explode(' ', strrev($order['sql']), 2);
+				$order = strrev($tmp[0]);
+				if(in_array($order, ['asc', 'desc'])) {
+					$sql = strrev($tmp[1]);
+				} else {
+					$sql = $order;
+					$order = 'asc';
+				}
+
+				$binding_count = substr_count($sql, '?');
+				$bindings = array_slice($orders_bindings, $binding_i, $binding_count);
+				$offset_query->whereRaw($sql, $bindings);
+				$binding_i += $binding_count;
+			} elseif(isset($item->{$order['column']})) {
+				if($item->{$order['column']} !== null) {
+					$offset_query->where(
+						$order['column'],
+						$order['direction'] == 'asc' ? '<=' : '>=',
+						$item->{$order['column']}
+					);
+				} else {
+					/**
+					 * Special case when the ordered thingy is null.
+					 * I think when ordering in db, NULL string values are considered
+					 * even less than ''.
+					 * Thus, we can think of it like this: NULL = 0, non-NULL = 1.
+					 * When order is ASC, it means earlier items are also NULL,
+					 * and later items are non-NULL. Vice-versa when order is DESC.
+					 */
+					$fn = $order['direction'] == 'asc' ? 'whereNull' : 'whereNotNull';
+					$offset_query->$fn($order['column']);
+				}
 			} else {
-				/**
-				 * Special case when the ordered thingy is null.
-				 * I think when ordering in db, NULL string values are considered
-				 * even less than ''.
-				 * Thus, we can think of it like this: NULL = 0, non-NULL = 1.
-				 * When order is ASC, it means earlier items are also NULL,
-				 * and later items are non-NULL. Vice-versa when order is DESC.
-				 */
-				$fn = $order['direction'] == 'asc' ? 'whereNull' : 'whereNotNull';
-				$offset_query->$fn($order['column']);
+				// Column not found
+				throw new \UnexpectedValueException('Order column `'.$order['column'].'` not found. Make sure the column exists by default and is not a derived column (columns in SELECT clauses do not work in WHERE clauses).');
 			}
 		}
 		$offset = $offset_query->count();

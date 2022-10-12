@@ -34,7 +34,10 @@ if(!$is_edit) {
 @section('content')
 
 <div class="alert alert-warning">
-  @lang('admin/abilities.management_warning')
+  <div class="icon-text-pair icon-color-reset">
+    <span class="fas fa-exclamation-triangle icon icon-2x mt-2 mr-2"></span>
+    <span>@lang('admin/abilities.management_warning')</span>
+  </div>
 </div>
 
 <div class="mb-2">
@@ -121,8 +124,9 @@ if(!$is_edit) {
             <div class="ofy-auto list-group ability-roles" id="inputAbilityRoles" style="max-height: 250px;">
               @foreach($roles as $role)
               <label class="list-group-item list-group-item-action role-item cursor-pointer py-1 pr-2 pl-3 m-0" for="input-role-check-{{ $role->id }}">
+                <input type="hidden" name="roles[{{ $role->id }}][id]" class="input-role-id" value="{{ $role->id }}" id="input-role-id-{{ $role->id }}">
                 <div class="form-check">
-                  <input type="checkbox" name="roles[{{ $role->id }}][id]" class="form-check-input input-role-check" value="{{ $role->id }}" id="input-role-check-{{ $role->id }}" {!! old_checked('roles.'.$role->id.'.id', $abl->roles_ids, $role->id) !!}>
+                  <input type="checkbox" name="roles[{{ $role->id }}][check]" class="form-check-input input-role-check" value="{{ $role->id }}" id="input-role-check-{{ $role->id }}" {!! old_checked('roles.'.$role->id.'.check', $abl->roles_ids, $role->id) !!}>
                   <select name="roles[{{ $role->id }}][mode]" class="form-control form-control-xs d-inline-block w-auto input-role-mode mr-1">
                     <option value="allow" {!! old_selected('roles.'.$role->id.'.mode', $abl->roles_modes[$role->id] ?? null, 'allow') !!}>{{ __('admin/abilities.details.mode_allow') }}</option>
                     <option value="forbid" {!! old_selected('roles.'.$role->id.'.mode', $abl->roles_modes[$role->id] ?? null, 'forbid') !!}>{{ __('admin/abilities.details.mode_forbid') }}</option>

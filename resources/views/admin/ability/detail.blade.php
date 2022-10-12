@@ -92,7 +92,10 @@ $rand = random_string(5);
         @if(count($abl->roles) > 0)
         <ol>
           @foreach($abl->roles as $role)
-          <li>{{ $role->title }} ({{ $role->name }})</li>
+          <li>
+            <span>{{ $role->title }} ({{ $role->name }})</span>
+            @include('admin.ability.components.item-pivot-icons', ['pivot' => $role->pivot])
+          </li>
           @endforeach
         </ol>
         @else

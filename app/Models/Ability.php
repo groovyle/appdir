@@ -2,7 +2,11 @@
 
 namespace App\Models;
 
+use Bouncer;
+
 use Silber\Bouncer\Database\Ability as BaseAbility;
+use Silber\Bouncer\Database\Titles\AbilityTitle;
+use Silber\Bouncer\Database\Models as BouncerModels;
 
 class Ability extends BaseAbility
 {
@@ -24,4 +28,37 @@ class Ability extends BaseAbility
 		$query->orderBy('title', $ascending);
 		$query->orderBy('name', $ascending);
 	}
+
+
+	public function syncUsers($users, $refresh_cache = true) {
+		$user_ids = [];
+		if($users instanceof EloCollection) {
+			// $user_ids = $users->modelKeys();
+		} elseif($users instanceof Collection) {
+			$users = new EloCollection($users->all());
+		} else {
+			$user_ids = (array) $users;
+			$users = BouncerModels::user()->findMany($user_ids);
+		}
+
+		$current_users = $this->users;
+
+		$users_to_remove = $current_users->diff($users);
+		$users_to_add = $users->diff($current_users);
+
+		foreach($users_to_remove as $u) {
+			Bouncer::disallow($u)->to($this);
+		}
+		foreach($users_to_add as $u) {
+			Bouncer::allow($u)->to($this);
+		}
+
+		if($refresh_cache) {
+			// Refresh users authorization cache
+			foreach($users_to_remove->concat($users_to_add) as $u) {
+				Bouncer::refreshFor($u);
+			}
+		}
+	}
+
 }

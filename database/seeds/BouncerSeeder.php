@@ -68,9 +68,10 @@ class BouncerSeeder extends Seeder
 
 		// ----- mahasiswa
 		Bouncer::allow('mahasiswa')->toOwn(\App\Models\App::class);
-		Bouncer::allow('mahasiswa')->to(['viewAny', 'view'], \App\Models\App::class);
+		Bouncer::allow('mahasiswa')->to(['viewAny', 'create'], \App\Models\App::class);
 		Bouncer::forbid('mahasiswa')->to('viewAll', \App\Models\App::class);
 		Bouncer::forbid('mahasiswa')->to('viewVersion', \App\Models\App::class);
+
 		Bouncer::allow('mahasiswa')->to(['view'], \App\Models\AppVerification::class);
 
 

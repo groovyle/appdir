@@ -7,8 +7,12 @@ use App\Http\Controllers\Controller;
 use App\Models\App;
 use App\Models\Prodi;
 use App\User;
+use App\Models\Role;
+use App\Models\Ability;
 
 use App\Rules\ModelExists;
+
+use Bouncer;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -89,7 +93,8 @@ class UserController extends Controller
 				break;
 		}
 
-		$query->orderByRaw('(entity = ?) asc', ['system']);
+		// $query->orderByRaw('(entity = ?) asc', ['system']);
+		$query->orderBy('entity', 'asc');
 		$query->orderBy('name');
 
 		$per_page = 20;
@@ -136,8 +141,10 @@ class UserController extends Controller
 	{
 		//
 		$data = [
-			'model'		=> new User,
+			// 'model'		=> new User,
+			'model'		=> optional(),
 			'prodis'	=> Prodi::all(),
+			'roles'		=> Role::defaultOrder()->get(),
 			'is_edit'	=> false,
 			'action'	=> route('admin.users.store'),
 			'method'	=> 'POST',
@@ -205,6 +212,21 @@ class UserController extends Controller
 	{
 		$user->loadCount('apps');
 
+		$roles_abilities = elocollect();
+		$user->load([
+			'abilities' => function($query) {
+				$query->defaultOrder();
+			},
+			'roles' => function($query) {
+				$query->defaultOrder();
+			},
+			'roles.abilities' => function($query) use(&$roles_abilities) {
+				$query->defaultOrder();
+				$roles_abilities = $query->get();
+			},
+		]);
+		$user->roles_abilities = $roles_abilities;
+
 		$data = [
 			'user'	=> $user,
 			'ajax'	=> request()->ajax(),
@@ -222,6 +244,9 @@ class UserController extends Controller
 	public function edit(User $user)
 	{
 		//
+		$user->load(['roles']);
+		$user->roles_ids = $user->roles->modelKeys();
+
 		$back_url = route('admin.users.show', ['user' => $user->id]);
 		$backto = request()->query('backto');
 		if($backto == 'list') {
@@ -231,6 +256,7 @@ class UserController extends Controller
 		$data = [
 			'model'		=> $user,
 			'prodis'	=> Prodi::all(),
+			'roles'		=> Role::defaultOrder()->get(),
 			'is_edit'	=> true,
 			'action'	=> route('admin.users.update', ['user' => $user->id]),
 			'method'	=> 'PATCH',
@@ -298,7 +324,7 @@ class UserController extends Controller
 		}
 
 		$cuser = $request->user();
-		$user_id = $user->id;
+		$cuser_id = $cuser->id;
 
 		// Validation rules
 		request_replace_nl($request);
@@ -311,9 +337,12 @@ class UserController extends Controller
 				'max:200',
 				Rule::unique(User::class, 'email')->ignore($user),
 			],
-			'prodi_id'		=> ['required', new ModelExists(Prodi::class)],
-			'password'		=> ['required', 'confirmed'],
+			'prodi_id'		=> ['nullable', new ModelExists(Prodi::class)],
+			// 'password'		=> ['required', 'confirmed'],
+			'password'		=> [Rule::requiredIf(!$is_edit), 'confirmed'],
 			// 'password_confirmation'	=> 'required',
+			'roles'			=> ['nullable', 'array'],
+			'roles.*.id'	=> ['nullable', new ModelExists(Role::class)],
 		];
 
 		$validData = $request->validate($rules);
@@ -329,6 +358,18 @@ class UserController extends Controller
 			$user->password		= Hash::make($request->input('password'));
 
 			$result = $user->save();
+
+			// Roles
+			$input_role_ids = $request->input('roles', []);
+			$role_ids = [];
+			foreach($input_role_ids as $irole) {
+				if(!isset($irole['check'])) continue;
+				$role_ids[] = $irole['id'];
+			}
+			Bouncer::sync($user)->roles($role_ids);
+
+			// Refresh user authorization cache
+			Bouncer::refreshFor($user);
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = false;
 			$messages[] = $e->getMessage();

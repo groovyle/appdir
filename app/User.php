@@ -53,6 +53,7 @@ class User extends Authenticatable
 
 	protected $with = [
 		'prodi',
+		'roles',
 	];
 
 	public static function boot() {

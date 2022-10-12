@@ -105,6 +105,12 @@ function old_conditional($key, $valueToCheck = NULL, $compareTo = NULL, $default
 }
 
 function old_checked($key, $valueToCheck = NULL, $compareTo = 1, $default = NULL, $output = ' checked="checked"') {
+	// More often, unchecked checkboxes won't even be present in the old input
+	// (since it wasn't submitted in the first place), so nullify default old()
+	// value if other input exists but this specific key doesn't.
+	if(old_input_exists() && old($key) === NULL) {
+		$valueToCheck = NULL;
+	}
 	return old_conditional($key, $valueToCheck, $compareTo, $default, $output);
 }
 

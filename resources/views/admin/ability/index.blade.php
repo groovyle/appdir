@@ -16,7 +16,10 @@ $hide_filters = !$show_filters;
 @section('content')
 
 	<div class="alert alert-warning">
-		@lang('admin/abilities.management_warning')
+		<div class="icon-text-pair icon-color-reset">
+			<span class="fas fa-exclamation-triangle icon icon-2x mt-2 mr-2"></span>
+			<span>@lang('admin/abilities.management_warning')</span>
+		</div>
 	</div>
 
 	<div class="mt-2 mb-3">

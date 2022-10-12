@@ -22,6 +22,11 @@ return [
 'edit_user'				=> 'Edit user',
 'see_apps_by_this_user'	=> 'See apps owned by this user',
 'add_user'				=> 'Add user',
+'user_data'				=> 'User data',
+'user_roles'			=> 'User roles',
+'user_abilities'		=> 'User abilities',
+'user_roles_abilities'	=> 'User\'s roles abilities',
+'user_direct_abilities'	=> 'Special permissions - abilities granted directly to the user',
 
 'fields'	=> [
 	'name_placeholder'	=> 'User name',
