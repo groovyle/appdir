@@ -16,7 +16,9 @@ $show_type_col = $show_type_col ?? false;
 
 @section('content')
 	<div class="mt-2 mb-3">
+		@can('create', App\User::class)
 		<a href="{{ route('admin.users.create') }}" class="btn btn-primary">{{ __('admin/users.add_new_user') }}</a>
+		@endcan
 	</div>
 
 	<!-- Filters -->
@@ -137,20 +139,24 @@ $show_type_col = $show_type_col ?? false;
 								@endif
 							</td>
 							<td class="text-nowrap text-unitalic">
+								@can('view', $item)
 								<a href="{{ route('admin.users.show', ['user' => $item->id]) }}" class="btn btn-default btn-xs text-nowrap btn-ofa-modal" data-title="{{ __('admin/users.page_title.detail') }}: {{ text_truncate($item->name, 30) }}" data-footer="false">
 									<span class="fas fa-search mr-1"></span>
 									{{ __('common.view') }}
 								</a>
-								@if(!$item->is_system)
+								@endcan
+								@can('update', $item)
 								<a href="{{ route('admin.users.edit', ['user' => $item->id, 'backto' => 'list']) }}" class="btn btn-primary btn-xs text-nowrap">
 									<span class="fas fa-edit mr-1"></span>
 									{{ __('common.edit') }}
 								</a>
-								<a href="{{ route('admin.users.destroy', array_merge(['user' => $item->id])) }}" class="btn btn-danger btn-xs text-nowrap btn-ays-modal" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/users._self'), $item->name, __('admin/common.fields.id'), $item->id) }}">
+								@endcan
+								@can('delete', $item)
+								<a href="{{ route('admin.users.destroy', ['user' => $item->id, 'backto' => 'back']) }}" class="btn btn-danger btn-xs text-nowrap btn-ays-modal" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/users._self'), $item->name, __('admin/common.fields.id'), $item->id) }}">
 									<span class="fas fa-trash mr-1"></span>
 									{{ __('common.delete') }}
 								</a>
-								@endif
+								@endcan
 							</td>
 						</tr>
 						@endforeach

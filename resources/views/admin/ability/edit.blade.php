@@ -41,10 +41,12 @@ if(!$is_edit) {
 </div>
 
 <div class="mb-2">
+  @if($back)
   @if($is_edit)
   <a href="{{ $back }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back') }}</a>
   @else
-  <a href="{{ route('admin.abilities.index') }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+  <a href="{{ $back }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+  @endif
   @endif
 </div>
 
@@ -69,6 +71,27 @@ if(!$is_edit) {
           @endif
 
           <div class="form-group">
+            <label for="inputAbilityEntityType">{{ __('admin/abilities.fields.entity_type') }}</label>
+            <input type="text" name="entity_type" class="form-control" id="inputAbilityEntityType" placeholder="{{ __('admin/abilities.fields.entity_type') }}" value="{{ old('entity_type', $abl->entity_type) }}" maxlength="100">
+          </div>
+
+          <div class="form-group">
+            <label for="inputAbilityEntityId">{{ __('admin/abilities.fields.entity_id') }}</label>
+            <input type="text" name="entity_id" class="form-control" id="inputAbilityEntityId" placeholder="{{ __('admin/abilities.fields.entity_id') }}" value="{{ old('entity_id', $abl->entity_id) }}" maxlength="100">
+          </div>
+
+          <div class="form-group">
+            <label for="inputAbilityName">
+              {{ __('admin/abilities.fields.name') }}
+              @component('admin.slots.label-hint')
+              @lang('admin/abilities.fields.name_hint')
+              @endcomponent
+            </label>
+            <input type="text" name="name" class="form-control" id="inputAbilityName" placeholder="{{ __('admin/abilities.fields.name_placeholder') }}" value="{{ old('name', $abl->name) }}" maxlength="100" required>
+          </div>
+
+          {{--
+          <div class="form-group">
             <label for="inputAbilityName">
               {{ __('admin/abilities.fields.name') }}
               @if($is_edit)
@@ -87,6 +110,7 @@ if(!$is_edit) {
             <p class="form-control-plaintext" id="inputAbilityName">{{ $abl->name }}</p>
             @endif
           </div>
+          --}}
 
           <div class="form-group">
             <label for="inputAbilityTitle">
@@ -99,16 +123,6 @@ if(!$is_edit) {
           </div>
 
           <div class="form-group">
-            <label for="inputAbilityEntityType">{{ __('admin/abilities.fields.entity_type') }}</label>
-            <input type="text" name="entity_type" class="form-control" id="inputAbilityEntityType" placeholder="{{ __('admin/abilities.fields.entity_type') }}" value="{{ old('entity_type', $abl->entity_type) }}" maxlength="100">
-          </div>
-
-          <div class="form-group">
-            <label for="inputAbilityEntityId">{{ __('admin/abilities.fields.entity_id') }}</label>
-            <input type="text" name="entity_id" class="form-control" id="inputAbilityEntityId" placeholder="{{ __('admin/abilities.fields.entity_id') }}" value="{{ old('entity_id', $abl->entity_id) }}" maxlength="100">
-          </div>
-
-          <div class="form-group">
             <label for="inputAbilityOnlyOwned">{{ __('admin/abilities.fields.only_owned') }}</label>
             <input type="checkbox" name="only_owned" value="1" class="ml-2" id="inputAbilityOnlyOwned" {!! old_checked('only_owned', $abl->only_owned) !!}>
           </div>
@@ -117,10 +131,12 @@ if(!$is_edit) {
         <div class="col-12 col-md-6">
           <div class="form-group">
             <label for="inputAbilityRoles">{{ __('admin/abilities.fields.roles') }}</label>
+            {{--
             <div class="d-inline-block form-check ml-3">
               <input type="checkbox" class="form-check-input" id="input-role-all" value="1" autocomplete="off">
               <label class="form-check-label" for="input-role-all">{{ __('admin/common.check_all') }}</label>
             </div>
+            --}}
             <div class="ofy-auto list-group ability-roles" id="inputAbilityRoles" style="max-height: 250px;">
               @foreach($roles as $role)
               <label class="list-group-item list-group-item-action role-item cursor-pointer py-1 pr-2 pl-3 m-0" for="input-role-check-{{ $role->id }}">
@@ -155,8 +171,10 @@ if(!$is_edit) {
             @else
             <button type="submit" class="btn btn-primary btn-min-100">{{ __('admin/abilities.add_ability') }}</button>
             @endif
+            @if($back)
             <br>
             <a href="{{ $back }}" class="btn btn-default btn-sm mt-3">{{ __('common.cancel') }}</a>
+            @endif
           </div>
         </div>
       </div>

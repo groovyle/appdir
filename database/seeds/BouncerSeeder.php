@@ -18,14 +18,14 @@ class BouncerSeeder extends Seeder
 		// all actions available in the system
 
 		// View list of all apps, even the non-owned ones
-		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'viewAnyInProdi']);
+		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'view-any-in-prodi']);
 		// View non owned apps' past versions
-		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'viewVersion']);
+		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'view-version']);
 		// View all apps, even the ones not in the same prodi
-		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'viewAll']);
+		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'view-all']);
 
 		// Interact with all users, even the ones not in the same prodi
-		Bouncer::ability()::createForModel('App\User', ['name' => 'bypassProdi']);
+		Bouncer::ability()::createForModel('App\User', ['name' => 'bypass-prodi']);
 
 
 		// ===================== ROLES ======================== //
@@ -52,10 +52,10 @@ class BouncerSeeder extends Seeder
 
 		// System menus
 		Bouncer::allow('admin')->toManage(\App\User::class);
-		Bouncer::forbid('admin')->to('bypassProdi', \App\User::class);
+		Bouncer::forbid('admin')->to('bypass-prodi', \App\User::class);
 
 		// App management
-		Bouncer::allow('admin')->to(['view', 'viewAny', 'viewAnyInProdi', 'viewVersion'], \App\Models\App::class);
+		Bouncer::allow('admin')->to(['view', 'view-any', 'view-any-in-prodi', 'view-version'], \App\Models\App::class);
 		// App verifications
 		Bouncer::allow('admin')->toManage(\App\Models\AppVerification::class);
 		// App reports and verdicts management should always come in pairs
@@ -63,14 +63,14 @@ class BouncerSeeder extends Seeder
 		Bouncer::allow('admin')->toManage(\App\Models\AppVerdict::class);
 
 		// Admins shouldn't be able to force delete SoftDeletes
-		Bouncer::forbid('admin')->to('forceDelete', '*');
+		Bouncer::forbid('admin')->to('force-delete', '*');
 
 
 		// ----- mahasiswa
 		Bouncer::allow('mahasiswa')->toOwn(\App\Models\App::class);
-		Bouncer::allow('mahasiswa')->to(['viewAny', 'create'], \App\Models\App::class);
-		Bouncer::forbid('mahasiswa')->to('viewAll', \App\Models\App::class);
-		Bouncer::forbid('mahasiswa')->to('viewVersion', \App\Models\App::class);
+		Bouncer::allow('mahasiswa')->to(['view-any', 'create'], \App\Models\App::class);
+		Bouncer::forbid('mahasiswa')->to('view-all', \App\Models\App::class);
+		Bouncer::forbid('mahasiswa')->to('view-version', \App\Models\App::class);
 
 		Bouncer::allow('mahasiswa')->to(['view'], \App\Models\AppVerification::class);
 

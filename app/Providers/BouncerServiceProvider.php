@@ -20,6 +20,9 @@ class BouncerServiceProvider extends ServiceProvider
 	 */
 	public function boot()
 	{
+		// Allow for policy checks to run first
+		Bouncer::runAfterPolicies();
+
 		// Dependency injection
 		Container::getInstance()->singleton(BaseBouncer::class, function () {
 			return BaseBouncer::create();

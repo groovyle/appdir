@@ -771,6 +771,9 @@ if(jQuery) {
 
 	$.fn.extend({
 		noEnterSubmit: function(options) {
+			if(this.length == 0)
+				return this;
+
 			if( ! this.is("form") ) {
 				console.debug("Cannot prevent [Enter] key submission because the specified element is not a form element.", this);
 				return this;
@@ -820,6 +823,9 @@ if(jQuery) {
 			return this;
 		},
 		onlyNumbers: function(options) {
+			if(this.length == 0)
+				return this;
+
 			var $elm = this;
 
 			var defaultOptions = {
@@ -845,6 +851,9 @@ if(jQuery) {
 		// Credits: https://stackoverflow.com/a/25621277 (third option in the answer)
 		// ... with some customizations
 		textareaAutoHeight: function (options) {
+			if(this.length == 0)
+				return this;
+
 			var defaultOptions = {
 				bypassHeight: false,
 				selector: null, // "textarea.auto-height"
@@ -972,6 +981,9 @@ if(jQuery) {
 		},
 
 		textareaShowLength: function (options) {
+			if(this.length == 0)
+				return this;
+
 			var defaultOptions = {
 				position: "top right",
 				maxLength: null,
@@ -1078,6 +1090,9 @@ if(jQuery) {
 		},
 
 		readMore: function(passedOptions) {
+			if(this.length == 0)
+				return this;
+
 			var defaultOptions = {
 				maxLines: 3,
 				expandText: "Read more",
@@ -1278,6 +1293,9 @@ if(jQuery) {
 		// Hides Bootstrap's .invalid-feedback upon input change, so as to not
 		// persist the message
 		autoHideFeedback: function(options) {
+			if(this.length == 0)
+				return this;
+
 			var defaultOptions = {
 				inputSelector: "input:not[type=hidden], textarea, select, .form-control",
 				feedbackSelector: ".invalid-feedback",
@@ -1446,6 +1464,7 @@ if(jQuery) {
 			var defaultOptions = {
 				cache: true,
 				title: defaultTitle,
+				closeOtherModals: true,
 				header: true,
 				footer: true,
 				scroll: false,
@@ -1495,6 +1514,12 @@ if(jQuery) {
 				$dialog.attr("class", "modal-dialog"); // reset all the classes
 			}
 			var showModal = function(url, options) {
+				if(options.closeOtherModals) {
+					// Bootstrap does not support multiple open modals, so this
+					// option better be true
+					$(".modal.show").not($ofaModal).modal("hide");
+				}
+
 				resetModal();
 				showLoading();
 				showTitle(options.header ? options.title : false);
@@ -1515,6 +1540,9 @@ if(jQuery) {
 						if(status == "abort") return;
 						var errdetails = "Error occurred while trying to load content. "+ status +": "+ error;
 						console.error(errdetails);
+						if(xhr.responseJSON && xhr.responseJSON.message) {
+							errdetails += "<br>"+ xhr.responseJSON.message;
+						}
 						showError(options.errorText, options.errorDetails ? errdetails : null);
 					},
 					complete: function() {
@@ -1624,6 +1652,7 @@ if(jQuery) {
 			var defaultOptions = {
 				method: "POST",
 				postData: {},
+				closeOtherModals: true,
 				title: defaultTitle,
 				header: true,
 				scroll: false,
@@ -1641,6 +1670,8 @@ if(jQuery) {
 				onCancel: null,
 				onSuccess: "_reload",
 				onError: null,
+				successUrl: null,
+				followDataRedirect: true,
 				callback: null,
 			};
 
@@ -1732,6 +1763,12 @@ if(jQuery) {
 				$aysModal.modal("hide");
 			}
 			var showModal = function(url, options) {
+				if(options.closeOtherModals) {
+					// Bootstrap does not support multiple open modals, so this
+					// option better be true
+					$(".modal.show").not($aysModal).modal("hide");
+				}
+
 				resetModal();
 				initElements(options);
 
@@ -1784,6 +1821,9 @@ if(jQuery) {
 							if(status == "abort") return;
 							var errdetails = "Error occurred while trying to submit data. "+ status +": "+ error;
 							console.error(errdetails);
+							if(xhr.responseJSON && xhr.responseJSON.message) {
+								errdetails += "<br>"+ xhr.responseJSON.message;
+							}
 							showError(options.errorText, options.errorDetails ? errdetails : null);
 							if(typeof options.onError == "function") {
 								options.onError(xhr, status, error, $aysModal);
@@ -1798,6 +1838,12 @@ if(jQuery) {
 						success: function(data, status, xhr) {
 							if(typeof options.onSuccess == "function") {
 								options.onSuccess(data, status, xhr, $aysModal);
+							} else if(options.successUrl) {
+								window.location.href = options.successUrl;
+							} else if(options.followDataRedirect
+								&& typeof data === "object"
+								&& (data.redirect || data.url)) {
+								window.location.href = data.redirect || data.url;
 							} else {
 								$aysModal.modal("hide");
 								if(options.onSuccess == "_reload") {

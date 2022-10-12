@@ -41,10 +41,12 @@ if(!$is_edit) {
 </div>
 
 <div class="mb-2">
+  @if($back)
   @if($is_edit)
   <a href="{{ $back }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back') }}</a>
   @else
-  <a href="{{ route('admin.roles.index') }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+  <a href="{{ $back }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+  @endif
   @endif
 </div>
 
@@ -134,8 +136,10 @@ if(!$is_edit) {
             @else
             <button type="submit" class="btn btn-primary btn-min-100">{{ __('admin/roles.add_role') }}</button>
             @endif
+            @if($back)
             <br>
             <a href="{{ $back }}" class="btn btn-default btn-sm mt-3">{{ __('common.cancel') }}</a>
+            @endif
           </div>
         </div>
       </div>

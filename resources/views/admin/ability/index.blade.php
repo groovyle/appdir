@@ -23,7 +23,9 @@ $hide_filters = !$show_filters;
 	</div>
 
 	<div class="mt-2 mb-3">
+		@can('create', App\Models\Ability::class)
 		<a href="{{ route('admin.abilities.create') }}" class="btn btn-primary">{{ __('admin/abilities.add_new_ability') }}</a>
+		@endcan
 	</div>
 
 	<!-- Filters -->
@@ -76,10 +78,10 @@ $hide_filters = !$show_filters;
 					<thead>
 						<tr>
 							<th style="width: 50px;">{{ __('common.#') }}</th>
-							<th>{{ __('admin/abilities.fields.title') }}</th>
-							<th>{{ __('admin/abilities.fields.name') }}</th>
 							<th style="width: 10%;">{{ __('admin/abilities.fields.entity_type') }}</th>
 							<th style="width: 5%;">{{ __('admin/abilities.fields.entity_id') }}</th>
+							<th>{{ __('admin/abilities.fields.title') }}</th>
+							<th>{{ __('admin/abilities.fields.name') }}</th>
 							<th style="width: 5%;">{{ __('admin/abilities.fields.only_owned') }}</th>
 							<th style="width: 1%;">{{ __('common.actions') }}</th>
 						</tr>
@@ -88,24 +90,30 @@ $hide_filters = !$show_filters;
 						@foreach($list as $item)
 						<tr class="ability-item-{{ $item->id }}">
 							<td class="text-right">{{ $list->firstItem() + $loop->index }}</td>
+							<td class="text-085 text-bold">@vo_($item->entity_type)</td>
+							<td class="text-085">@vo_($item->entity_id)</td>
 							<td>@voe($item->title)</td>
 							<td>{{ $item->name }}</td>
-							<td class="text-wrap-word text-085">@vo_($item->entity_type)</td>
-							<td class="text-085">@vo_($item->entity_id)</td>
 							<td>@include('admin.components.yesno', ['value' => $item->only_owned, 'lower' => true, 'color_yes' => 'text-primary text-bold'])</td>
 							<td class="text-nowrap">
+								@can('view', $item)
 								<a href="{{ route('admin.abilities.show', ['abl' => $item->id]) }}" class="btn btn-default btn-xs text-nowrap btn-ofa-modal" data-title="{{ __('admin/abilities.page_title.detail') }}: {{ text_truncate($item->title, 30) }}" data-footer="false" data-size="lg">
 									<span class="fas fa-search mr-1"></span>
 									{{ __('common.view') }}
 								</a>
+								@endcan
+								@can('update', $item)
 								<a href="{{ route('admin.abilities.edit', ['abl' => $item->id, 'backto' => 'list']) }}" class="btn btn-primary btn-xs text-nowrap">
 									<span class="fas fa-edit mr-1"></span>
 									{{ __('common.edit') }}
 								</a>
-								<a href="{{ route('admin.abilities.destroy', array_merge(['abl' => $item->id])) }}" class="btn btn-danger btn-xs text-nowrap btn-ays-modal" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/abilities._self'), $item->name, __('admin/common.fields.id'), $item->id) }}">
+								@endcan
+								@can('delete', $item)
+								<a href="{{ route('admin.abilities.destroy', ['abl' => $item->id, 'backto' => 'back']) }}" class="btn btn-danger btn-xs text-nowrap btn-ays-modal" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s - %s - %s (%s: %s)', __('admin/abilities._self'), $item->name, $item->title, $item->entity_type, __('admin/common.fields.id'), $item->id) }}">
 									<span class="fas fa-trash mr-1"></span>
 									{{ __('common.delete') }}
 								</a>
+								@endcan
 							</td>
 						</tr>
 						@endforeach

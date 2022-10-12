@@ -55,12 +55,14 @@ class AbilityController extends Controller
 			$query->where(function($query) use($like) {
 				$query->where('name', 'like', $like);
 				$query->orWhere('title', 'like', $like);
+				$query->orWhere('entity_type', 'like', $like);
 			});
 			$filter_count++;
 		}
 
-		$query->orderBy('title');
-		$query->orderBy('name');
+		$query->defaultOrder();
+		// $query->orderBy('title');
+		// $query->orderBy('name');
 
 		$per_page = 10;
 		$page = request()->input('page', 1);
@@ -112,6 +114,11 @@ class AbilityController extends Controller
 	public function create()
 	{
 		//
+		$back_url = null;
+		if(Auth::user()->can('view-any', Prodi::class)) {
+			$back_url = route('admin.abilities.index');
+		}
+
 		$data = [
 			// 'abl'		=> new Ability,
 			'abl'		=> optional(),
@@ -120,7 +127,7 @@ class AbilityController extends Controller
 			'action'	=> route('admin.abilities.store'),
 			'method'	=> 'POST',
 			'user'		=> Auth::user(),
-			'back'		=> route('admin.abilities.index'),
+			'back'		=> $back_url,
 			'backto'	=> 'list',
 		];
 
@@ -165,11 +172,15 @@ class AbilityController extends Controller
 				'type'		=> 'success'
 			]);
 
-			// Scroll to the just added item
-			return redirect()->route('admin.abilities.index', [
-				'goto_item'		=> $store['abl']->id,
-				'goto_flash'	=> 1,
-			]);
+			if(Auth::user()->can('view-any', Ability::class)) {
+				// Scroll to the just added item
+				return redirect()->route('admin.abilities.index', [
+					'goto_item'		=> $store['abl']->id,
+					'goto_flash'	=> 1,
+				]);
+			}
+
+			return redirect()->back();
 		}
 	}
 
@@ -190,7 +201,6 @@ class AbilityController extends Controller
 				$query->orderBy('email');
 			}
 		]);
-		// $abl->loadCount(['abilities', 'users']);
 
 		$data = [
 			'abl'	=> $abl,
@@ -216,9 +226,13 @@ class AbilityController extends Controller
 		})->all();
 		$abl->users_ids = $abl->users->modelKeys();
 
-		$back_url = route('admin.abilities.show', ['abl' => $abl->id]);
+		$back_url = null;
+
+		if(Auth::user()->can('view', $abl)) {
+			$back_url = route('admin.abilities.show', ['abl' => $abl->id]);
+		}
 		$backto = request()->query('backto');
-		if($backto == 'list') {
+		if((!$back_url || $backto == 'list') && Auth::user()->can('view-any', Ability::class)) {
 			$back_url = route('admin.abilities.index', ['goto_item' => $abl->id]);
 		}
 
@@ -276,11 +290,13 @@ class AbilityController extends Controller
 			]);
 
 			$backto = $request->input('backto');
-			if($backto == 'list') {
+			if($backto == 'list' && Auth::user()->can('view-any', Ability::class)) {
 				return redirect()->route('admin.abilities.index', ['goto_item' => $abl->id, 'goto_flash' => 1]);
-			} else {
+			} elseif(Auth::user()->can('view', $abl)) {
 				return redirect()->route('admin.abilities.show', ['abl' => $abl->id]);
 			}
+
+			return redirect()->back();
 		}
 	}
 
@@ -299,7 +315,8 @@ class AbilityController extends Controller
 		$rules = [
 			// 'dummy'			=> ['required'],
 			'name'			=> [
-				Rule::requiredIf(!$is_edit),
+				'required',
+				// Rule::requiredIf(!$is_edit),
 				'max:100',
 				// Rule::unique(Ability::class, 'name')->ignore($abl),
 			],
@@ -324,17 +341,18 @@ class AbilityController extends Controller
 
 		// Begin storing entries
 		try {
-			if(!$is_edit) {
+			/*if(!$is_edit) {
 				$abl->name = $request->input('name');
-			}
+			}*/
+			$abl->name = $request->input('name');
+			$abl->entity_type = $request->input('entity_type');
+			$abl->entity_id = $request->input('entity_id');
+			$abl->only_owned = $request->input('only_owned') == '1';
+
 			$abl->title	= $request->input('title');
 			if(is_null($abl->title)) {
 				$abl->title = AbilityTitle::from($abl)->toString();
 			}
-
-			$abl->entity_type = $request->input('entity_type');
-			$abl->entity_id = $request->input('entity_id');
-			$abl->only_owned = $request->input('only_owned') == '1';
 
 			$result = $abl->save();
 
@@ -419,15 +437,27 @@ class AbilityController extends Controller
 			]);
 		}
 
+		$redirect = null;
+		$backto = request()->query('backto');
+		if(Auth::user()->can('view-any', Ability::class)) {
+			$redirect = route('admin.abilities.index');
+		}
+		if(!$redirect || $backto == 'back') {
+			$redirect = url()->previous();
+		}
+
 		if(!$request->ajax()) {
 			if($result) {
-				return redirect()->back();
+				return redirect($redirect);
 			} else {
 				return redirect()->back()->withErrors($messages);
 			}
 		} else {
 			if($result) {
-				return response('OK', 200);
+				return response()->json([
+					'status'	=> 'OK',
+					'redirect'	=> $redirect,
+				], 200);
 			} else {
 				return response()->json([
 					'status'	=> 'ERROR',

@@ -39,7 +39,7 @@ return [
 'fields'	=> [
 	'name'						=> 'Name',
 	'name_placeholder'			=> 'Ability name',
-	'name_hint'					=> 'Lowercase letters and capitals instead of spaces, e.g editNonOwnedItems.',
+	'name_hint'					=> 'Lowercase letters and dashes instead of spaces, e.g edit-non-owned-items.',
 	'name_hint_edit'			=> 'Changing ability name is not supported because the name is used internally by the system.',
 	'attribute_hint_no_edit'	=> 'Changing/editing this field is not supported because the it is used internally by the system.',
 	'title'						=> 'Title',

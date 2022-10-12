@@ -22,6 +22,7 @@ class AppCategoryController extends Controller
 	public function __construct()
 	{
 		$this->middleware('auth');
+		$this->authorizeResource(AppCategory::class, 'cat');
 	}
 
 	/**
@@ -65,14 +66,24 @@ class AppCategoryController extends Controller
 
 		$per_page = 20;
 		$page = request()->input('page', 1);
+		$goto_exact = request()->input('goto_exact');
 		$goto_item = request()->input('goto_item');
 		$goto_flash = request()->input('goto_flash') == 1;
 
-		if($goto_item) {
+		if($goto_exact) {
+			$data['goto_item'] = $goto_exact;
+		} elseif($goto_item) {
 			$offset = find_item_offset_from_list_query($query, $goto_item);
 			if($offset) {
-				$page = ceil($offset / $per_page);
-				$data['goto_item'] = $goto_item;
+				$target_page = ceil($offset / $per_page);
+				if($target_page == $page) {
+					$data['goto_item'] = $goto_item;
+				} else {
+					return self_redirect('goto_item', [
+						'goto_exact' => $goto_item,
+						'page' => $target_page
+					]);
+				}
 			}
 		}
 
@@ -103,13 +114,18 @@ class AppCategoryController extends Controller
 	public function create()
 	{
 		//
+		$back_url = null;
+		if(Auth::user()->can('view-any', AppCategory::class)) {
+			$back_url = route('admin.app_categories.index');
+		}
+
 		$data = [
 			'cat'		=> new AppCategory,
 			'is_edit'	=> false,
 			'action'	=> route('admin.app_categories.store'),
 			'method'	=> 'POST',
 			'user'		=> Auth::user(),
-			'back'		=> route('admin.app_categories.index'),
+			'back'		=> $back_url,
 			'backto'	=> 'list',
 		];
 
@@ -154,11 +170,15 @@ class AppCategoryController extends Controller
 				'type'		=> 'success'
 			]);
 
-			// Scroll to the just added item
-			return redirect()->route('admin.app_categories.index', [
-				'goto_item'		=> $store['cat']->id,
-				'goto_flash'	=> 1,
-			]);
+			if(Auth::user()->can('view-any', AppCategory::class)) {
+				// Scroll to the just added item
+				return redirect()->route('admin.app_categories.index', [
+					'goto_item'		=> $store['cat']->id,
+					'goto_flash'	=> 1,
+				]);
+			}
+
+			return redirect()->back();
 		}
 	}
 
@@ -189,9 +209,13 @@ class AppCategoryController extends Controller
 	public function edit(AppCategory $cat)
 	{
 		//
-		$back_url = route('admin.app_categories.show', ['cat' => $cat->id]);
+		$back_url = null;
+
+		if(Auth::user()->can('view', $cat)) {
+			$back_url = route('admin.app_categories.show', ['cat' => $cat->id]);
+		}
 		$backto = request()->query('backto');
-		if($backto == 'list') {
+		if((!$back_url || $backto == 'list') && Auth::user()->can('view-any', AppCategory::class)) {
 			$back_url = route('admin.app_categories.index', ['goto_item' => $cat->id]);
 		}
 
@@ -248,11 +272,13 @@ class AppCategoryController extends Controller
 			]);
 
 			$backto = $request->input('backto');
-			if($backto == 'list') {
+			if($backto == 'list' && Auth::user()->can('view-any', AppCategory::class)) {
 				return redirect()->route('admin.app_categories.index', ['goto_item' => $cat->id, 'goto_flash' => 1]);
-			} else {
+			} elseif(Auth::user()->can('view', $cat)) {
 				return redirect()->route('admin.app_categories.show', ['cat' => $cat->id]);
 			}
+
+			return redirect()->back();
 		}
 	}
 
@@ -348,15 +374,27 @@ class AppCategoryController extends Controller
 			]);
 		}
 
+		$redirect = null;
+		$backto = request()->query('backto');
+		if(Auth::user()->can('view-any', AppCategory::class)) {
+			$redirect = route('admin.app_categories.index');
+		}
+		if(!$redirect || $backto == 'back') {
+			$redirect = url()->previous();
+		}
+
 		if(!$request->ajax()) {
 			if($result) {
-				return redirect()->back();
+				return redirect($redirect);
 			} else {
 				return redirect()->back()->withErrors($messages);
 			}
 		} else {
 			if($result) {
-				return response('OK', 200);
+				return response()->json([
+					'status'	=> 'OK',
+					'redirect'	=> $redirect,
+				], 200);
 			} else {
 				return response()->json([
 					'status'	=> 'ERROR',

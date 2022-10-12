@@ -120,6 +120,7 @@ function find_item_offset_from_list_query($query, $id) {
 	$item = $query->getModel()->find($id);
 	$binding_i = 0;
 	if($orders && $item) {
+		$orders_to_apply = [];
 		foreach($orders as $order) {
 			if(($order['type'] ?? null) == 'Raw') {
 				// NOTE: opt to not support this, because there's no way to know
@@ -144,13 +145,23 @@ function find_item_offset_from_list_query($query, $id) {
 				$bindings = array_slice($orders_bindings, $binding_i, $binding_count);
 				$offset_query->whereRaw($sql, $bindings);
 				$binding_i += $binding_count;
-			} elseif(isset($item->{$order['column']})) {
+			} elseif( array_key_exists($order['column'], $item->getAttributes())
+				|| isset($item->{$order['column']}) ) {
 				if($item->{$order['column']} !== null) {
-					$offset_query->where(
-						$order['column'],
-						$order['direction'] == 'asc' ? '<=' : '>=',
-						$item->{$order['column']}
-					);
+					$orders_to_apply[] = function($query) use($order, $item) {
+						$query->where(function($query) use($order, $item) {
+							$query->where(
+								$order['column'],
+								$order['direction'] == 'asc' ? '<=' : '>=',
+								$item->{$order['column']}
+							);
+							if($order['direction'] == 'asc') {
+								// NULL values are always considered less, so
+								// we also need to account for that when ascending
+								$query->orWhereNull($order['column']);
+							}
+						});
+					};
 				} else {
 					/**
 					 * Special case when the ordered thingy is null.
@@ -161,13 +172,25 @@ function find_item_offset_from_list_query($query, $id) {
 					 * and later items are non-NULL. Vice-versa when order is DESC.
 					 */
 					$fn = $order['direction'] == 'asc' ? 'whereNull' : 'whereNotNull';
-					$offset_query->$fn($order['column']);
+					$orders_to_apply[] = function($query) use($order, $fn) {
+						$query->$fn($order['column']);
+					};
 				}
 			} else {
 				// Column not found
 				throw new \UnexpectedValueException('Order column `'.$order['column'].'` not found. Make sure the column exists by default and is not a derived column (columns in SELECT clauses do not work in WHERE clauses).');
 			}
 		}
+
+		// Apply gradual filters
+		for($i = 0; $i < count($orders_to_apply); $i++) {
+			$offset_query->orWhere(function($query) use($orders_to_apply, $i) {
+				for($j = 0; $j <= $i; $j++) {
+					$orders_to_apply[$j]($query);
+				}
+			});
+		}
+
 		$offset = $offset_query->count();
 	} else {
 		$offset = $offset_query->where($query->getModel()->getKeyName(), '<=', $id)->count();
@@ -176,13 +199,15 @@ function find_item_offset_from_list_query($query, $id) {
 	return $offset;
 }
 
-function self_redirect($query_except = [], $data = []) {
-	return redirect(
-		make_url_query(
-			null,
-			url_query_except($query_except, $data)
-		)
+function self_redirect_url($query_except = [], $data = []) {
+	return make_url_query(
+		null,
+		url_query_except($query_except, $data)
 	);
+}
+
+function self_redirect($query_except = [], $data = []) {
+	return redirect(self_redirect_url($query_except, $data));
 }
 
 

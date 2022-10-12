@@ -16,11 +16,21 @@ $append_breadcrumb = [
 
 @section('content')
 <div class="mb-2">
+  @can('view-any', App\Models\AppTag::class)
   <a href="{{ route('admin.app_tags.index', ['goto_item' => $tag->name]) }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+  @endcan
+  @can('update', $tag)
   <a href="{{ route('admin.app_tags.edit', ['tag' => $tag->name]) }}" class="btn btn-sm btn-primary">
     <span class="fas fa-edit"></span>
     {{ __('admin/app_tags.edit_tag') }}
   </a>
+  @endcan
+  @can('delete', $tag)
+  <a href="{{ route('admin.app_tags.destroy', ['tag' => $tag->name]) }}" class="btn btn-danger btn-sm text-nowrap btn-ays-modal ml-3" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s', __('admin/app_tags._self'), $tag->name) }}">
+    <span class="fas fa-trash mr-1"></span>
+    {{ __('common.delete') }}
+  </a>
+  @endcan
 </div>
 <div class="card">
   <div class="card-body">
@@ -45,10 +55,18 @@ $append_breadcrumb = [
       </dl>
       @if($ajax)
       <div class="mt-2">
+        @can('update', $tag)
         <a href="{{ route('admin.app_tags.edit', ['tag' => $tag->name, 'backto' => 'list']) }}" class="btn btn-sm btn-primary">
           <span class="fas fa-edit"></span>
           {{ __('admin/app_tags.edit_tag') }}
         </a>
+        @endcan
+        @can('delete', $tag)
+        <a href="{{ route('admin.app_tags.destroy', ['tag' => $tag->name, 'backto' => 'back']) }}" class="btn btn-danger btn-sm text-nowrap btn-ays-modal ml-3" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s', __('admin/app_tags._self'), $tag->name) }}">
+          <span class="fas fa-trash mr-1"></span>
+          {{ __('common.delete') }}
+        </a>
+        @endcan
       </div>
       @endif
     </div>

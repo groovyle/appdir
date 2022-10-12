@@ -23,6 +23,7 @@ class ProdiController extends Controller
 	public function __construct()
 	{
 		$this->middleware('auth');
+		$this->authorizeResource(Prodi::class);
 	}
 
 	/**
@@ -67,14 +68,24 @@ class ProdiController extends Controller
 
 		$per_page = 20;
 		$page = request()->input('page', 1);
+		$goto_exact = request()->input('goto_exact');
 		$goto_item = request()->input('goto_item');
 		$goto_flash = request()->input('goto_flash') == 1;
 
-		if($goto_item) {
+		if($goto_exact) {
+			$data['goto_item'] = $goto_exact;
+		} elseif($goto_item) {
 			$offset = find_item_offset_from_list_query($query, $goto_item);
 			if($offset) {
-				$page = ceil($offset / $per_page);
-				$data['goto_item'] = $goto_item;
+				$target_page = ceil($offset / $per_page);
+				if($target_page == $page) {
+					$data['goto_item'] = $goto_item;
+				} else {
+					return self_redirect('goto_item', [
+						'goto_exact' => $goto_item,
+						'page' => $target_page
+					]);
+				}
 			}
 		}
 
@@ -105,13 +116,18 @@ class ProdiController extends Controller
 	public function create()
 	{
 		//
+		$back_url = null;
+		if(Auth::user()->can('view-any', Prodi::class)) {
+			$back_url = route('admin.prodi.index');
+		}
+
 		$data = [
 			'prodi'		=> new Prodi,
 			'is_edit'	=> false,
 			'action'	=> route('admin.prodi.store'),
 			'method'	=> 'POST',
 			'user'		=> Auth::user(),
-			'back'		=> route('admin.prodi.index'),
+			'back'		=> $back_url,
 			'backto'	=> 'list',
 		];
 
@@ -156,11 +172,15 @@ class ProdiController extends Controller
 				'type'		=> 'success'
 			]);
 
-			// Scroll to the just added item
-			return redirect()->route('admin.prodi.index', [
-				'goto_item'		=> $store['prodi']->id,
-				'goto_flash'	=> 1,
-			]);
+			if(Auth::user()->can('view-any', Prodi::class)) {
+				// Scroll to the just added item
+				return redirect()->route('admin.prodi.index', [
+					'goto_item'		=> $store['prodi']->id,
+					'goto_flash'	=> 1,
+				]);
+			}
+
+			return redirect()->back();
 		}
 	}
 
@@ -191,9 +211,13 @@ class ProdiController extends Controller
 	public function edit(Prodi $prodi)
 	{
 		//
-		$back_url = route('admin.prodi.show', ['prodi' => $prodi->id]);
+		$back_url = null;
+
+		if(Auth::user()->can('view', $prodi)) {
+			$back_url = route('admin.prodi.show', ['prodi' => $prodi->id]);
+		}
 		$backto = request()->query('backto');
-		if($backto == 'list') {
+		if((!$back_url || $backto == 'list') && Auth::user()->can('view-any', Prodi::class)) {
 			$back_url = route('admin.prodi.index', ['goto_item' => $prodi->id]);
 		}
 
@@ -250,11 +274,13 @@ class ProdiController extends Controller
 			]);
 
 			$backto = $request->input('backto');
-			if($backto == 'list') {
+			if($backto == 'list' && Auth::user()->can('view-any', Prodi::class)) {
 				return redirect()->route('admin.prodi.index', ['goto_item' => $prodi->id, 'goto_flash' => 1]);
-			} else {
+			} elseif(Auth::user()->can('view', $prodi)) {
 				return redirect()->route('admin.prodi.show', ['prodi' => $prodi->id]);
 			}
+
+			return redirect()->back();
 		}
 	}
 
@@ -354,15 +380,27 @@ class ProdiController extends Controller
 			]);
 		}
 
+		$redirect = null;
+		$backto = request()->query('backto');
+		if(Auth::user()->can('view-any', Prodi::class)) {
+			$redirect = route('admin.prodi.index');
+		}
+		if(!$redirect || $backto == 'back') {
+			$redirect = url()->previous();
+		}
+
 		if(!$request->ajax()) {
 			if($result) {
-				return redirect()->back();
+				return redirect($redirect);
 			} else {
 				return redirect()->back()->withErrors($messages);
 			}
 		} else {
 			if($result) {
-				return response('OK', 200);
+				return response()->json([
+					'status'	=> 'OK',
+					'redirect'	=> $redirect,
+				], 200);
 			} else {
 				return response()->json([
 					'status'	=> 'ERROR',

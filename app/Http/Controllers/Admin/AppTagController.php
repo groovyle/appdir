@@ -24,6 +24,7 @@ class AppTagController extends Controller
 	public function __construct()
 	{
 		$this->middleware('auth');
+		$this->authorizeResource(AppTag::class, 'tag');
 	}
 
 	/**
@@ -67,14 +68,24 @@ class AppTagController extends Controller
 
 		$per_page = 20;
 		$page = request()->input('page', 1);
+		$goto_exact = request()->input('goto_exact');
 		$goto_item = request()->input('goto_item');
 		$goto_flash = request()->input('goto_flash') == 1;
 
-		if($goto_item) {
+		if($goto_exact) {
+			$data['goto_item'] = $goto_exact;
+		} elseif($goto_item) {
 			$offset = find_item_offset_from_list_query($query, $goto_item);
 			if($offset) {
-				$page = ceil($offset / $per_page);
-				$data['goto_item'] = $goto_item;
+				$target_page = ceil($offset / $per_page);
+				if($target_page == $page) {
+					$data['goto_item'] = $goto_item;
+				} else {
+					return self_redirect('goto_item', [
+						'goto_exact' => $goto_item,
+						'page' => $target_page
+					]);
+				}
 			}
 		}
 
@@ -105,13 +116,18 @@ class AppTagController extends Controller
 	public function create()
 	{
 		//
+		$back_url = null;
+		if(Auth::user()->can('view-any', AppTag::class)) {
+			$back_url = route('admin.app_tags.index');
+		}
+
 		$data = [
 			'tag'		=> new AppTag,
 			'is_edit'	=> false,
 			'action'	=> route('admin.app_tags.store'),
 			'method'	=> 'POST',
 			'user'		=> Auth::user(),
-			'back'		=> route('admin.app_tags.index'),
+			'back'		=> $back_url,
 			'backto'	=> 'list',
 		];
 
@@ -156,11 +172,15 @@ class AppTagController extends Controller
 				'type'		=> 'success'
 			]);
 
-			// Scroll to the just added item
-			return redirect()->route('admin.app_tags.index', [
-				'goto_item'		=> $store['tag']->name,
-				'goto_flash'	=> 1,
-			]);
+			if(Auth::user()->can('view-any', AppTag::class)) {
+				// Scroll to the just added item
+				return redirect()->route('admin.app_tags.index', [
+					'goto_item'		=> $store['tag']->name,
+					'goto_flash'	=> 1,
+				]);
+			}
+
+			return redirect()->back();
 		}
 	}
 
@@ -191,9 +211,13 @@ class AppTagController extends Controller
 	public function edit(AppTag $tag)
 	{
 		//
-		$back_url = route('admin.app_tags.show', ['tag' => $tag->name]);
+		$back_url = null;
+
+		if(Auth::user()->can('view', $tag)) {
+			$back_url = route('admin.app_tags.show', ['tag' => $tag->name]);
+		}
 		$backto = request()->query('backto');
-		if($backto == 'list') {
+		if((!$back_url || $backto == 'list') && Auth::user()->can('view-any', AppTag::class)) {
 			$back_url = route('admin.app_tags.index', ['goto_item' => $tag->name]);
 		}
 
@@ -250,11 +274,13 @@ class AppTagController extends Controller
 			]);
 
 			$backto = $request->input('backto');
-			if($backto == 'list') {
+			if($backto == 'list' && Auth::user()->can('view-any', AppTag::class)) {
 				return redirect()->route('admin.app_tags.index', ['goto_item' => $tag->name, 'goto_flash' => 1]);
-			} else {
+			} elseif(Auth::user()->can('view', $tag)) {
 				return redirect()->route('admin.app_tags.show', ['tag' => $tag->name]);
 			}
+
+			return redirect()->back();
 		}
 	}
 
@@ -334,7 +360,8 @@ class AppTagController extends Controller
 		}
 
 		if($result) {
-			DB::commit();
+			// DB::commit();
+			DB::rollback();
 
 			// Pass a message
 			$request->session()->flash('flash_message', [
@@ -351,15 +378,27 @@ class AppTagController extends Controller
 			]);
 		}
 
+		$redirect = null;
+		$backto = request()->query('backto');
+		if(Auth::user()->can('view-any', AppTag::class)) {
+			$redirect = route('admin.app_tags.index');
+		}
+		if(!$redirect || $backto == 'back') {
+			$redirect = url()->previous();
+		}
+
 		if(!$request->ajax()) {
 			if($result) {
-				return redirect()->back();
+				return redirect($redirect);
 			} else {
 				return redirect()->back()->withErrors($messages);
 			}
 		} else {
 			if($result) {
-				return response('OK', 200);
+				return response()->json([
+					'status'	=> 'OK',
+					'redirect'	=> $redirect,
+				], 200);
 			} else {
 				return response()->json([
 					'status'	=> 'ERROR',

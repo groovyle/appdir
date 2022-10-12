@@ -17,11 +17,21 @@ $rand = random_string(5);
 
 @section('content')
 <div class="mb-2">
+  @can('view-any', App\Models\Ability::class)
   <a href="{{ route('admin.abilities.index', ['goto_item' => $abl->id]) }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+  @endcan
+  @can('update', $abl)
   <a href="{{ route('admin.abilities.edit', ['abl' => $abl->id]) }}" class="btn btn-sm btn-primary">
     <span class="fas fa-edit"></span>
     {{ __('admin/abilities.edit_ability') }}
   </a>
+  @endcan
+  @can('delete', $abl)
+  <a href="{{ route('admin.abilities.destroy', ['abl' => $abl->id]) }}" class="btn btn-danger btn-sm text-nowrap btn-ays-modal ml-3" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s - %s - %s (%s: %s)', __('admin/abilities._self'), $abl->name, $abl->title, $abl->entity_type, __('admin/common.fields.id'), $abl->id) }}">
+    <span class="fas fa-trash mr-1"></span>
+    {{ __('common.delete') }}
+  </a>
+  @endcan
 </div>
 <div class="main-content">
 <div class="card card-primary card-outline card-outline-tabs">
@@ -47,16 +57,9 @@ $rand = random_string(5);
 
           <div class="row gutter-lg d-table">
             <div class="col d-table-cell w-auto">
-              <dt>@lang('admin/abilities.fields.title')</dt>
-              <dd>{{ $abl->title }}</dd>
-            </div>
-            <div class="col d-table-cell w-auto">
               <dt>@lang('admin/abilities.fields.name')</dt>
               <dd>{{ $abl->name }}</dd>
             </div>
-          </div>
-
-          <div class="row gutter-lg d-table">
             <div class="col d-table-cell w-auto">
               <dt>@lang('admin/abilities.fields.entity_type')</dt>
               <dd>@vo_($abl->entity_type)</dd>
@@ -64,6 +67,13 @@ $rand = random_string(5);
             <div class="col d-table-cell w-auto">
               <dt>@lang('admin/abilities.fields.entity_id')</dt>
               <dd>@vo_($abl->entity_id)</dd>
+            </div>
+          </div>
+
+          <div class="row gutter-lg d-table">
+            <div class="col d-table-cell w-auto">
+              <dt>@lang('admin/abilities.fields.title')</dt>
+              <dd>{{ $abl->title }}</dd>
             </div>
           </div>
 
@@ -81,10 +91,18 @@ $rand = random_string(5);
         </dl>
         @if($ajax)
         <div class="mt-2">
+          @can('update', $abl)
           <a href="{{ route('admin.abilities.edit', ['abl' => $abl->id, 'backto' => 'list']) }}" class="btn btn-sm btn-primary">
             <span class="fas fa-edit"></span>
             {{ __('admin/abilities.edit_ability') }}
           </a>
+          @endcan
+          @can('delete', $abl)
+          <a href="{{ route('admin.abilities.destroy', ['abl' => $abl->id, 'backto' => 'back']) }}" class="btn btn-danger btn-sm text-nowrap btn-ays-modal ml-3" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s - %s - %s (%s: %s)', __('admin/abilities._self'), $abl->name, $abl->title, $abl->entity_type, __('admin/common.fields.id'), $abl->id) }}">
+            <span class="fas fa-trash mr-1"></span>
+            {{ __('common.delete') }}
+          </a>
+          @endcan
         </div>
         @endif
       </div>

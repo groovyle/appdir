@@ -16,11 +16,21 @@ $append_breadcrumb = [
 
 @section('content')
 <div class="mb-2">
+  @can('view-any', App\Models\AppCategory::class)
   <a href="{{ route('admin.app_categories.index', ['goto_item' => $cat->id]) }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+  @endcan
+  @can('update', $cat)
   <a href="{{ route('admin.app_categories.edit', ['cat' => $cat->id]) }}" class="btn btn-sm btn-primary">
     <span class="fas fa-edit"></span>
     {{ __('admin/app_categories.edit_category') }}
   </a>
+  @endcan
+  @can('delete', $cat)
+  <a href="{{ route('admin.app_categories.destroy', ['cat' => $cat->id]) }}" class="btn btn-danger btn-sm text-nowrap btn-ays-modal ml-3" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/app_categories._self'), $cat->name, __('admin/common.fields.id'), $cat->id) }}">
+    <span class="fas fa-trash mr-1"></span>
+    {{ __('common.delete') }}
+  </a>
+  @endcan
 </div>
 <div class="card">
   <div class="card-body">
@@ -48,10 +58,18 @@ $append_breadcrumb = [
       </dl>
       @if($ajax)
       <div class="mt-2">
+        @can('update', $cat)
         <a href="{{ route('admin.app_categories.edit', ['cat' => $cat->id, 'backto' => 'list']) }}" class="btn btn-sm btn-primary">
           <span class="fas fa-edit"></span>
           {{ __('admin/app_categories.edit_category') }}
         </a>
+        @endcan
+        @can('delete', $cat)
+        <a href="{{ route('admin.app_categories.destroy', ['cat' => $cat->id, 'backto' => 'back']) }}" class="btn btn-danger btn-sm text-nowrap btn-ays-modal ml-3" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/app_categories._self'), $cat->name, __('admin/common.fields.id'), $cat->id) }}">
+          <span class="fas fa-trash mr-1"></span>
+          {{ __('common.delete') }}
+        </a>
+        @endcan
       </div>
       @endif
     </div>

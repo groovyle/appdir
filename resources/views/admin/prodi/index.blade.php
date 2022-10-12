@@ -15,7 +15,9 @@ $hide_filters = !$show_filters;
 
 @section('content')
 	<div class="mt-2 mb-3">
+		@can('create', App\Models\Prodi::class)
 		<a href="{{ route('admin.prodi.create') }}" class="btn btn-primary">{{ __('admin/prodi.add_new_prodi') }}</a>
+		@endcan
 	</div>
 
 	<!-- Filters -->
@@ -90,18 +92,24 @@ $hide_filters = !$show_filters;
 							<td>{{ $item->complete_name }}</td>
 							<td class="text-center @if($item->users_count == 0) text-muted @endif">{{ $item->users_count }}</td>
 							<td class="text-nowrap">
+								@can('view', $item)
 								<a href="{{ route('admin.prodi.show', ['prodi' => $item->id]) }}" class="btn btn-default btn-xs text-nowrap btn-ofa-modal" data-title="{{ __('admin/prodi.page_title.detail') }}: {{ text_truncate($item->name, 30) }}" data-size="lg" data-footer="false">
 									<span class="fas fa-search mr-1"></span>
 									{{ __('common.view') }}
 								</a>
+								@endcan
+								@can('update', $item)
 								<a href="{{ route('admin.prodi.edit', ['prodi' => $item->id, 'backto' => 'list']) }}" class="btn btn-primary btn-xs text-nowrap">
 									<span class="fas fa-edit mr-1"></span>
 									{{ __('common.edit') }}
 								</a>
-								<a href="{{ route('admin.prodi.destroy', array_merge(['prodi' => $item->id])) }}" class="btn btn-danger btn-xs text-nowrap btn-ays-modal" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/prodi._self'), $item->complete_name, __('admin/common.fields.id'), $item->id) }}">
+								@endcan
+								@can('delete', $item)
+								<a href="{{ route('admin.prodi.destroy', ['prodi' => $item->id, 'backto' => 'back']) }}" class="btn btn-danger btn-xs text-nowrap btn-ays-modal" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/prodi._self'), $item->complete_name, __('admin/common.fields.id'), $item->id) }}">
 									<span class="fas fa-trash mr-1"></span>
 									{{ __('common.delete') }}
 								</a>
+								@endcan
 							</td>
 						</tr>
 						@endforeach

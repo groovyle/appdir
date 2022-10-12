@@ -20,7 +20,7 @@ class Ability extends BaseAbility
 		$ascending = $asc ? 'asc' : 'desc';
 		$descending = $asc ? 'desc' : 'asc';
 
-		$query->orderBy('abilities.entity_type', $ascending);
+		$query->orderBy('entity_type', $ascending);
 		if($with_permissions) {
 			// $query->orderBy('pivot_forbidden', $ascending);
 			$query->orderBy('pivot_forbidden', 'asc');

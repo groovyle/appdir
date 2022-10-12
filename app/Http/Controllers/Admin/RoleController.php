@@ -64,14 +64,24 @@ class RoleController extends Controller
 
 		$per_page = 20;
 		$page = request()->input('page', 1);
+		$goto_exact = request()->input('goto_exact');
 		$goto_item = request()->input('goto_item');
 		$goto_flash = request()->input('goto_flash') == 1;
 
-		if($goto_item) {
+		if($goto_exact) {
+			$data['goto_item'] = $goto_exact;
+		} elseif($goto_item) {
 			$offset = find_item_offset_from_list_query($query, $goto_item);
 			if($offset) {
-				$page = ceil($offset / $per_page);
-				$data['goto_item'] = $goto_item;
+				$target_page = ceil($offset / $per_page);
+				if($target_page == $page) {
+					$data['goto_item'] = $goto_item;
+				} else {
+					return self_redirect('goto_item', [
+						'goto_exact' => $goto_item,
+						'page' => $target_page
+					]);
+				}
 			}
 		}
 
@@ -102,6 +112,11 @@ class RoleController extends Controller
 	public function create()
 	{
 		//
+		$back_url = null;
+		if(Auth::user()->can('view-any', Role::class)) {
+			$back_url = route('admin.roles.index');
+		}
+
 		$data = [
 			// 'role'		=> new Role,
 			'role'		=> optional(),
@@ -110,7 +125,7 @@ class RoleController extends Controller
 			'action'	=> route('admin.roles.store'),
 			'method'	=> 'POST',
 			'user'		=> Auth::user(),
-			'back'		=> route('admin.roles.index'),
+			'back'		=> $back_url,
 			'backto'	=> 'list',
 		];
 
@@ -155,11 +170,15 @@ class RoleController extends Controller
 				'type'		=> 'success'
 			]);
 
-			// Scroll to the just added item
-			return redirect()->route('admin.roles.index', [
-				'goto_item'		=> $store['role']->id,
-				'goto_flash'	=> 1,
-			]);
+			if(Auth::user()->can('view-any', Role::class)) {
+				// Scroll to the just added item
+				return redirect()->route('admin.roles.index', [
+					'goto_item'		=> $store['role']->id,
+					'goto_flash'	=> 1,
+				]);
+			}
+
+			return redirect()->back();
 		}
 	}
 
@@ -180,7 +199,6 @@ class RoleController extends Controller
 				$query->orderBy('email');
 			}
 		]);
-		// $role->loadCount(['abilities', 'users']);
 
 		$data = [
 			'role'	=> $role,
@@ -199,18 +217,22 @@ class RoleController extends Controller
 	public function edit(Role $role)
 	{
 		//
+		$back_url = null;
+
+		if(Auth::user()->can('view', $role)) {
+			$back_url = route('admin.roles.show', ['role' => $role->id]);
+		}
+		$backto = request()->query('backto');
+		if((!$back_url || $backto == 'list') && Auth::user()->can('view-any', Prodi::class)) {
+			$back_url = route('admin.roles.index', ['goto_item' => $role->id]);
+		}
+
 		$role->load(['abilities', 'users']);
 		$role->abilities_ids = $role->abilities->modelKeys();
 		$role->abilities_modes = $role->abilities->mapWithKeys(function($item) {
 			return [$item->id => $item->pivot->forbidden ? 'forbid' : 'allow'];
 		})->all();
 		$role->users_ids = $role->users->modelKeys();
-
-		$back_url = route('admin.roles.show', ['role' => $role->id]);
-		$backto = request()->query('backto');
-		if($backto == 'list') {
-			$back_url = route('admin.roles.index', ['goto_item' => $role->id]);
-		}
 
 		$data = [
 			'role'		=> $role,
@@ -266,11 +288,13 @@ class RoleController extends Controller
 			]);
 
 			$backto = $request->input('backto');
-			if($backto == 'list') {
+			if($backto == 'list' && Auth::user()->can('view-any', Role::class)) {
 				return redirect()->route('admin.roles.index', ['goto_item' => $role->id, 'goto_flash' => 1]);
-			} else {
+			} elseif(Auth::user()->can('view', $role)) {
 				return redirect()->route('admin.roles.show', ['role' => $role->id]);
 			}
+
+			return redirect()->back();
 		}
 	}
 
@@ -315,6 +339,7 @@ class RoleController extends Controller
 			if(!$is_edit) {
 				$role->name	= $request->input('name');
 			}
+
 			$role->title	= $request->input('title');
 			if(is_null($role->title)) {
 				$role->title = RoleTitle::from($role)->toString();
@@ -388,15 +413,27 @@ class RoleController extends Controller
 			]);
 		}
 
+		$redirect = null;
+		$backto = request()->query('backto');
+		if(Auth::user()->can('view-any', Role::class)) {
+			$redirect = route('admin.roles.index');
+		}
+		if(!$redirect || $backto == 'back') {
+			$redirect = url()->previous();
+		}
+
 		if(!$request->ajax()) {
 			if($result) {
-				return redirect()->back();
+				return redirect($redirect);
 			} else {
 				return redirect()->back()->withErrors($messages);
 			}
 		} else {
 			if($result) {
-				return response('OK', 200);
+				return response()->json([
+					'status'	=> 'OK',
+					'redirect'	=> $redirect,
+				], 200);
 			} else {
 				return response()->json([
 					'status'	=> 'ERROR',

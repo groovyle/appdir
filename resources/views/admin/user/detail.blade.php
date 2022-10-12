@@ -17,11 +17,21 @@ $rand = random_string(5);
 
 @section('content')
 <div class="mb-2">
+  @can('view-any', App\User::class)
   <a href="{{ route('admin.users.index', ['goto_item' => $user->id]) }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+  @endcan
+  @can('update', $user)
   <a href="{{ route('admin.users.edit', ['user' => $user->id]) }}" class="btn btn-sm btn-primary">
     <span class="fas fa-edit"></span>
     {{ __('admin/users.edit_user') }}
   </a>
+  @endcan
+  @can('delete', $user)
+  <a href="{{ route('admin.users.destroy', ['user' => $user->id]) }}" class="btn btn-danger btn-sm text-nowrap btn-ays-modal ml-3" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/users._self'), $user->name, __('admin/common.fields.id'), $user->id) }}">
+    <span class="fas fa-trash mr-1"></span>
+    {{ __('common.delete') }}
+  </a>
+  @endcan
 </div>
 <div class="main-content">
 <div class="card card-primary card-outline card-outline-tabs">
@@ -95,12 +105,18 @@ $rand = random_string(5);
         </dl>
         @if($ajax)
         <div class="mt-2">
-          @if(!$user->is_system)
+          @can('update', $user)
           <a href="{{ route('admin.users.edit', ['user' => $user->id, 'backto' => 'list']) }}" class="btn btn-sm btn-primary">
             <span class="fas fa-edit"></span>
             {{ __('admin/users.edit_user') }}
           </a>
-          @endif
+          @endcan
+          @can('delete', $user)
+          <a href="{{ route('admin.users.destroy', ['user' => $user->id, 'backto' => 'back']) }}" class="btn btn-danger btn-sm text-nowrap btn-ays-modal ml-3" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/users._self'), $user->name, __('admin/common.fields.id'), $user->id) }}">
+            <span class="fas fa-trash mr-1"></span>
+            {{ __('common.delete') }}
+          </a>
+          @endcan
         </div>
         @endif
       </div>
