@@ -27,6 +27,14 @@ $rand = random_alpha(5);
 
 @section('detail-content')
       <dl class="row">
+        <dt class="col-12 col-sm-3 col-xl-2">{{ __('admin/apps.fields.owner') }}</dt>
+        <dd class="col-12 col-sm-9 col-xl-10">
+          {{ $app->owner->name }}
+          @if($app->is_owned)
+          <span class="fas fa-house-user text-primary text-080 ml-2" title="{{ __('admin/apps.you_own_this_app') }}" data-toggle="tooltip"></span>
+          @endif
+        </dd>
+
         <dt class="col-12 col-sm-3 col-xl-2">{{ __('admin/apps.fields.name') }}</dt>
         <dd class="col-12 col-sm-9 col-xl-10">
           @von($app->name)

@@ -36,10 +36,12 @@ if(!$is_edit) {
 @section('content')
 
 <div class="mb-2">
+  @if($back)
   @if($is_edit)
-  <a href="{{ route('admin.apps.show', ['app' => $app->id]) }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back') }}</a>
+  <a href="{{ $back }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back') }}</a>
   @else
-  <a href="{{ route('admin.apps.index') }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+  <a href="{{ $back }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+  @endif
   @endif
 </div>
 
@@ -98,9 +100,9 @@ if(!$is_edit) {
 
             <div class="form-group">
               <label for="inputAppUrl">{{ __('admin/apps.fields.url') }}</label>
-              <a href="#" class="d-inline-block ml-2" data-toggle="popover" data-content="{{ __('admin/apps.fields.url_hint') }}" data-html="true" data-trigger="click">
-                <span class="far fa-question-circle text-muted"></span>
-              </a>
+              @component('admin.slots.label-hint')
+              @lang('admin/apps.fields.url_hint')
+              @endcomponent
               <input type="text" name="app_url" class="form-control" id="inputAppUrl" placeholder="{{ __('admin/apps.fields.url_placeholder') }}" value="{{ old('app_url', $app->url) }}" maxlength="200">
             </div>
 
@@ -131,9 +133,9 @@ if(!$is_edit) {
 
             <div class="form-group">
               <label for="inputAppTags">{{ __('admin/apps.fields.tags') }}</label>
-              <a href="#" class="d-inline-block ml-2" data-toggle="popover" data-content="{{ __('admin/apps.fields.tags_hint') }}" data-trigger="focus">
-                <span class="far fa-question-circle text-muted"></span>
-              </a>
+              @component('admin.slots.label-hint')
+              @lang('admin/apps.fields.tags_hint')
+              @endcomponent
               <div class="select2-light">
                 <select name="tags[]" class="form-control w-100" id="inputAppTags" multiple="multiple" data-placeholder="&ndash; {{ __('admin/apps.fields.tags_placeholder') }} &ndash;" data-dropdown-css-class="select2-light">
                   @if (!empty($tags))
@@ -147,9 +149,9 @@ if(!$is_edit) {
           <div class="col-12">
             <div class="form-group">
               <label>{{ __('admin/apps.fields.logo') }}</label>
-              <a href="#" class="d-inline-block ml-2" data-toggle="popover" data-content="{{ __('admin/apps.fields.logo_hint') }}" data-html="true" data-trigger="click">
-                <span class="far fa-question-circle text-muted"></span>
-              </a>
+              @component('admin.slots.label-hint')
+              @lang('admin/apps.fields.logo_hint')
+              @endcomponent
               <div class="row gutter-lg">
                 @if($is_edit && $app->logo)
                 <div class="col flex-grow-0">
@@ -227,8 +229,10 @@ if(!$is_edit) {
           @else
           <button type="submit" class="btn btn-primary btn-min-100">{{ __('admin/apps.submit_app') }}</button>
           @endif
+          @if($back)
           <br>
-          <a href="{{ $is_edit ? route('admin.apps.show', ['app' => $app->id]) : route('admin.apps.index') }}" class="btn btn-default btn-sm mt-2">{{ __('common.cancel') }}</a>
+          <a href="{{ $back }}" class="btn btn-default btn-sm mt-2">{{ __('common.cancel') }}</a>
+          @endif
         </div>
       </li>
     </ul>

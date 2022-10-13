@@ -148,7 +148,7 @@ class App extends Model
 	}
 
 	public function owner() {
-		return $this->belongsTo('App\User', 'owner_id');
+		return $this->belongsTo('App\User', 'owner_id')->withDefault();
 	}
 
 	public function verifications() {
@@ -288,6 +288,10 @@ class App extends Model
 			// && $this->changelogs()->count() == $this->floating_changes()->count()
 			&& $this->verifications()->where('concern', AppVerification::CONCERN_PUBLISH_ITEM)->doesntExist()
 		;
+	}
+
+	public function getIsOwnedAttribute() {
+		return $this->owner_id == \Auth::id();
 	}
 
 	public function getCompleteNameAttribute() {

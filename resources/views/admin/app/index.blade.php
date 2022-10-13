@@ -8,11 +8,21 @@ $hide_filters = !$show_filters;
 {{ __('admin/apps.page_title.index') }} - @parent
 @endsection
 
-@section('page-title', __('admin/apps.page_title.index'))
+@section('page-title')
+{{ __('admin/apps.page_title.index') }}
+<span class="page-sub-title">{{ __('common.total_x', ['x' => $total_scoped]) }}</span>
+@if($view_mode == 'prodi')
+<span class="page-sub-title text-r100">@lang('admin/apps.page_title.view_mode.'.$view_mode, ['x' => von($prodi->complete_name)])</span>
+@else
+<span class="page-sub-title text-r100">{{ __('admin/apps.page_title.view_mode.'.$view_mode) }}</span>
+@endif
+@endsection
 
 @section('content')
   <div class="mt-2 mb-3">
+    @can('create', App\Models\App::class)
     <a href="{{ route('admin.apps.create') }}" class="btn btn-primary">{{ __('admin/apps.submit_an_app') }}</a>
+    @endcan
   </div>
 
   <!-- Filters -->
@@ -74,6 +84,18 @@ $hide_filters = !$show_filters;
             </select>
           </div>
         </div>
+        @if($view_mode != 'owned')
+        <div class="form-group row">
+          <label for="fOwned" class="col-sm-3 col-lg-2">{{ __('admin/apps.fields.filter_is_owned') }}</label>
+          <div class="col-sm-8 col-lg-5">
+            <select class="form-control" name="owned" id="fOwned" autocomplete="off">
+              <option value="">&ndash; {{ __('admin/common.all') }} &ndash;</option>
+              <option value="mine" {!! old_selected('', $filters['owned'], 'mine') !!}>{{ __('admin/apps.status.my_apps') }}</option>
+              <option value="others" {!! old_selected('', $filters['owned'], 'others') !!}>{{ __('admin/apps.status.other_apps') }}</option>
+            </select>
+          </div>
+        </div>
+        @endif
         <div class="form-group row mb-0">
           <div class="offset-sm-3 offset-lg-2 col">
             <button type="submit" class="btn btn-primary">{{ __('admin/common.search') }}</button>
@@ -87,7 +109,7 @@ $hide_filters = !$show_filters;
   <!-- Card -->
   <div class="card main-content @if($show_filters) scroll-to-me @endif">
     <div class="card-header">
-      <h3 class="card-title">{{ __('admin/apps.apps_list') }}</h3>
+      <h3 class="card-title">{{ __('admin/apps.apps_list') }} ({{ $items->total() }})</h3>
       <div class="card-tools">
         <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
           <i class="fas fa-minus"></i></button>
@@ -95,12 +117,16 @@ $hide_filters = !$show_filters;
     </div>
     @if($items->isEmpty())
     <div class="card-body">
-      <h4 class="text-left">{{ __('admin/apps.no_app_submissions_yet') }}</h4>
+      @if($total_scoped == 0)
+      <h4 class="text-left">&ndash; {{ __('admin/apps.no_app_submissions_yet') }} &ndash;</h4>
+      @else
+      <h5 class="text-left">&ndash; {{ __('admin/apps.no_apps_matches') }} &ndash;</h5>
+      @endif
     </div>
     @else
     <div class="card-body p-0">
       <div class="table-responsive">
-        <table class="table table-head-fixed">
+        <table class="table table-head-fixed table-hover">
           <thead>
             <tr>
               <th style="width: 50px;">{{ __('common.#') }}</th>
@@ -118,6 +144,9 @@ $hide_filters = !$show_filters;
               <td>
                 <div>
                   {{ $app->complete_name }}
+                  @if($view_mode != 'owned')
+                  @include('admin.app.components.owned-icon')
+                  @endif
                 </div>
                 @include('components.app-logo', ['logo' => $app->logo, 'exact' => '60x60', 'none' => false, 'img_class' => 'mini-app-logo'])
               </td>
@@ -127,7 +156,7 @@ $hide_filters = !$show_filters;
                 <div>
                   @if($app->is_published)
                   {{ __('admin/apps.status.is_published') }}
-                  @if($app->is_public)
+                  @if($app->is_listed)
                   <a href="{{ $app->public_url }}" target="_blank" class="text-success ml-2" title="@lang('admin/apps.app_had_been_verified')" data-toggle="tooltip">
                     <span class="fas fa-check-circle"></span>
                   </a>
@@ -145,21 +174,21 @@ $hide_filters = !$show_filters;
                 </div>
                 <div class="d-inline-block">
                   @if(optional($app->last_verification)->status_id == 'revision-needed')
-                  <a href="{{ route('admin.apps.show', ['app' => $app->id, 'show_verification' => '']) }}" class="text-info ml-2" title="@lang('admin/apps.app_changes_needs_revision_to_be_approved')" data-toggle="tooltip">
+                  <a href="{{ Auth::user()->cannot('view', $app) ? '#' : route('admin.apps.show', ['app' => $app->id, 'show_verification' => '']) }}" class="text-info ml-2" title="@lang('admin/apps.app_changes_needs_revision_to_be_approved')" data-toggle="tooltip">
                     <span class="fas fa-question-circle"></span>
                   </a>
                   @elseif($app->has_pending)
-                  <a href="{{ route('admin.apps.show', ['app' => $app->id, 'show_pending' => '']) }}" class="text-warning ml-2" title="@lang('admin/apps.app_has_pending_changes')" data-toggle="tooltip">
+                  <a href="{{ Auth::user()->cannot('view', $app) ? '#' : route('admin.apps.show', ['app' => $app->id, 'show_pending' => '']) }}" class="text-warning ml-2" title="@lang('admin/apps.app_has_pending_changes')" data-toggle="tooltip">
                     <span class="fas fa-question-circle"></span>
                   </a>
                   @endif
                   @if($app->has_approved)
-                  <a href="{{ route('admin.apps.show', ['app' => $app->id, 'show_verification' => '']) }}" class="text-success ml-2" title="@lang('admin/apps.app_has_approved_changes')" data-toggle="tooltip">
+                  <a href="{{ Auth::user()->cannot('view', $app) ? '#' : route('admin.apps.show', ['app' => $app->id, 'show_verification' => '']) }}" class="text-success ml-2" title="@lang('admin/apps.app_has_approved_changes')" data-toggle="tooltip">
                     <span class="fas fa-question-circle"></span>
                   </a>
                   @endif
                   @if(optional($app->last_changes)->is_rejected)
-                  <a href="{{ route('admin.apps.show', ['app' => $app->id, 'show_verification' => '']) }}" class="text-danger ml-2" title="@lang('admin/apps.app_has_rejected_changes')" data-toggle="tooltip">
+                  <a href="{{ Auth::user()->cannot('view', $app) ? '#' : route('admin.apps.show', ['app' => $app->id, 'show_verification' => '']) }}" class="text-danger ml-2" title="@lang('admin/apps.app_has_rejected_changes')" data-toggle="tooltip">
                     <span class="fas fa-times-circle"></span>
                   </a>
                   @endif
@@ -180,15 +209,19 @@ $hide_filters = !$show_filters;
                 @endif
               </td>
               <td class="text-nowrap">
+                @can('view', $app)
                 <a href="{{ route('admin.apps.show', ['app' => $app->id]) }}" class="btn btn-default btn-sm text-nowrap">
                   <span class="fas fa-search mr-1"></span>
                   {{ __('common.view') }}
                 </a>
+                @endcan
                 {{--
+                @can('update', $app)
                 <a href="{{ route('admin.apps.edit', ['app' => $app->id]) }}" class="btn btn-primary btn-sm text-nowrap">
                   <span class="fas fa-edit mr-1"></span>
                   {{ __('common.edit') }}
                 </a>
+                @endcan
                 --}}
               </td>
             </tr>

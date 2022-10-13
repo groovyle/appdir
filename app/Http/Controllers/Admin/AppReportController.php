@@ -61,6 +61,10 @@ class AppReportController extends Controller
 			$query->on('a.id', '=', 'vd.app_id');
 		});
 
+		// Do not include trashed/deleted items
+		$query->whereNull('a.deleted_at');
+
+
 		$query->select('a.*');
 		$query->selectRaw('count(distinct r.id) as num_reports');
 		$query->selectRaw('max(r.updated_at) as last_report');
@@ -116,6 +120,7 @@ class AppReportController extends Controller
 	 */
 	public function index()
 	{
+		$this->authorize('view-any', AppReport::class);
 		//
 		$data = [];
 
@@ -133,6 +138,7 @@ class AppReportController extends Controller
 
 	public function review(Request $request, App $app)
 	{
+		$this->authorize('create', AppReport::class);
 		//
 		$data = [];
 
@@ -164,6 +170,7 @@ class AppReportController extends Controller
 	}
 
 	public function verify(Request $request, App $app) {
+		$this->authorize('create', AppReport::class);
 
 		request_replace_nl($request);
 		$rules = [
@@ -324,6 +331,7 @@ class AppReportController extends Controller
 
 	public function verdicts(Request $request, App $app)
 	{
+		$this->authorize('view-any', AppReport::class);
 		//
 		$data = [];
 

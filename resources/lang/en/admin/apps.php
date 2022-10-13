@@ -2,6 +2,8 @@
 
 return [
 
+'_self'			=> 'App',
+
 'page_title'	=> [
 	'index'				=> 'Apps List',
 	'detail'			=> 'View & Manage App',
@@ -13,6 +15,12 @@ return [
 	'review_changes'	=> 'Review Changes',
 	'publish_changes'	=> 'Publish Changes',
 	'publish_app'		=> 'Publish App',
+
+	'view_mode'			=> [
+		'all'	=> 'Viewing all apps in the system',
+		'prodi'	=> 'Viewing apps in your study program - :x',
+		'owned'	=> 'Viewing your apps',
+	],
 ],
 
 'tab_title'		=> [
@@ -62,6 +70,9 @@ return [
 'compare'				=> 'Compare',
 'view_your_app'			=> 'View your app',
 'back_to_app_details'	=> 'Back to app details',
+'no_app_submissions_yet'	=> 'There are\'nt any app submissions yet',
+'no_apps_matches'			=> 'No apps match your search',
+'you_own_this_app'			=> 'You own this app',
 
 'status'	=> [
 	'is_published'		=> 'Published',
@@ -69,9 +80,12 @@ return [
 	'is_reported'		=> 'Reported',
 	'is_verified'		=> 'Verified',
 	'is_unverified'		=> 'Unverified',
+	'my_apps'			=> 'My apps',
+	'other_apps'		=> 'Other apps',
 ],
 
 'fields'	=> [
+	'owner'						=> 'Owner',
 	'name'						=> 'Name',
 	'name_placeholder'			=> 'App name',
 	'short_name'				=> 'Short Name',
@@ -83,7 +97,7 @@ return [
 	'url_placeholder'			=> 'https://.....',
 	'url_hint'					=> 'Link to the app\'s website or social media, or etc.',
 	'logo'						=> 'Logo',
-	'logo_hint'					=> 'Logo recommendations: <br>JPG type, aspect ratio of 1:1, 300x300 <br>Max file size of 2MB',
+	'logo_hint'					=> 'Logo recommendations: <br>JPG type, aspect ratio of 1:1, size up to 300x300 pixels <br>Max file size of 2MB',
 	'current_logo'				=> 'Current Logo',
 	'remove_logo?'				=> 'Remove logo?',
 	'change_logo'				=> 'Change logo',
@@ -91,7 +105,7 @@ return [
 	'categories'				=> 'Categories',
 	'categories_placeholder'	=> 'Categories the app belongs to',
 	'tags'						=> 'Tags',
-	'tags_hint'					=> 'You can add your own tag by typing it in',
+	'tags_hint'					=> 'You can add your own tag by typing it in, items are separated with a space or comma',
 	'tags_placeholder'			=> 'App topics',
 	'status'					=> 'Status',
 	'order'						=> 'Order',
@@ -104,6 +118,7 @@ return [
 	'visuals_other_value_placeholder'	=> 'Visual media',
 	'submission_status'			=> 'Submission Status',
 	'is_published'				=> 'Published',
+	'filter_is_owned'			=> 'Whose Apps',
 ],
 
 'changes'	=> [

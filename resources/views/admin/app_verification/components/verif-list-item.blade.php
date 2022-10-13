@@ -34,8 +34,10 @@ $hide_edit = !!($hide_edit ?? true);
     @endif
     @if(!$hide_navs)
     <button type="button" class="btn btn-tool btn-view-verif ml-n1" data-toggle="tooltip" title="@lang('admin/app_verifications.view_this_item')" data-app-id="{{ $app->id }}" data-verif-id="{{ $verif->id }}"><span class="fas fa-expand"></span></button>
-    @if($verif->can_edit && !$hide_edit)
+    @if(!$hide_edit)
+    @can('update', $verif)
     <a href="{{ route('admin.app_verifications.review', ['app' => $verif->app_id, 'verif' => $verif->id]) }}" class="btn btn-tool ml-n2" data-toggle="tooltip" title="@lang('admin/app_verifications.edit_this_item')"><span class="fas fa-pencil-alt"></span></a>
+    @endcan
     @endif
     @endif
   </div>

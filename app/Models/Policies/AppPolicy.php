@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Policies;
+namespace App\Models\Policies;
 
-use App\App\Models\App;
+use App\Models\App;
 use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -77,6 +77,8 @@ class AppPolicy
 	public function update(User $user, App $app)
 	{
 		//
+		if($user->can('update-all', App::class)) return true;
+		if(!$app->is_owned) return false;
 	}
 
 	/**
@@ -89,6 +91,8 @@ class AppPolicy
 	public function delete(User $user, App $app)
 	{
 		//
+		if($user->can('delete-all', App::class)) return true;
+		if(!$app->is_owned) return false;
 	}
 
 	/**

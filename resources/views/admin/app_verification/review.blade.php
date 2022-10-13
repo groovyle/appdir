@@ -46,7 +46,9 @@ $rand = random_alpha(5);
 
 @section('content')
 <div class="mb-2">
+  @can('view-any', App\Models\AppVerification::class)
   <a href="{{ route('admin.app_verifications.index') }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+  @endcan
 </div>
 
 

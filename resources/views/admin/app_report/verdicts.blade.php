@@ -10,13 +10,17 @@ $show_recent = $show_recent ?? false;
 
 <div class="d-flex flex-wrap text-nowrap mb-1">
 	<div class="details-nav-left mr-auto mb-1">
+		@can('view-any', App\Models\AppReport::class)
 		<a href="{{ route('admin.app_reports.index') }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+		@endcan
 	</div>
 	<div class="details-nav-right ml-auto mb-1">
+		@can('create', App\Models\AppReport::class)
 		<a href="{{ route('admin.app_reports.review', ['app' => $app->id]) }}" class="btn btn-sm bg-primary">
 			<span class="fas fa-clipboard-check mr-1"></span>
 			{{ __('admin/app_reports.review_reports') }}
 		</a>
+		@endcan
 	</div>
 </div>
 

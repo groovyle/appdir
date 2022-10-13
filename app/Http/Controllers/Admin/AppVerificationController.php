@@ -18,7 +18,9 @@ use App\DataManagers\AppManager;
 use App\Rules\ModelExists;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Str;
 
 class AppVerificationController extends Controller
@@ -48,6 +50,11 @@ class AppVerificationController extends Controller
 			$query->where('cl.status', AppChangelog::STATUS_PENDING);
 			$query->whereRaw('if(cv.id is not null, cl.created_at >= cv.created_at and cl.id > cv.id, 1)');
 		});
+
+		// Do not include trashed/deleted items
+		$query->whereNull('a.deleted_at');
+
+
 		$query->select('a.*');
 		$query->groupBy('a.id');
 		$query->orderBy('a.updated_at', 'desc');
@@ -79,6 +86,8 @@ class AppVerificationController extends Controller
 	 */
 	public function index()
 	{
+		$this->authorize('view-any', AppVerification::class);
+
 		//
 		$data = [];
 
@@ -95,6 +104,8 @@ class AppVerificationController extends Controller
 
 	public function review(Request $request, App $app, $verif = null)
 	{
+		$this->authorize('review', [AppVerification::class, null, $app]);
+
 		//
 		$data = [];
 
@@ -125,7 +136,10 @@ class AppVerificationController extends Controller
 				}
 			}
 		} else {
+			// Additional gate checks
 			$is_edit = true;
+			$this->authorize('update', $verif);
+
 			$versions = $verif->changelogs->reverse()->values();
 
 			$verif->base_version = $verif->base_changelog->version;
@@ -177,14 +191,26 @@ class AppVerificationController extends Controller
 
 	public function verify(Request $request, App $app)
 	{
+		$this->authorize('review', [AppVerification::class, null, $app]);
+
 		//
 		$id = $request->input('id');
 		$is_edit = !empty($id);
 
+		// Make verification item
+		if(!$is_edit) {
+			$ver = new AppVerification;
+			$ver->verifier_id = $request->user()->id;
+		} else {
+			$ver = AppVerification::find($id);
+
+			// Additional gate checks
+			$this->authorize('update', $ver);
+		}
+
 		request_replace_nl($request);
 		$rules = [
-			// 'versionq'			=> ['required'],
-			// 'versionb'			=> ['required'],
+			// 'dummy'				=> ['required'],
 			'base_version'		=> [
 				'required',
 				new ModelExists(AppChangelog::class, 'version', null, function($query) use($app) {
@@ -213,14 +239,6 @@ class AppVerificationController extends Controller
 		$result = true;
 		$error = [];
 		try {
-			// Make verification item
-			if(!$is_edit) {
-				$ver = new AppVerification;
-				$ver->verifier_id = $request->user()->id;
-			} else {
-				$ver = AppVerification::find($id);
-			}
-
 			$verif_status = $request->input('verif_status');
 			$ver->status_id = $verif_status;
 			$ver->comment = $request->input('overall_comment');
@@ -363,182 +381,6 @@ class AppVerificationController extends Controller
 
 		$data['app'] = $app;
 		return view('admin/app_verification/detail-snippet', $data);
-	}
-
-	public function advancedReview(Request $request, App $app)
-	{
-		//
-		$data = [];
-
-		// NOTE: use find() to generate a new, separate object
-		$base_app = App::find($app->id);
-
-		if($input_version = $request->input('version')) {
-			$app = AppManager::getMockItem($app->id, $input_version);
-		}
-
-		// Show the latest edits if there are any pending changes
-		/*if($app->has_floating_changes) {
-			list($ori, $app) = AppManager::getPendingVersion($app);
-			$app->setRelation('version', $ori->floating_changes->last());
-			$data['ori'] = $ori;
-		}*/
-
-		$data['app'] = $app;
-		$data['base_app'] = $base_app;
-
-		$data['version'] = optional($ori ?? $app)->version;
-		$data['vstatus'] = VVStatus::all()->keyBy('id');
-		$data['current_version_number'] = $app->version_number ?? $input_version;
-
-		return view('admin/app_verification/advanced_review', $data);
-	}
-
-	public function advancedVerify(Request $request, App $app)
-	{
-		//
-
-		request_replace_nl($request);
-		$rules = [
-			// 'versionq'			=> ['required'],
-			// 'versionb'			=> ['required'],
-			'version'			=> ['required'],
-			'details'			=> ['array'],
-			'details.*'			=> ['nullable', 'string', 'max:200'],
-			'overall_comment'	=> ['required', 'string', 'max:1000'],
-			'verif_status'		=> ['required', new ModelExists(VVStatus::class)],
-		];
-		$validData = $request->validate($rules);
-
-		$input_version = $request->input('version');
-
-		// Begin storing entries
-		DB::beginTransaction();
-
-		$result = true;
-		$error = [];
-		try {
-			// Make verification item
-			$ver = new AppVerification;
-			$ver->verifier_id = $request->user()->id;
-			$verif_status = $request->input('verif_status');
-			$ver->status_id = $verif_status;
-			$ver->comment = $request->input('overall_comment');
-
-			$details = array_filter($request->input('details'));
-			$ver->details = $details;
-
-			$result = $app->verifications()->save($ver);
-
-			// Set the verification's related changelog(s)
-			$version = $app->changelogs()->where('version', $input_version)->firstOrFail();
-
-			// TODO: what to do if status is rejected and/or needs-revision? What
-			// about the changelog's verified status? Should we make it such that
-			// it has both is_verified and status?
-			if($verif_status == 'approved') {
-				// TODO: find all pending changes between the app's current version
-				// and the version being verified right now, example:
-				// (current) - A - B - C - D - E
-				// If C is being approved, then compile changes from A to C, and
-				// then commit it. The versions after (D forwards) should be unaffected.
-				/*$related_changelogs = $app->pending_changes()
-					->where('created_at', '<=', (string) $version->created_at)
-					->get()
-				;*/
-
-				// Commit all related changes and set app to be verified.
-
-				// TODO: commit changes
-				$compiled = AppManager::applyVersionsChanges($app, $version->version, $app->version_number, function($query) {
-					$query->where('status', AppChangelog::STATUS_PENDING);
-				});
-				$related_changelogs = $compiled['versions'];
-
-				// Approved changes shouldn't be counted as pending changes anymore,
-				// because they got applied - i.e they're not pending anymore.
-				foreach($related_changelogs as $rcl) {
-					$rcl->status = AppChangelog::STATUS_APPROVED;
-				}
-
-				// Set to verified
-				$app->is_verified = true;
-				$result = $result && $app->save();
-			} elseif($verif_status == 'rejected') {
-				// TODO: find all pending changes AFTER this one and also reject them,
-				// because all subsequent pendings depend on this version, example:
-				// (current) - A - B - C - D - E
-				// If C is being rejected, then versions before C are unaffected (A to B),
-				// but C forwards (D to E) are all affected because they depend on C.
-				// That way, it is possible that CDE gets rejected, but A or B can
-				// still get reviewed. If then F gets introduced, it should diff
-				// not from E, but from B (the last still pending change).
-				$related_changelogs = $app->pending_changes()
-					->where('created_at', '>=', (string) $version->created_at)
-					->get()
-				;
-
-				// Set all related changes to rejected...
-				// Rejected changes shouldn't be counted as pending changes anymore,
-				// i.e they're considered lost.
-				foreach($related_changelogs as $rcl) {
-					$rcl->status = AppChangelog::STATUS_REJECTED;
-				}
-			} else {
-				// Assume revision-needed
-
-				// TODO: find all pending changes between the app's current version
-				// and the version being verified right now, example:
-				// (current) - A - B - C - D - E
-				// If C is being reviewed, then changes prior to it (A to B) are
-				// also being reviewed, because C depends on them.
-				$related_changelogs = $app->pending_changes()
-					->where('created_at', '<=', (string) $version->created_at)
-					->get()
-				;
-
-				// Since it's being reviewed, there should be no change to the
-				// related changes' state.
-			}
-
-			// Set verified state of the related changes
-			foreach($related_changelogs as $rcl) {
-				$rcl->is_verified = true;
-				$result = $result && $rcl->save();
-			}
-
-			// Pair the changes with the verification
-			$ver->changelogs()->detach();
-			$ver->changelogs()->attach($related_changelogs->modelKeys());
-
-		} catch(\Illuminate\Database\QueryException $e) {
-			$result = FALSE;
-			// TODO: do something with the message
-			$error[] = $e->getMessage();
-			// dd($e->getMessage());
-		}
-
-		if(!$result) {
-			DB::rollback();
-
-			// Pass a message...?
-			$request->session()->flash('flash_message', [
-				'message'	=> __('admin.app_verification.message.verify_failed'),
-				'type'		=> 'error'
-			]);
-
-			return redirect()->back()->withInput()->withErrors($error);
-		} else {
-			DB::commit();
-
-			// Pass a message
-			$request->session()->flash('flash_message', [
-				'message'	=> __('admin.app_verification.message.verify_successful'),
-				'type'		=> 'success'
-			]);
-
-			return redirect()->route('admin.app_verifications.advanced_review', ['app' => $app->id, 'version' => $input_version]);
-		}
 	}
 
 	/**

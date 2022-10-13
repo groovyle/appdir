@@ -53,7 +53,8 @@ class UserPolicy
 	public function update(User $user, User $model)
 	{
 		//
-		return ! $model->is_system;
+		if($model->exists)
+			return ! $model->is_system;
 	}
 
 	/**
@@ -66,7 +67,8 @@ class UserPolicy
 	public function delete(User $user, User $model)
 	{
 		//
-		return ! $model->is_system;
+		if($model->exists)
+			return ! $model->is_system;
 	}
 
 	/**

@@ -648,6 +648,7 @@ class AppManager {
 
 		$mock = new App;
 		$mock->id = $app_id;
+		$mock->owner_id = $app->owner_id;
 		$mock->setRelation('version', $compiled['versions']->last());
 		return static::applyDiff($mock, $compiled['changes'], true);
 	}

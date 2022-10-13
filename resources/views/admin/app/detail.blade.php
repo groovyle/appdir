@@ -20,7 +20,10 @@ $append_breadcrumb = [
 @section('content')
 <div class="d-flex flex-wrap text-nowrap mb-1">
   <div class="details-nav-left mr-auto mb-1">
+    @can('view-any', $app)
     <a href="{{ route('admin.apps.index') }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+    @endcan
+    @can('update', $app)
     <a href="{{ route('admin.apps.edit', ['app' => $app->id]) }}" class="btn btn-sm btn-primary">
       <span class="fas fa-edit"></span>
       {{ __('admin/apps.edit_app_info') }}
@@ -29,8 +32,15 @@ $append_breadcrumb = [
       <span class="fas fa-photo-video"></span>
       {{ __('admin/apps.edit_visuals') }}
     </a>
+    @endcan
   </div>
   <div class="details-nav-right ml-auto mb-1">
+    @can('delete', $app)
+    <a href="{{ route('admin.apps.destroy', ['app' => $app->id]) }}" class="btn btn-danger btn-sm text-nowrap btn-ays-modal" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/apps._self'), $app->complete_name, __('admin/common.fields.id'), $app->id) }}">
+      <span class="fas fa-trash mr-1"></span>
+      {{ __('common.delete') }}
+    </a>
+    @endcan
   </div>
 </div>
 <!-- Card -->
@@ -38,7 +48,10 @@ $append_breadcrumb = [
   <div class="card-header">
     <div class="d-flex flex-wrap align-items-center">
       <div class="mr-auto">
-        <h4 class="mb-0 text-primary d-inline-block">{{ $app->complete_name }}</h4>
+        <h4 class="mb-0 d-inline-block">
+          {{ $app->complete_name }}
+          @include('admin.app.components.owned-icon')
+        </h4>
         <br>
         @if($app->is_reported)
           <span class="badge badge-soft badge-danger align-middle text-080">
@@ -62,11 +75,13 @@ $append_breadcrumb = [
         </span>
         @endif
         @if($app->has_floating_changes)
+        @canany(['update', 'view-changelog'], $app)
         <br>
         <button class="btn btn-xs btn-warning btn-pending-changes-show" data-app-id="{{ $app->id }}" data-current-version="{{ $app->version_number }}" data-accumulate-changes="false">
           <span class="fas fa-clock"></span>
           @lang('admin/apps.show_pending_changes')
         </button>
+        @endcan
         @endif
       </div>
     </div>
@@ -76,18 +91,22 @@ $append_breadcrumb = [
       <div class="col-12 col-md-4 side-panel right">
         <div class="mb-2 text-center">
           @if($app->has_verifications)
+          @can('view-verifications', $app)
           <a href="{{ route('admin.apps.verifications', ['app' => $app->id]) }}" class="btn btn-app text-dark">
             <span class="badge badge-primary text-100">{{ count($app->verifications) }}</span>
             <span class="fas fa-clipboard-check"></span>
             {{ __('admin/apps.verifications') }}
           </a>
+          @endcan
           @endif
           @if($app->has_history)
+          @can('view-changelog', $app)
           <a href="{{ route('admin.apps.changes', ['app' => $app->id, 'current' => '']) }}" class="btn btn-app text-dark">
             <span class="badge badge-primary text-100">{{ count($app->changelogs) }}</span>
             <span class="fas fa-history"></span>
             {{ __('admin/apps.history') }}
           </a>
+          @endcan
           @endif
         </div>
 
@@ -146,8 +165,10 @@ $append_breadcrumb = [
           <br>
           <strong>{{ __('common.note') }}: {{ __('admin/apps.messages.app_ban_will_be_lifted_after_publish') }}</strong>
           @endif
+          @can('update', $app)
           <br>
           <a href="{{ route('admin.apps.publish', ['app' => $app->id]) }}" class="btn btn-success text-white btn-sm mt-1">@lang('admin/apps.publish_edits') &raquo;</a>
+          @endcan
         </div>
         @endif
         @endif

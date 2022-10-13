@@ -12,14 +12,15 @@ if(isset($section_id))
   <div class="card-header">
     <div class="d-flex flex-wrap align-items-center">
       <div class="mr-auto">
-        <h4 class="mb-0 text-primary d-inline-block">
+        <h4 class="mb-0 d-inline-block">
           {{ $app->complete_name }}
+          @include('admin.app.components.owned-icon')
           <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="@lang('common.show/hide')"><i class="fas fa-search"></i></button>
         </h4>
         <br>
         @if(!$hide_header_extras)
           @if($app->is_published)
-            @if($app->is_public)
+            @if($app->is_listed)
             <span class="badge badge-soft badge-success align-middle text-080">
               <span class="fas fa-check-circle mr-1"></span>
               @lang('admin/apps.app_is_public')

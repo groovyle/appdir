@@ -23,7 +23,9 @@ $append_breadcrumb = [
 
 @section('content')
 <div class="mb-2">
-  <a href="{{ route('admin.apps.show', ['app' => $app->id]) }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back') }}</a>
+  @if($back)
+  <a href="{{ $back }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back') }}</a>
+  @endif
 </div>
 
 @if($use_mock)
@@ -161,8 +163,10 @@ $append_breadcrumb = [
           <button type="submit" class="btn btn-primary btn-min-100">@lang('common.save')</button>
           <br>
           <button type="submit" class="btn btn-default btn-min-100 btn-sm mt-2 btn-save-back">@lang('common.save_and_go_back')</button>
+          @if($back)
           <br>
-          <a href="{{ route('admin.apps.show', ['app' => $app->id]) }}" class="btn btn-sm btn-warning mt-3">{{ __('common.cancel') }}</a>
+          <a href="{{ $back }}" class="btn btn-sm btn-warning mt-3">{{ __('common.cancel') }}</a>
+          @endif
         </div>
       </div>
     </div>

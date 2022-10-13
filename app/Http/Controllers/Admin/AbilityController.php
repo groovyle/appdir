@@ -64,7 +64,7 @@ class AbilityController extends Controller
 		// $query->orderBy('title');
 		// $query->orderBy('name');
 
-		$per_page = 10;
+		$per_page = 20;
 		$page = request()->input('page', 1);
 		$goto_exact = request()->input('goto_exact');
 		$goto_item = request()->input('goto_item');
@@ -115,7 +115,7 @@ class AbilityController extends Controller
 	{
 		//
 		$back_url = null;
-		if(Auth::user()->can('view-any', Prodi::class)) {
+		if(Auth::user()->can('view-any', Ability::class)) {
 			$back_url = route('admin.abilities.index');
 		}
 

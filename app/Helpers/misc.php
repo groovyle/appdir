@@ -118,6 +118,8 @@ function find_item_offset_from_list_query($query, $id) {
 	$orders = $offset_query->getQuery()->orders;
 	$orders_bindings = $offset_query->getQuery()->bindings['order'];
 	$item = $query->getModel()->find($id);
+	$item_keyname = $query->getModel()->getKeyName();
+	$item_key = $id;
 	$binding_i = 0;
 	if($orders && $item) {
 		$orders_to_apply = [];
@@ -148,14 +150,14 @@ function find_item_offset_from_list_query($query, $id) {
 			} elseif( array_key_exists($order['column'], $item->getAttributes())
 				|| isset($item->{$order['column']}) ) {
 				if($item->{$order['column']} !== null) {
-					$orders_to_apply[] = function($query) use($order, $item) {
-						$query->where(function($query) use($order, $item) {
+					$orders_to_apply[] = function($query, $last) use($order, $item) {
+						$query->where(function($query) use($order, $item, $last) {
 							$query->where(
 								$order['column'],
-								$order['direction'] == 'asc' ? '<=' : '>=',
+								($order['direction'] == 'asc' ? '<' : '>').(!$last ? '=' : ''),
 								$item->{$order['column']}
 							);
-							if($order['direction'] == 'asc') {
+							if($last && $order['direction'] == 'asc') {
 								// NULL values are always considered less, so
 								// we also need to account for that when ascending
 								$query->orWhereNull($order['column']);
@@ -171,9 +173,16 @@ function find_item_offset_from_list_query($query, $id) {
 					 * When order is ASC, it means earlier items are also NULL,
 					 * and later items are non-NULL. Vice-versa when order is DESC.
 					 */
-					$fn = $order['direction'] == 'asc' ? 'whereNull' : 'whereNotNull';
-					$orders_to_apply[] = function($query) use($order, $fn) {
-						$query->$fn($order['column']);
+					$orders_to_apply[] = function($query, $last) use($order, $item_keyname, $item_key) {
+						$query->where(function($query) use($order, $item_keyname, $item_key, $last) {
+							$fn = $order['direction'] == 'asc' ? 'whereNull' : 'whereNotNull';
+							$query->$fn($order['column']);
+							$query->where(
+								$item_keyname,
+								($order['direction'] == 'asc' ? '<' : '>').(!$last ? '=' : ''),
+								$item_key
+							);
+						});
 					};
 				}
 			} else {
@@ -186,14 +195,15 @@ function find_item_offset_from_list_query($query, $id) {
 		for($i = 0; $i < count($orders_to_apply); $i++) {
 			$offset_query->orWhere(function($query) use($orders_to_apply, $i) {
 				for($j = 0; $j <= $i; $j++) {
-					$orders_to_apply[$j]($query);
+					$orders_to_apply[$j]($query, $j == $i);
 				}
 			});
 		}
+		$offset_query->orWhere($item_keyname, $item_key);
 
 		$offset = $offset_query->count();
 	} else {
-		$offset = $offset_query->where($query->getModel()->getKeyName(), '<=', $id)->count();
+		$offset = $offset_query->where($item_keyname, '<=', $item_key)->count();
 	}
 
 	return $offset;

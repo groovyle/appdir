@@ -23,6 +23,10 @@ class BouncerSeeder extends Seeder
 		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'view-version']);
 		// View all apps, even the ones not in the same prodi
 		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'view-all']);
+		// Update non owned apps
+		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'update-all']);
+		// Delete non owned apps
+		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'delete-all']);
 
 		// Interact with all users, even the ones not in the same prodi
 		Bouncer::ability()::createForModel('App\User', ['name' => 'bypass-prodi']);

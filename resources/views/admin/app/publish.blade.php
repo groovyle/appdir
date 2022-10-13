@@ -30,7 +30,9 @@ $show_changes = $app->has_committed;
 @section('content')
 <div class="d-flex flex-wrap text-nowrap mb-1">
   <div class="details-nav-left mr-auto mb-1">
+    @can('view', $app)
     <a href="{{ route('admin.apps.show', ['app' => $app->id]) }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back') }}</a>
+    @endcan
   </div>
 </div>
 <form method="POST" action="{{ route('admin.apps.publish.save', ['app' => $app->id]) }}" id="formPublishChanges">

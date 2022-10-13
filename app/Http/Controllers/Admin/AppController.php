@@ -29,6 +29,7 @@ use Illuminate\Http\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -44,6 +45,32 @@ class AppController extends Controller
 	public function __construct()
 	{
 		$this->middleware('auth');
+		$this->authorizeResource(App::class, 'app');
+	}
+
+	/**
+	 * Get the map of resource methods to ability names.
+	 *
+	 * @return array
+	 */
+	protected function resourceAbilityMap()
+	{
+		return [
+			'index'		=> 'viewAny',
+			'show'		=> 'view',
+			'create'	=> 'create',
+			'store'		=> 'create',
+			'edit'		=> 'update',
+			'update'	=> 'update',
+			'destroy'	=> 'delete',
+			'visuals'	=> 'update',
+			'updateVisuals'	=> 'update',
+			'verifications'	=> 'view-verifications',
+			'changes'		=> 'view-changelog',
+			'reviewChanges'		=> 'update',
+			'publishChanges'	=> 'update',
+			'afterPublishChanges'	=> 'update',
+		];
 	}
 
 	/**
@@ -58,7 +85,7 @@ class AppController extends Controller
 		$user = Auth::user();
 		// $apps = Auth::user()->apps()->get();
 
-		$filters = get_filters(['keyword', 'status', 'published', 'categories', 'tags']);
+		$filters = get_filters(['keyword', 'status', 'published', 'categories', 'tags', 'owned']);
 		$opt_filters = optional($filters);
 		$filter_count = 0;
 
@@ -66,7 +93,13 @@ class AppController extends Controller
 		$tags = array_filter(explode(',', $opt_filters['tags']));
 
 		$query = (new App)->newQueryWithoutScopes();
-		$query->with(['last_verification.status', 'last_changes', 'categories', 'tags']);
+		$query->with([
+			'last_verification.status',
+			'last_changes',
+			'categories',
+			'tags',
+		]);
+
 		$query->from('apps as a');
 		$query->leftJoin('app_changelogs as cv', 'a.version_id', '=', 'cv.id');
 		$query->leftJoin('app_changelogs as cl', function($query) {
@@ -86,6 +119,39 @@ class AppController extends Controller
 				$query->whereIn('atag.tag', $tags);
 			}
 		});
+		$query->leftJoin('users as o', 'a.owner_id', '=', 'o.id');
+		$query->leftJoin('ref_prodi as prodi', 'o.prodi_id', '=', 'prodi.id');
+
+		// Do not include trashed/deleted items
+		$query->whereNull('a.deleted_at');
+
+		$total_all = $query->count(DB::raw('distinct a.id'));
+
+		// TODO: role/ability scoping filter
+		$view_mode = 'owned';
+		$query->where(function($query) use($user, &$view_mode) {
+			// Always able to view owned items
+			$query->where('a.owner_id', $user->id);
+
+			// More scope filters
+			$query->orWhere(function($query) use($user, &$view_mode) {
+				if($user->can('view-all', App::class)) {
+					// No scope filter, enable all
+					$view_mode = 'all';
+					$query->whereRaw('1');
+				} elseif($user->can('view-any-in-prodi', App::class)) {
+					// Only ones in the same prodi
+					$view_mode = 'prodi';
+					$query->where('prodi.id', $user->prodi_id);
+					$query->whereNotNull('prodi.id');
+				} else {
+					// Only owned
+				}
+			});
+		});
+		$total_scoped = $query->count(DB::raw('distinct a.id'));
+
+
 		$query->groupBy('a.id');
 		$query->orderBy('a.is_reported', 'desc'); // bring reported apps into attention
 		$query->orderBy('a.name', 'asc');
@@ -95,9 +161,6 @@ class AppController extends Controller
 		$query->selectRaw('(count(cl.id) > 0) as has_floating');
 		$query->selectRaw('(count(if(cl.status = ?, cl.id, null)) > 0) as has_pending', [AppChangelog::STATUS_PENDING]);
 		$query->selectRaw('(count(if(cl.status = ?, cl.id, null)) > 0) as has_approved', [AppChangelog::STATUS_APPROVED]);
-
-		// TODO: don't filter if admin
-		$query->where('a.owner_id', $user->id);
 
 		if($keyword = trim($opt_filters['keyword'])) {
 			$str = escape_mysql_like_str($keyword);
@@ -149,10 +212,34 @@ class AppController extends Controller
 				break;
 		}
 
-		$items = $query->paginate(10);
+		switch($opt_filters['owned']) {
+			case 'mine':
+				$query->where('a.owner_id', '=', $user->id);
+				$filter_count++;
+				break;
+			case 'others':
+				$query->where('a.owner_id', '!=', $user->id);
+				$filter_count++;
+				break;
+		}
+
+		$per_page = 10;
+		$page = request()->input('page', 1);
+
+		$items = $query->paginate($per_page);
 		$items->appends($filters);
 
+		// Redirect if over page. This can happen when e.g the last item in the
+		// last page gets deleted. Redirect to last available page.
+		if($items->total() > 0 && $page > $items->lastPage()) {
+			return redirect()->to( $items->url($items->lastPage()) );
+		}
+
+		$data['view_mode'] = $view_mode;
+		$data['prodi'] = optional($user->prodi);
 		$data['items'] = $items;
+		$data['total_all'] = $total_all;
+		$data['total_scoped'] = $total_scoped;
 		$data['filters'] = $opt_filters;
 		$data['filter_count'] = $filter_count;
 		$data['categories'] = AppCategory::all();
@@ -181,6 +268,11 @@ class AppController extends Controller
 		$data = $this->_getFormPreps();
 
 		//
+		$back_url = null;
+		if(Auth::user()->can('view-any', App::class)) {
+			$back_url = route('admin.apps.index');
+		}
+
 		$app = new App;
 
 		$data['app'] = $app;
@@ -189,6 +281,7 @@ class AppController extends Controller
 
 		$data['action'] = route('admin.apps.store');
 		$data['method'] = 'POST';
+		$data['back'] = $back_url;
 
 		return view('admin/app/edit', $data);
 	}
@@ -538,7 +631,7 @@ class AppController extends Controller
 			}
 		}
 
-		return compact('result', 'messages');
+		return compact('result', 'messages', 'app');
 	}
 
 	/**
@@ -580,7 +673,15 @@ class AppController extends Controller
 				'type'		=> 'success'
 			]);
 
-			return redirect()->route('admin.apps.index');
+			if(Auth::user()->can('view-any', App::class)) {
+				// Scroll to the just added item
+				return redirect()->route('admin.apps.index', [
+					'goto_item'		=> $store['app']->id,
+					'goto_flash'	=> 1,
+				]);
+			}
+
+			return redirect()->back();
 		}
 	}
 
@@ -615,12 +716,23 @@ class AppController extends Controller
 			$data['ori'] = $ori;
 		}
 
+		$back_url = null;
+
+		if(Auth::user()->can('view', $app)) {
+			$back_url = route('admin.apps.show', ['app' => $app->id]);
+		}
+		$backto = request()->query('backto');
+		if((!$back_url || $backto == 'list') && Auth::user()->can('view-any', App::class)) {
+			$back_url = route('admin.apps.index', ['goto_item' => $app->id]);
+		}
+
 		$data['app'] = $app;
 		$data['is_edit'] = TRUE;
 		$data['pending_edits'] = settings('app.modification_needs_verification', false);
 
 		$data['action'] = route('admin.apps.update', ['app' => $app->id]);
 		$data['method'] = 'PATCH';
+		$data['back'] = $back_url;
 
 		$data['user'] = Auth::user();
 
@@ -666,7 +778,14 @@ class AppController extends Controller
 				'type'		=> 'success'
 			]);
 
-			return redirect()->route('admin.apps.show', ['app' => $app->id]);
+			$backto = $request->input('backto');
+			if($backto == 'list' && Auth::user()->can('view-any', App::class)) {
+				return redirect()->route('admin.apps.index', ['goto_item' => $app->id, 'goto_flash' => 1]);
+			} elseif(Auth::user()->can('view', $app)) {
+				return redirect()->route('admin.apps.show', ['app' => $app->id]);
+			}
+
+			return redirect()->back();
 		}
 	}
 
@@ -676,9 +795,65 @@ class AppController extends Controller
 	 * @param  \App\App  $app
 	 * @return \Illuminate\Http\Response
 	 */
-	public function destroy(App $app)
+	public function destroy(Request $request, App $app)
 	{
-		//
+		DB::beginTransaction();
+
+		$result = true;
+		$messages = [];
+		try {
+			$result = $app->delete();
+		} catch(\Illuminate\Database\QueryException $e) {
+			$result = false;
+			$messages[] = $e->getMessage();
+		}
+
+		if($result) {
+			DB::commit();
+
+			// Pass a message
+			$request->session()->flash('flash_message', [
+				'message'	=> __('admin/common.messages.delete_successful'),
+				'type'		=> 'success'
+			]);
+		} else {
+			DB::rollback();
+
+			// Pass a message
+			$request->session()->flash('flash_message', [
+				'message'	=> __('admin/common.messages.delete_failed'),
+				'type'		=> 'danger'
+			]);
+		}
+
+		$redirect = null;
+		$backto = request()->query('backto');
+		if(Auth::user()->can('view-any', App::class)) {
+			$redirect = route('admin.apps.index');
+		}
+		if(!$redirect || $backto == 'back') {
+			$redirect = url()->previous();
+		}
+
+		if(!$request->ajax()) {
+			if($result) {
+				return redirect($redirect);
+			} else {
+				return redirect()->back()->withErrors($messages);
+			}
+		} else {
+			if($result) {
+				return response()->json([
+					'status'	=> 'OK',
+					'redirect'	=> $redirect,
+				], 200);
+			} else {
+				return response()->json([
+					'status'	=> 'ERROR',
+					'message'	=> \Arr::get($messages, 0),
+				], 500);
+			}
+		}
 	}
 
 	public function verifications(App $app)
@@ -739,6 +914,16 @@ class AppController extends Controller
 			$data['ori'] = $ori;
 		}
 
+		$back_url = null;
+
+		if(Auth::user()->can('view', $app)) {
+			$back_url = route('admin.apps.show', ['app' => $app->id]);
+		}
+		$backto = request()->query('backto');
+		if((!$back_url || $backto == 'list') && Auth::user()->can('view-any', App::class)) {
+			$back_url = route('admin.apps.index', ['goto_item' => $app->id]);
+		}
+
 		$data['app'] = $app;
 		$data['max_visuals'] = Settings::get('app.visuals.max_amount');
 
@@ -779,6 +964,7 @@ class AppController extends Controller
 		$data['cerrors'] = $cerrors;
 
 		$data['user'] = Auth::user();
+		$data['back'] = $back_url;
 		$data['old_uploads'] = old('new_images', []);
 
 		$data['pending_edits'] = settings('app.modification_needs_verification', false);
@@ -1072,10 +1258,16 @@ class AppController extends Controller
 				'type'		=> 'success'
 			]);
 
-			return $request->input('back_after_save', 0) == 1
-				? redirect()->route('admin.apps.show', ['app' => $app->id])
-				: redirect()->route('admin.apps.visuals', ['app' => $app->id])
-			;
+			$back_after_save = $request->input('back_after_save', 0) == 1;
+			if($back_after_save && Auth::user()->can('view', $app)) {
+				return redirect()->route('admin.apps.show', ['app' => $app->id]);
+			} elseif(Auth::user()->can('update', $app)) {
+				return redirect()->route('admin.apps.visuals', ['app' => $app->id]);
+			} elseif(Auth::user()->can('view-any', $app)) {
+				return redirect()->route('admin.apps.index', ['goto_item' => $app->id, 'goto_flash' => 1]);
+			}
+
+			return redirect()->back();
 		}
 	}
 

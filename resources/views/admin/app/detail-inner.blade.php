@@ -41,6 +41,12 @@ $rand = random_alpha(5);
 ?>
 @section($section)
       <dl class="row">
+        <dt class="col-12 col-sm-3 col-xl-2">{{ __('admin/apps.fields.owner') }}</dt>
+        <dd class="col-12 col-sm-9 col-xl-10">
+          @vo_($app->owner->name)
+          @include('admin.app.components.owned-icon')
+        </dd>
+
         <dt class="col-12 col-sm-3 col-xl-2 {{ $mark_changes_attr('name') }}">{{ __('admin/apps.fields.name') }}</dt>
         <dd class="col-12 col-sm-9 col-xl-10">
           @von($app->name)
@@ -184,7 +190,9 @@ $rand = random_alpha(5);
             ({{ $app->visuals->count() }})
           </span>
           @if(!$is_snippet)
+          @can('update', $app)
           <a href="{{ route('admin.apps.visuals', ['app' => $app->id]) }}" class="text-info ml-2" title="@lang('admin/apps.edit_visuals')" data-toggle="tooltip"><span class="fas fa-edit"></span></a>
+          @endcan
           @endif
 
           @if(is_array($diff_relations['visuals']) && array_key_exists('old', $diff_relations['visuals']))

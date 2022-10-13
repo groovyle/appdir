@@ -35,7 +35,7 @@ class Prodi extends Model
 	}
 
 	public function getCompleteNameAttribute() {
-		if(!isset($this->attributes['name']))
+		if(empty($this->attributes['name']))
 			return null;
 
 		$complete = $this->attributes['name'];

@@ -29,7 +29,9 @@ if(($count = $app->changelogs()->count()) > 0) {
 
 @section('content')
 <div class="mb-2">
+  @can('view', $app)
   <a href="{{ route('admin.apps.show', ['app' => $app->id]) }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back') }}</a>
+  @endcan
 </div>
 
 @if($page > 1)

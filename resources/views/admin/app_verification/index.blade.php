@@ -77,10 +77,12 @@
                 @include('components.app-verification-status', ['app' => $app])
               </td>
               <td class="text-nowrap">
+                @can('review', [App\Models\AppVerification::class, null, $app])
                 <a href="{{ route('admin.app_verifications.review', ['app' => $app->id]) }}" class="btn btn-primary btn-sm">
                   <span class="fas fa-clipboard-check mr-1"></span>
                   {{ __('admin/app_verifications.verify') }}
                 </a>
+                @endcan
               </td>
             </tr>
             @endforeach
