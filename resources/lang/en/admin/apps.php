@@ -73,6 +73,22 @@ return [
 'no_app_submissions_yet'	=> 'There are\'nt any app submissions yet',
 'no_apps_matches'			=> 'No apps match your search',
 'you_own_this_app'			=> 'You own this app',
+'app_is_private'		=> 'App is private',
+'app_is_not_private'	=> 'App is not private',
+
+'man_pan'		=> [
+	'title'					=> 'Management Panel',
+
+	'app_is_private'		=> 'App is private (publicly listed)',
+	'app_is_not_private'	=> 'App is not private (hidden from public list, only owner can see)',
+	'make_private'			=> 'Make this app private (i.e hidden, just for you): :name ?',
+	'make_not_private'		=> 'Make this app not private (i.e publicly visible): :name ?',
+
+	'app_is_published'		=> 'App is published (its data have been verified)',
+	'app_is_not_published'	=> 'App is not published',
+	'make_published'		=> 'Publish this app, and make it possible to show publicly: :name ?',
+	'make_not_published'	=> 'Unpublish this app, and prevent it from showing up in the public listing: :name ?',
+],
 
 'status'	=> [
 	'is_published'		=> 'Published',
@@ -118,6 +134,7 @@ return [
 	'visuals_other_value_placeholder'	=> 'Visual media',
 	'submission_status'			=> 'Submission Status',
 	'is_published'				=> 'Published',
+	'is_private'				=> 'Is Private?',
 	'filter_is_owned'			=> 'Whose Apps',
 ],
 

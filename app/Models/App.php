@@ -19,18 +19,21 @@ class App extends Model
 		'is_verified' => false,
 		'is_published' => false,
 		'is_reported' => false,
+		'is_private' => false,
 	];
 
 	protected $guarded = [
 		'is_verified',
 		'is_published',
 		'is_reported',
+		'is_private',
 	];
 
 	protected $casts = [
 		'is_verified' => 'boolean',
 		'is_published' => 'boolean',
 		'is_reported' => 'boolean',
+		'is_private' => 'boolean',
 	];
 
 	protected $dates = [
@@ -86,6 +89,9 @@ class App extends Model
 		$query->where('is_verified', !$invert ? 1 : 0);
 		$query->where('is_published', !$invert ? 1 : 0);
 		$query->where('is_reported', !$invert ? 0 : 1);
+
+		// TODO: limit scope breadth depending on who the user is
+		$query->where('is_private', !$invert ? 0 : 1);
 	}
 
 	public static function getFrontendItem($slug) {
@@ -168,6 +174,10 @@ class App extends Model
 			->latest(AppVerification::UPDATED_AT)
 			->latest('id')
 		;
+	}
+
+	public function last_verifier_verification() {
+		return $this->last_verification()->byVerifiers();
 	}
 
 	public function report_verification() {
@@ -320,6 +330,7 @@ class App extends Model
 		return $this->is_verified
 			&& $this->is_published
 			&& ! $this->is_reported
+			&& ! $this->is_private
 		;
 	}
 
@@ -332,6 +343,11 @@ class App extends Model
 	public function setToReported($state = true) {
 		$this->is_reported = $state;
 		$this->reported_at = $state ? now() : null;
+		return $this;
+	}
+
+	public function setToPrivate($state = true) {
+		$this->is_private = $state;
 		return $this;
 	}
 

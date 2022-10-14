@@ -213,10 +213,21 @@ $rand = random_alpha(5);
         </dd>
         @endisset
 
+        <dt class="col-sm-3 col-xl-2">{{ __('admin/apps.fields.is_private') }}</dt>
+        <dd class="col-sm-9 col-xl-10">
+          @include('admin.components.yesno', ['value' => $app->is_private, 'color_yes' => 'text-bold'])
+          @if($app->is_private)
+          <span class="fas fa-lock text-secondary ml-1" title="{{ __('admin/apps.app_is_private') }}" data-toggle="tooltip"></span>
+          @endif
+        </dd>
+
         @if(!$hide_status)
         <dt class="col-sm-3 col-xl-2">{{ __('admin/apps.fields.status') }}</dt>
         <dd class="col-sm-9 col-xl-10">@include('components.app-verification-status', ['app' => $app])</dd>
         @endif
+
+        <dt class="col-sm-3 col-xl-2">{{ __('admin/common.fields.last_updated') }}</dt>
+        <dd class="col-sm-9 col-xl-10">@include('components.date-with-tooltip', ['date' => $app->updated_at ?? $app->created_at, 'reverse' => true])</dd>
       </dl>
 @endsection
 

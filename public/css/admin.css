@@ -635,6 +635,13 @@
 	/*border-color: #aea100;*/
 }
 
+.btn-light.bordered {
+	border-color: #adb5bd;
+}
+.btn-light.bordered:hover, .btn-light.bordered:focus {
+	border-color: #6c757d;
+}
+
 .btn-tool-inline {
 	padding: 0;
 	margin: 0;

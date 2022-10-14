@@ -41,6 +41,9 @@ Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
 	Route::post('apps/{app}/publish', 'AppController@publishChanges')->name('apps.publish.save');
 	Route::get('apps/{app}/published', 'AppController@afterPublishChanges')->name('apps.published');
 
+	Route::post('apps/{app}/set_private/{private?}', 'AppController@setPrivate')->name('apps.set-private');
+	Route::post('apps/{app}/set_published/{published?}', 'AppController@setPublished')->name('apps.set-published');
+
 	// The route is reversed for ajax stuffs so that URL management is easy
 	// (i.e put all parameters at the end).
 	// TODO: put these AJAX calls outside of login middleware

@@ -63,6 +63,18 @@ class AppVerification extends Model
 		;
 	}
 
+	public function scopeByVerifiers($query) {
+		$query->whereHas('status', function($query) {
+			$query->where('by', VerifierVerificationStatus::ACTOR);
+		});
+	}
+
+	public function scopeByEditors($query) {
+		$query->whereHas('status', function($query) {
+			$query->where('by', EditorVerificationStatus::ACTOR);
+		});
+	}
+
 	public function getAppColumn() {
 		return $this->app_column;
 	}

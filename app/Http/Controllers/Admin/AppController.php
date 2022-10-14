@@ -673,7 +673,11 @@ class AppController extends Controller
 				'type'		=> 'success'
 			]);
 
-			if(Auth::user()->can('view-any', App::class)) {
+			if(Auth::user()->can('view', $store['app'])) {
+				return redirect()->route('admin.apps.show', [
+					'app'	=> $store['app']->id,
+				]);
+			} elseif(Auth::user()->can('view-any', App::class)) {
 				// Scroll to the just added item
 				return redirect()->route('admin.apps.index', [
 					'goto_item'		=> $store['app']->id,
@@ -1392,6 +1396,144 @@ class AppController extends Controller
 		$data['app'] = $app;
 
 		return view('admin/app/publish-after', $data);
+	}
+
+	public function setPrivate(Request $request, App $app, $private = null) {
+		$this->authorize('set-private', $app);
+
+		// Simple action, like delete
+
+		$private = $private === null ? 1 : intval($private);
+
+		DB::beginTransaction();
+
+		$result = true;
+		$messages = [];
+		try {
+			$app->setToPrivate($private != 0);
+			$result = $app->save();
+		} catch(\Illuminate\Database\QueryException $e) {
+			$result = false;
+			$messages[] = $e->getMessage();
+		}
+
+		if($result) {
+			DB::commit();
+
+			// Pass a message
+			$request->session()->flash('flash_message', [
+				'message'	=> $private == 1
+					? __('admin/apps.messages.app_was_made_private')
+					: __('admin/apps.messages.app_was_made_not_private'),
+				'type'		=> 'success'
+			]);
+		} else {
+			DB::rollback();
+
+			// Pass a message
+			$request->session()->flash('flash_message', [
+				'message'	=> __('admin/common.messages.action_failed'),
+				'type'		=> 'danger'
+			]);
+		}
+
+		$redirect = null;
+		$backto = request()->query('backto');
+		if(Auth::user()->can('view', $app)) {
+			$redirect = route('admin.apps.show', ['app' => $app->id]);
+		}
+		if(!$redirect || $backto == 'back') {
+			$redirect = url()->previous();
+		}
+
+		if(!$request->ajax()) {
+			if($result) {
+				return redirect($redirect);
+			} else {
+				return redirect()->back()->withErrors($messages);
+			}
+		} else {
+			if($result) {
+				return response()->json([
+					'status'	=> 'OK',
+					'redirect'	=> $redirect,
+				], 200);
+			} else {
+				return response()->json([
+					'status'	=> 'ERROR',
+					'message'	=> \Arr::get($messages, 0),
+				], 500);
+			}
+		}
+	}
+
+	public function setPublished(Request $request, App $app, $published = null) {
+		$this->authorize('set-published', $app);
+
+		// Simple action, like delete
+
+		$published = $published === null ? 1 : intval($published);
+
+		DB::beginTransaction();
+
+		$result = true;
+		$messages = [];
+		try {
+			$app->setToPublished($published != 0);
+			$result = $app->save();
+		} catch(\Illuminate\Database\QueryException $e) {
+			$result = false;
+			$messages[] = $e->getMessage();
+		}
+
+		if($result) {
+			DB::commit();
+
+			// Pass a message
+			$request->session()->flash('flash_message', [
+				'message'	=> $private == 1
+					? __('admin/apps.messages.app_was_published')
+					: __('admin/apps.messages.app_was_unpublished'),
+				'type'		=> 'success'
+			]);
+		} else {
+			DB::rollback();
+
+			// Pass a message
+			$request->session()->flash('flash_message', [
+				'message'	=> __('admin/common.messages.action_failed'),
+				'type'		=> 'danger'
+			]);
+		}
+
+		$redirect = null;
+		$backto = request()->query('backto');
+		if(Auth::user()->can('view', $app)) {
+			$redirect = route('admin.apps.show', ['app' => $app->id]);
+		}
+		if(!$redirect || $backto == 'back') {
+			$redirect = url()->previous();
+		}
+
+		if(!$request->ajax()) {
+			if($result) {
+				return redirect($redirect);
+			} else {
+				return redirect()->back()->withErrors($messages);
+			}
+		} else {
+			if($result) {
+				return response()->json([
+					'status'	=> 'OK',
+					'redirect'	=> $redirect,
+				], 200);
+			} else {
+				return response()->json([
+					'status'	=> 'ERROR',
+					'message'	=> \Arr::get($messages, 0),
+				], 500);
+			}
+		}
 	}
 
 	public function snippetVisualsComparison(Request $request, $app = null, $version = null)

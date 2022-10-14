@@ -48,7 +48,7 @@ class AppVerificationController extends Controller
 		$query->leftJoin('app_changelogs as cl', function($query) {
 			$query->on('a.id', '=', 'cl.app_id');
 			$query->where('cl.status', AppChangelog::STATUS_PENDING);
-			$query->whereRaw('if(cv.id is not null, cl.created_at >= cv.created_at and cl.id > cv.id, 1)');
+			$query->whereRaw('if(cv.id is not null, cl.created_at >= cv.created_at and cl.id >= cv.id, 1)');
 		});
 
 		// Do not include trashed/deleted items

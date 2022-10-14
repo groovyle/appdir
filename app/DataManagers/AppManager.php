@@ -21,6 +21,7 @@ class AppManager {
 		'published_at',
 		'is_reported',
 		'reported_at',
+		'is_private',
 		'page_views',
 		'created_by',
 		'created_at',
@@ -934,9 +935,12 @@ class AppManager {
 		// Apply the thing
 		$base_version = optional($model->version ?? $model->changelogs()->oldest()->get());
 		$model->is_verified = 1;
-		if($publish) {
-			$model->setToPublished();
+
+		$model->setToPublished();
+		if(!$publish) {
+			$model->setToPrivate();
 		}
+
 		if($model->is_reported) {
 			$model->setToReported(false);
 		}

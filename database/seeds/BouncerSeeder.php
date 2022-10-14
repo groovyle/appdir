@@ -27,6 +27,10 @@ class BouncerSeeder extends Seeder
 		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'update-all']);
 		// Delete non owned apps
 		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'delete-all']);
+		// App: set to private
+		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'set-private']);
+		// App: set to published
+		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'set-published']);
 
 		// Interact with all users, even the ones not in the same prodi
 		Bouncer::ability()::createForModel('App\User', ['name' => 'bypass-prodi']);
@@ -59,7 +63,13 @@ class BouncerSeeder extends Seeder
 		Bouncer::forbid('admin')->to('bypass-prodi', \App\User::class);
 
 		// App management
-		Bouncer::allow('admin')->to(['view', 'view-any', 'view-any-in-prodi', 'view-version'], \App\Models\App::class);
+		Bouncer::allow('admin')->to([
+			'view-any',
+			'view',
+			'view-any-in-prodi',
+			'view-version',
+			'set-published',
+		], \App\Models\App::class);
 		// App verifications
 		Bouncer::allow('admin')->toManage(\App\Models\AppVerification::class);
 		// App reports and verdicts management should always come in pairs
@@ -75,6 +85,7 @@ class BouncerSeeder extends Seeder
 		Bouncer::allow('mahasiswa')->to(['view-any', 'create'], \App\Models\App::class);
 		Bouncer::forbid('mahasiswa')->to('view-all', \App\Models\App::class);
 		Bouncer::forbid('mahasiswa')->to('view-version', \App\Models\App::class);
+		Bouncer::forbid('mahasiswa')->to('set-published', \App\Models\App::class);
 
 		Bouncer::allow('mahasiswa')->to(['view'], \App\Models\AppVerification::class);
 

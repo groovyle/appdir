@@ -94,16 +94,20 @@
               </td>
               <td>
                 @if($app->num_unresolved_reports > 0)
+                @can('create', App\Models\AppReport::class)
                 <a href="{{ route('admin.app_reports.review', ['app' => $app->id]) }}" class="btn btn-primary btn-sm text-nowrap mb-1">
                   <span class="fas fa-clipboard-check mr-1"></span>
                   {{ __('admin/app_reports.review') }}
                 </a>
+                @endcan
                 @endif
                 @if($app->num_verdicts > 0)
+                @can('view-any', App\Models\AppReport::class)
                 <a href="{{ route('admin.app_reports.verdicts', ['app' => $app->id]) }}" class="btn btn-sm bg-purple text-nowrap mb-1">
                   <span class="fas fa-list mr-1"></span>
                   {{ __('admin/app_reports.view_verdicts') }}
                 </a>
+                @endcan
                 @endif
               </td>
             </tr>

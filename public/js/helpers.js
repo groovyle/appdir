@@ -1898,8 +1898,9 @@ if(jQuery) {
 					}
 				}
 
+				var urlAttr = $btn.attr("href") || $btn.attr("data-url");
 				var url = $btn.prop("href") || $btn.data("url");
-				if(!url || String(url)[0] == "#") return;
+				if(!urlAttr || String(urlAttr)[0] == "#") return;
 
 				e.preventDefault();
 				showModal(url, collectOptions($btn));
