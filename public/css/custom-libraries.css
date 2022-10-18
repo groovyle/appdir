@@ -175,6 +175,7 @@ textarea.auto-height-init-bypass {
 	display: table; /* forces new line like block, but fits width to its content like inline-block */
 	margin-left: 0.25em;
 	margin-top: 0.25em;
+	background-color: transparent;
 	box-shadow: none;
 }
 /* END Read More Handles */

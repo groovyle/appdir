@@ -41,6 +41,7 @@ jQuery(document).ready(function($) {
 
     function modalContent(content) {
       $modalBody.empty().append(content);
+      if(window.initDefaultClasses) window.initDefaultClasses($modalBody);
     }
 
     function modalShow(appId, verifId) {

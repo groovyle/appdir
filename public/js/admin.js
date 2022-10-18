@@ -57,11 +57,16 @@ $("body").tooltip({
 	},
 });
 
-$(".init-popover").popover().removeClass(".init-popover");
 
-$(".init-readmore").readMore().removeClass(".init-readmore");
+// Call the following function upon loading/appending html ajax content
+window.initDefaultClasses = function(context) {
+	var $context = context ? $(context) : $("body");
 
-$("form.no-enter-submit").noEnterSubmit();
+	$context.find(".init-popover").removeClass(".init-popover").popover();
+	$context.find(".init-readmore").removeClass(".init-readmore").addClass("text-pre-wrap").readMore();
+	$context.find("form.no-enter-submit").noEnterSubmit();
+}
+window.initDefaultClasses();
 
 
 var $mainContent = $(".main-content").first();

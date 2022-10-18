@@ -56,6 +56,7 @@ jQuery(document).ready(function($) {
       $modalContent.find("[data-toggle]").popover("hide").tooltip("hide");
 
       $modalContent.empty().append(content);
+      if(window.initDefaultClasses) window.initDefaultClasses($modalContent);
       $modalContent.modal("handleUpdate");
     }
 

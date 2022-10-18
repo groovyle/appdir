@@ -1128,7 +1128,7 @@ if(jQuery) {
 					return fontSize / 16 * 3;
 				},
 				centeredHandle: false,
-				autoScroll: true,
+				autoScroll: false,
 				indicatorLine: true,
 			};
 
@@ -1518,6 +1518,8 @@ if(jQuery) {
 					$body.append(content);
 				else
 					$body.html(content);
+
+				if(window.initDefaultClasses) window.initDefaultClasses($body);
 			}
 			var resetModal = function() {
 				if(ajaxRequest) {

@@ -117,11 +117,11 @@ $rand = random_alpha(5);
 
         <dt class="col-12 col-md-3 col-xl-2 {{ $mark_changes_attr('description') }}">{{ __('admin/apps.fields.description') }}</dt>
         <dd class="col-12 col-md-9 col-xl-10">
-          <span class="text-pre-wrap">@von($app->description)</span>
+          <span class="init-readmore">@von($app->description)</span>
 
           @component('admin.app.components.detail-old-value')
             @isset($old_attributes['description'])
-              <span class="text-pre-wrap">@voe($old_attributes['description'])</span>
+              <span class="init-readmore">@voe($old_attributes['description'])</span>
             @endisset
           @endcomponent
 

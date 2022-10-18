@@ -78,12 +78,12 @@ $hide_edit = !!($hide_edit ?? true);
     </div>
     <div class="verif-value-group">
       <div class="verif-label">@lang('admin/app_reports.fields.ban_reasons'):</div>
-      <div class="verif-value">@voe($verif->comment ?? $verif->verdict->comments)</div>
+      <div class="verif-value"><span class="init-readmore">@voe($verif->comment ?? $verif->verdict->comments)</span></div>
     </div>
     @else
     <div class="verif-value-group">
       <div class="verif-label">@lang('admin/app_verifications.fields.overall_comments'):</div>
-      <div class="verif-value">@voe($verif->comment)</div>
+      <div class="verif-value"><span class="init-readmore">@voe($verif->comment)</span></div>
     </div>
     @endif
     @if($other_comments && $verif->details)

@@ -41,9 +41,9 @@ $regular_relations = ['categories', 'tags'];
 	<div class="item field-group long-attribute col-12">
 		<div class="title">@lang('admin/apps.fields.'. $k)</div>
 		<div class="comparison">
-			<div class="value old-value text-secondary" title="@lang('admin/apps.changes.old_value')">@voe($old_attrs[$k])</div>
+			<div class="value old-value text-secondary" title="@lang('admin/apps.changes.old_value')"><span class="init-readmore">@voe($old_attrs[$k])</span></div>
 			<span class="fas fa-arrow-down arrow text-primary"></span>
-			<div class="value new-value text-primary" title="@lang('admin/apps.changes.new_value')">@voe($v)</div>
+			<div class="value new-value text-primary" title="@lang('admin/apps.changes.new_value')"><span class="init-readmore">@voe($v)</span></div>
 		</div>
 	</div>
 	@endif

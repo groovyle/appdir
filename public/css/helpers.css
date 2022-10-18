@@ -118,6 +118,10 @@ span.icon-text-pair {
 	/* usually 200px */
 	max-width: 300px;
 }
+.popover-wider {
+	/* usually 276px */
+	max-width: 400px;
+}
 
 
 

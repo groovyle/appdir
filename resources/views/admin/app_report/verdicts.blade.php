@@ -89,7 +89,7 @@ $collapse_class = $show_verdict ? 'scroll-to-me' : 'collapsed-card';
 			<strong class="mr-1">@lang('admin/app_reports.fields.comments'):</strong>
 			@if($vd->comments)
 			<div class="lh-130">
-				<span class="init-readmore text-pre-wrap">{{ $vd->comments }}</span>
+				<span class="init-readmore">@voe($vd->comments)</span>
 			</div>
 			@else
 			@vo_

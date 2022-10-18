@@ -57,12 +57,12 @@ $is_reported_guilty = $verif->is_reported_guilty;
       </div>
       <div class="verif-value-group">
         <div class="verif-label">@lang('admin/app_reports.fields.ban_reasons'):</div>
-        <div class="verif-value">@voe($verif->comment ?? $verif->verdict->comments)</div>
+        <div class="verif-value"><span class="init-readmore">@voe($verif->comment ?? $verif->verdict->comments)</span></div>
       </div>
       @else
       <div class="verif-piece">
         <span class="verif-label">@lang('admin/app_verifications.fields.overall_comments'):</span>
-        <span class="verif-value">@voe($verif->comment)</span>
+        <span class="verif-value"><span class="init-readmore">@voe($verif->comment)</span></span>
       </div>
       @endif
       <?php

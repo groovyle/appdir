@@ -56,7 +56,7 @@ $append_breadcrumb = [
         </dd>
 
         <dt>@lang('admin/common.fields.description')</dt>
-        <dd><span class="text-pre-wrap">@voe($prodi->description)</span></dd>
+        <dd><span class="init-readmore">@voe($prodi->description)</span></dd>
 
         <dt>@lang('admin/common.fields.last_updated')</dt>
         <dd>@include('components.date-with-tooltip', ['date' => $prodi->updated_at])</dd>
