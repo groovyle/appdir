@@ -98,7 +98,7 @@ $hide_edit = !!($hide_edit ?? true);
           <span class="fas fa-comment text-light-gray text-090 icon"></span>
           <span>
             {{ __('admin/apps.fields.'.$field) }}:
-            <div class="verif-value">@voe($comment)</div>
+            <div class="verif-value"><span class="init-readmore" data-max-lines="2">@voe($comment)</span></div>
           </span>
         </div>
         @endforeach
