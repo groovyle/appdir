@@ -89,6 +89,13 @@ $menu_list = [
 		'match'	=> 'admin.settings.',
 		'check'	=> Gate::allows('view-any', App\Models\Setting::class),
 	],
+	'log_actions'	=> [
+		'text'	=> __('admin/menus.log_actions'),
+		'icon'	=> 'fas fa-stream',
+		'route'	=> 'admin.log_actions.index',
+		'match'	=> 'admin.log_actions.',
+		'check'	=> Gate::allows('view-any', App\Models\LogAction::class),
+	],
 ];
 
 // TODO: different menus based on role
@@ -113,6 +120,7 @@ $menus = [
 		'user_roles',
 		'system_abilities',
 		'system_settings',
+		'log_actions',
 	],
 ];
 

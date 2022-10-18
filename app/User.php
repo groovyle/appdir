@@ -94,6 +94,18 @@ class User extends Authenticatable
 		}
 	}
 
+	public function getNameEmailAttribute() {
+		$name = $this->name;
+		if(!$this->is_system) {
+			if(!$name)
+				$name = $this->email;
+			elseif($this->email)
+				$name .= ' ('.$this->email.')';
+		}
+
+		return $name;
+	}
+
 	public function getRawNameAttribute() {
 		return $this->attributes['name'] ?? null;
 	}

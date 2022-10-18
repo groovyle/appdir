@@ -35,6 +35,12 @@ class LogAction extends Model
 		return $this->belongsTo('App\User', 'actor_id');
 	}
 
+	public function getActorNameAttribute() {
+		return $this->attributes['actor_name']
+			?: $this->actor->name_email ?? null
+		;
+	}
+
 	public static function logModel(Model $model, $action, $actor = null, $payload = NULL, $description = NULL, Model $related = NULL) {
 		$actor = $actor === null ? Auth::user() : User::find($actor);
 		/*if(!$user) {

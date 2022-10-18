@@ -85,6 +85,9 @@ Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
 	Route::resource('settings', 'SettingController')->parameters([
 		'settings'	=> 'stt',
 	]);
+	Route::resource('log_actions', 'LogActionController')->only(['index', 'show'])->parameters([
+		'log_actions'	=> 'log',
+	]);
 });
 
 Route::group(['middleware' => config('filepond.middleware', ['web', 'auth'])], function() {

@@ -21,5 +21,6 @@ return [
 	'user_roles'			=> 'User Roles',
 	'system_abilities'		=> 'Permissions',
 	'system_settings'		=> 'System Settings',
+	'log_actions'			=> 'Actions Log',
 
 ];

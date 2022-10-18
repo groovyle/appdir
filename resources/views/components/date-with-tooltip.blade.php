@@ -1,9 +1,11 @@
-@if(isset($date))
+@if(isset($date) || isset($text))
 <?php
 $format = $format ?? 'j F Y, H:i';
 $tip_classes = $tip_classes ?? '';
-$date_text = $date->translatedFormat($format);
-$text = isset($text) ? sprintf($text, $date_text) : $date_text;
+if(isset($date) && !isset($text)) {
+	$date_text = $date->translatedFormat($format);
+	$text = isset($text) ? sprintf($text, $date_text) : $date_text;
+}
 $title = $title ?? $date->longRelativeToNowDiffForHumans();
 $reverse = $reverse ?? false;
 if($reverse) {
