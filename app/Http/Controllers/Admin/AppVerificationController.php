@@ -41,6 +41,8 @@ class AppVerificationController extends Controller
 		} else {
 			$filters = $default_filters;
 		}
+		$opt_filters = optional($filters);
+		$filter_count = 0;
 
 		$query = (new App)->newQueryWithoutScopes();
 		$query->from('apps as a');
@@ -50,17 +52,24 @@ class AppVerificationController extends Controller
 			$query->where('cl.status', AppChangelog::STATUS_PENDING);
 			$query->whereRaw('if(cv.id is not null, cl.created_at >= cv.created_at and cl.id >= cv.id, 1)');
 		});
+		$query->leftJoin('users as o', 'a.owner_id', '=', 'o.id');
+		$query->leftJoin('ref_prodi as prodi', 'o.prodi_id', '=', 'prodi.id');
 
 		// Do not include trashed/deleted items
 		$query->whereNull('a.deleted_at');
 
+		// Role/ability scoping filter
+		$view_mode = 'none';
+		AppManager::scopeListQuery($query, $view_mode, false);
+
+		$total = (clone $query)->count(DB::raw('distinct a.id'));
 
 		$query->select('a.*');
 		$query->groupBy('a.id');
 		$query->orderBy('a.updated_at', 'desc');
 		$query->orderBy('a.id', 'desc');
 
-		if($keyword = trim(optional($filters)['keyword'])) {
+		if($keyword = trim($opt_filters['keyword'])) {
 			$str = escape_mysql_like_str($keyword);
 			$like = '%'.$str.'%';
 			$query->where(function($query) use($like) {
@@ -68,15 +77,21 @@ class AppVerificationController extends Controller
 				$query->orWhere('a.short_name', 'like', $like);
 				$query->orWhere('a.description', 'like', $like);
 			});
+			$filter_count++;
 		}
 
 		if($filters['status'] == 'unverified') {
 			$query->whereNotNull('cl.id');
 		} elseif($filters['status'] == 'verified') {
 			$query->whereNull('cl.id');
+			$filter_count++;
+		} else {
+			if($opt_filters['status'] == 'all') {
+				$filter_count++;
+			}
 		}
 
-		return [$query, $filters];
+		return compact('query', 'filters', 'filter_count', 'total', 'view_mode');
 	}
 
 	/**
@@ -90,14 +105,19 @@ class AppVerificationController extends Controller
 
 		//
 		$data = [];
+		$user = Auth::user();
 
-		list($query, $filters) = static::listQuery(['keyword', 'status']);
+		extract( static::listQuery(['keyword', 'status']) );
 
 		$items = $query->paginate(10);
 		$items->appends($filters);
 
+		$data['total'] = $total;
 		$data['items'] = $items;
 		$data['filters'] = optional($filters);
+		$data['filter_count'] = $filter_count;
+		$data['view_mode'] = $view_mode;
+		$data['prodi'] = optional($user->prodi);
 
 		return view('admin/app_verification/index', $data);
 	}

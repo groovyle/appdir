@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Models\Settings as SettingsModel;
+use App\Models\Setting as SettingModel;
 
 class Settings
 {
@@ -35,27 +35,27 @@ class Settings
 
 	public static function get($key) {
 		if(static::$fail)
-			return static::castValue( SettingsModel::findOrFail($key)->value );
+			return static::castValue( SettingModel::findOrFail($key)->value );
 		else
-			return static::castValue( SettingsModel::whereKey($key)->value('value') );
+			return static::castValue( SettingModel::whereKey($key)->value('value') );
 	}
 
 	public static function getItem($key) {
 		if(static::$fail) {
-			$model = SettingsModel::findOrFail($key);
+			$model = SettingModel::findOrFail($key);
 		} else {
-			$model = SettingsModel::whereKey($key)->first();
+			$model = SettingModel::whereKey($key)->first();
 			if(!$model)
-				$model = new SettingsModel;
+				$model = new SettingModel;
 		}
 		$model->value = static::castValue($model->value);
 		return $model;
 	}
 
 	public static function set($key, $value, $attributes = []) {
-		$model = SettingsModel::find($key);
+		$model = SettingModel::find($key);
 		if(!$model) {
-			$model = new SettingsModel;
+			$model = new SettingModel;
 			$model->key = $key;
 		}
 

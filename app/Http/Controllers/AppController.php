@@ -16,6 +16,7 @@ use App\Rules\ModelExists;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class AppController extends Controller
 {
@@ -89,16 +90,50 @@ class AppController extends Controller
 		// TODO: if user is admin/verifier/owner, allow viewing an unpublished app
 		// as a preview
 
-		$app = App::getFrontendItem($slug);
+		$app = App::getFrontendItem($slug, false, false);
+		$ori = $app;
+		// $this->authorize('view-public', $app ?? App::class);
+		$check = Gate::inspect('view-public', [$app ?? App::class, true]);
+		if(!$check->allowed()) {
+			throw (new \Illuminate\Database\Eloquent\ModelNotFoundException)->setModel(App::class);
+			return;
+		}
+		// TODO: custom 403 or 404 page for app page
+
+		$check_data = $check->message();
+		if($check_data['view_mode'] == 'admin') {
+			$app->load(['changelogs']);
+
+			// Can't view a rejected version... or can we?
+			$app->setRelation('changelogs',
+				$app->changelogs->keyBy('version')->filter(function($item, $key) {
+					// return !$item->is_rejected;
+					return true;
+				})
+			);
+
+			$input_version = request('version');
+			$version = $app->changelogs[$input_version] ?? null;
+			if($input_version && $version && $version->version != $app->version_number) {
+				// Mock item
+				$app = AppManager::getMockItem($app->id, $version->version);
+			}
+		}
+
+		if($app->is_original_version) {
+			// Got through, can access
+			$app->increasePageViews();
+		}
 
 		$data = [];
+		$data['ori'] = $ori;
 		$data['app'] = $app;
 
-		$data['report_categories'] = AppReportCategory::all();
+		$data['view_mode'] = $check_data['view_mode'];
 
+		$data['report_categories'] = AppReportCategory::all();
 		$data['report_reason_limit'] = settings('app.reports.reason_limit', 500);
 
-		$app->increasePageViews();
 		return view('app/page', $data);
 	}
 
@@ -113,7 +148,7 @@ class AppController extends Controller
 
 	public function postReport(Request $request, string $slug) {
 
-		$app = App::getFrontendItem($slug);
+		$app = App::getFrontendItem($slug, true, false);
 
 		$logged_in = Auth::check();
 		$user = Auth::user();

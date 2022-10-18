@@ -19,7 +19,7 @@ $show_status = !!($show_status ?? true);
 				@endif
 			</span>
 			@if($show_current && $show_status)
-			<span class="text-090 ml-2">@include('components.app-version-status', ['status' => $cl->status, 'class' => 'align-text-top'])</span>
+			<span class="text-090 ml-2">@include('components.app-version-status', ['status' => $cl->status, 'class' => 'align-middle'])</span>
 			@endif
 			<br>
 			<div class="changes-timestamp">@include('components.date-with-tooltip', ['date' => $cl->created_at])</div>

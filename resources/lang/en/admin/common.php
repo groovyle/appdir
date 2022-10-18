@@ -33,6 +33,15 @@ return [
 	'last_updated'		=> 'Last Updated',
 ],
 
+'messages'	=> [
+	'create_successful'	=> 'A new item has been added.',
+	'create_failed'		=> 'An error occurred while attempting to create a new item.',
+	'update_successful'	=> 'The item has been edited.',
+	'update_failed'		=> 'An error occurred while attempting to update item data.',
+	'delete_successful'	=> 'Item has been deleted.',
+	'delete_failed'		=> 'An error occurred while attempting to delete item.',
+],
+
 'ofamodal'	=> [
 	'default_title'			=> 'Content Dialog',
 	'loading_text'			=> 'Loading...',

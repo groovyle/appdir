@@ -12,13 +12,15 @@ $hide_filters = !$show_filters;
 {{ __('admin/apps.page_title.index') }}
 <span class="page-sub-title">{{ __('common.total_x', ['x' => $total_scoped]) }}</span>
 @if($view_mode == 'prodi')
-<span class="page-sub-title text-r100">@lang('admin/apps.page_title.view_mode.'.$view_mode, ['x' => von($prodi->complete_name)])</span>
+<span class="page-sub-title text-r100">@lang('admin/apps.page_title.view_mode.'.$view_mode, ['x' => vo_($prodi->complete_name)])</span>
 @else
 <span class="page-sub-title text-r100">{{ __('admin/apps.page_title.view_mode.'.$view_mode) }}</span>
 @endif
 @endsection
 
 @section('content')
+  @include('components.page-message', ['dismiss' => true])
+
   <div class="mt-2 mb-3">
     @can('create', App\Models\App::class)
     <a href="{{ route('admin.apps.create') }}" class="btn btn-primary">{{ __('admin/apps.submit_an_app') }}</a>

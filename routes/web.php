@@ -82,6 +82,9 @@ Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
 	Route::resource('abilities', 'AbilityController')->parameters([
 		'abilities'	=> 'abl',
 	]);
+	Route::resource('settings', 'SettingController')->parameters([
+		'settings'	=> 'stt',
+	]);
 });
 
 Route::group(['middleware' => config('filepond.middleware', ['web', 'auth'])], function() {

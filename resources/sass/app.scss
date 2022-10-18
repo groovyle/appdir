@@ -1,4 +1,6 @@
 
+// Frontend CSS
+
 // Variables
 @import 'variables';
 @import '~bootstrap/scss/functions';
@@ -278,6 +280,13 @@ $app-item-margin-xs: 0.375rem;
 	display: flex;
 	flex-flow: column nowrap;
 	align-items: stretch;
+
+	.app-notices {
+		.alert {
+			padding: 0.5rem 1rem;
+			margin-bottom: 0.25rem;
+		}
+	}
 
 	> .app-header {
 		padding-top: 2rem;

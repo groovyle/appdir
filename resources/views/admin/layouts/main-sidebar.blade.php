@@ -3,8 +3,8 @@
 use App\Http\Controllers\Admin as Ctl;
 use Illuminate\Support\Facades\Gate;
 
-$app_verif_count = get_count_from_list_query(Ctl\AppVerificationController::listQuery()[0], 'a.id');
-$app_reports_count = get_count_from_list_query(Ctl\AppReportController::listQuery()[0], 'rur.id');
+$app_verif_count = get_count_from_list_query(Ctl\AppVerificationController::listQuery()['query'], 'a.id');
+$app_reports_count = get_count_from_list_query(Ctl\AppReportController::listQuery()['query'], 'rur.id');
 
 $menu_list = [
 	'dashboard'		=> [
@@ -20,7 +20,7 @@ $menu_list = [
 		'icon'	=> 'fas fa-cloud',
 		'route'	=> 'admin.apps.index',
 		'match'	=> 'admin.apps.',
-		'check'	=> Gate::any(['view-any', 'view-any-in-prodi', 'view-all'], 'App\Models\App'),
+		'check'	=> Gate::any(['view-any', 'view-any-in-prodi', 'view-all'], App\Models\App::class),
 	],
 	'app_verif'	=> [
 		'text'	=> __('admin/menus.app_verifications'),
@@ -28,7 +28,7 @@ $menu_list = [
 		'route'	=> 'admin.app_verifications.index',
 		'match'	=> 'admin.app_verifications.',
 		'extra'	=> '<span class="badge badge-info ml-2 text-090">'.badge_number($app_verif_count).'</span>',
-		'check'	=> Gate::allows('view-any', 'App\Models\AppVerification'),
+		'check'	=> Gate::allows('view-any', App\Models\AppVerification::class),
 	],
 	'app_report'	=> [
 		'text'	=> __('admin/menus.app_moderation'),
@@ -36,7 +36,7 @@ $menu_list = [
 		'route'	=> 'admin.app_reports.index',
 		'match'	=> 'admin.app_reports.',
 		'extra'	=> '<span class="badge badge-danger ml-2 text-090">'.badge_number($app_reports_count).'</span>',
-		'check'	=> Gate::allows('view-any', 'App\Models\AppVerdict'),
+		'check'	=> Gate::allows('view-any', App\Models\AppVerdict::class),
 	],
 
 	'app_categories'	=> [
@@ -44,14 +44,14 @@ $menu_list = [
 		'icon'	=> 'fas fa-list-ul',
 		'route'	=> 'admin.app_categories.index',
 		'match'	=> 'admin.app_categories.',
-		'check'	=> Gate::allows('view-any', 'App\Models\AppCategory'),
+		'check'	=> Gate::allows('view-any', App\Models\AppCategory::class),
 	],
 	'app_tags'	=> [
 		'text'	=> __('admin/menus.app_tags'),
 		'icon'	=> 'fas fa-tags',
 		'route'	=> 'admin.app_tags.index',
 		'match'	=> 'admin.app_tags.',
-		'check'	=> Gate::allows('view-any', 'App\Models\AppTag'),
+		'check'	=> Gate::allows('view-any', App\Models\AppTag::class),
 	],
 
 	'prodi'	=> [
@@ -59,7 +59,7 @@ $menu_list = [
 		'icon'	=> 'fas fa-sitemap',
 		'route'	=> 'admin.prodi.index',
 		'match'	=> 'admin.prodi.',
-		'check'	=> Gate::allows('view-any', 'App\Models\Prodi'),
+		'check'	=> Gate::allows('view-any', App\Models\Prodi::class),
 	],
 	'users'	=> [
 		'text'	=> __('admin/menus.users'),
@@ -73,14 +73,21 @@ $menu_list = [
 		'icon'	=> 'fas fa-users-cog',
 		'route'	=> 'admin.roles.index',
 		'match'	=> 'admin.roles.',
-		'check'	=> Gate::allows('view-any', 'App\Models\Role'),
+		'check'	=> Gate::allows('view-any', App\Models\Role::class),
 	],
 	'system_abilities'	=> [
 		'text'	=> __('admin/menus.system_abilities'),
 		'icon'	=> 'fas fa-user-cog',
 		'route'	=> 'admin.abilities.index',
 		'match'	=> 'admin.abilities.',
-		'check'	=> Gate::allows('view-any', 'App\Models\Ability'),
+		'check'	=> Gate::allows('view-any', App\Models\Ability::class),
+	],
+	'system_settings'	=> [
+		'text'	=> __('admin/menus.system_settings'),
+		'icon'	=> 'fas fa-wrench',
+		'route'	=> 'admin.settings.index',
+		'match'	=> 'admin.settings.',
+		'check'	=> Gate::allows('view-any', App\Models\Setting::class),
 	],
 ];
 
@@ -105,6 +112,7 @@ $menus = [
 		'users',
 		'user_roles',
 		'system_abilities',
+		'system_settings',
 	],
 ];
 

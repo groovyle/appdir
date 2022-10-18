@@ -2,6 +2,17 @@
 
 return [
 
+'page_title'		=> [
+	'index'			=> 'App Verifications',
+
+	'view_mode'			=> [
+		'all'	=> 'Viewing all apps needing verification',
+		'prodi'	=> 'Viewing app verifications list in your study program - :x',
+	],
+],
+
+'apps_list'				=> 'App Verifications List',
+'no_app_verifications_yet'	=> 'No apps need verifications yet',
 'review'				=> 'Review',
 'review_app'			=> 'Review App',
 'verify'				=> 'Verify',

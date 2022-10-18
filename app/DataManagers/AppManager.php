@@ -7,6 +7,7 @@ use App\Models\AppChangelog;
 use App\Models\AppVerification;
 use App\Models\AppVisualMedia;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class AppManager {
@@ -650,6 +651,8 @@ class AppManager {
 		$mock = new App;
 		$mock->id = $app_id;
 		$mock->owner_id = $app->owner_id;
+		$mock->is_mock = true;
+		$mock->original_version_number = $app->version_number;
 		$mock->setRelation('version', $compiled['versions']->last());
 		return static::applyDiff($mock, $compiled['changes'], true);
 	}
@@ -725,11 +728,14 @@ class AppManager {
 			}
 		}
 		// Query
-		// TODO: include/exclude rejected changes based on destination version
 		$query = $model->changelogs()->withoutGlobalScope('_order')
 					->whereBetween('created_at', [$start_time, $end_time])
 					->orderBy('created_at', $direction)
 		;
+		if(!$target->is_rejected) {
+			// Exclude rejected versions if the target version isn't rejected
+			$query->rejected(false);
+		}
 		if(is_callable($query_callback)) {
 			$query_callback($query);
 		}
@@ -980,6 +986,34 @@ class AppManager {
 
 	public static function publishItem(App $model, $changelogs, $user = null) {
 
+	}
+
+	public static function scopeListQuery($query, &$view_mode, $owned = true, $user = null) {
+		if(!$user)
+			$user = Auth::user();
+
+		$query->where(function($query) use($user, &$view_mode, $owned) {
+			if($owned) {
+				// Always able to view owned items
+				$query->where('a.owner_id', $user->id);
+			}
+
+			// More scope filters
+			$query->orWhere(function($query) use($user, &$view_mode, $owned) {
+				if($user->can('view-all', App::class)) {
+					// No scope filter, enable all
+					$view_mode = 'all';
+					$query->whereRaw('1');
+				} elseif($user->can('view-any-in-prodi', App::class)) {
+					// Only ones in the same prodi
+					$view_mode = 'prodi';
+					$query->where('prodi.id', $user->prodi_id);
+					$query->whereNotNull('prodi.id');
+				} else {
+					// Only owned
+				}
+			});
+		});
 	}
 
 }

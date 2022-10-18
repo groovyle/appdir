@@ -18,6 +18,8 @@ $append_breadcrumb = [
 @include('admin.app.changes.pending')
 
 @section('content')
+@include('components.page-message', ['dismiss' => true])
+
 <div class="d-flex flex-wrap text-nowrap mb-1">
 	<div class="details-nav-left mr-auto mb-1">
 		@can('view-any', $app)
@@ -71,15 +73,9 @@ $append_breadcrumb = [
 				</a>
 			</div>
 			<div class="text-right ml-auto">
-				@if($app->has_committed)
 				<span class="text-bold">
-					@lang('admin/apps.changes.version_x', ['x' => $app->version_number])
+					@lang('admin/apps.changes.version_x', ['x' => vo_($app->version_number)])
 				</span>
-				@else
-				<span class="text-bold">
-					@lang('admin/apps.this_new_item_is_waiting_verification')
-				</span>
-				@endif
 				@if($app->has_floating_changes)
 				@canany(['update', 'view-changelog'], $app)
 				<br>
@@ -88,6 +84,12 @@ $append_breadcrumb = [
 					@lang('admin/apps.show_pending_changes')
 				</button>
 				@endcan
+				@endif
+				@if($app->is_unverified_new)
+				<br>
+				<span class="text-bold">
+					@lang('admin/apps.this_new_item_is_waiting_verification')
+				</span>
 				@endif
 			</div>
 		</div>
@@ -133,6 +135,7 @@ $append_breadcrumb = [
 					],
 					'is_published'		=> [
 						'value'				=> $app->is_published,
+						'hide'				=> $app->is_unverified_new,
 						'check'				=> Auth::user()->can('set-published', $app),
 						'action'			=> route('admin.apps.set-published', ['app' => $app->id, 'published' => $app->is_published ? 0 : 1]),
 						'icon'				=> ['fa-eye', 'fa-eye-slash'],
@@ -143,7 +146,7 @@ $append_breadcrumb = [
 						],
 					],
 				];
-				// $man_panels = array_filter($man_panels, function($item) { return $item['check'] ?? false; });
+				$man_panels = array_filter($man_panels, function($item) { return !($item['hide'] ?? false); });
 				?>
 				@if(!empty($man_panels))
 				<div class="mb-4 app-manpan-wrapper">

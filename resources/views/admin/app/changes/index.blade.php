@@ -85,10 +85,17 @@ jQuery(document).ready(function($) {
   gotoVersion();
 
   @if($goto_version)
+  @if($goto_flash)
+  Helpers.scrollAndFlash(@json('#changes-item-'.$goto_version), {
+    animate: true,
+    offset: 30,
+  }, {});
+  @else
   Helpers.scrollTo(@json('#changes-item-'.$goto_version), {
     animate: true,
     offset: 30,
   });
+  @endif
   @endif
 });
 </script>

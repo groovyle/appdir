@@ -12,10 +12,16 @@ elseif(!isset($messages))
 $messages = (array) $messages;
 if(!isset($status)) {
 	$status = session('status');
-	if(is_string($status)) {
-		$status_class = $status;
+	if(isset($status)) {
+		if(is_string($status)) {
+			$status_class = $status;
+		} else {
+			$status_class = $status == 1 ? 'success' : 'danger';
+		}
+	} elseif($show_errors) {
+		$status_class = 'danger';
 	} else {
-		$status_class = $status == 1 ? 'success' : 'danger';
+		$status_class = 'info';
 	}
 } else {
 	$status_class = $status;

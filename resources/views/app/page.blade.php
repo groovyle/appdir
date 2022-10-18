@@ -2,10 +2,100 @@
 $is_report_form = old('is_report_form') ?? request()->has('report');
 $show_report_form = $is_report_form ? 'show' : '';
 
-// dd($errors->all());
+// dump($app->is_original_version, $app->version_number, isset($app->original_version_number), $app->attributes);
+$notices_count = 0;
 ?>
 
 @extends('layouts.app')
+
+@section('app-notices')
+<div class="app-notices collapse show mb-4" id="app-{{ $app->id }}-notices">
+	@if($app->is_owned)
+	@php $notices_count++; @endphp
+	<div class="alert alert-info">
+		<span class="icon-text-pair icon-color-reset icon-2x">
+			<span class="fas fa-user-check fa-fw icon text-130"></span>
+			<span>
+				@lang('frontend.apps.notices.owner')
+				<br>
+				<a href="{{ route('admin.apps.show', ['app' => $ori->id]) }}" class="alert-link">{{ ucfirst(__('frontend.apps.notices.go_to_admin_panel')) }}</a>,
+				@lang('common.or')
+				<a href="#app-{{ $app->id }}-notices" data-toggle="collapse" class="alert-link">@lang('frontend.apps.notices.hide_these_messages')</a>.
+			</span>
+		</span>
+	</div>
+	@endif
+	@if(!$app->is_original_version)
+		@php $notices_count++; @endphp
+		<div class="alert alert-danger">
+			<div class="icon-text-pair icon-color-reset icon-2x">
+				<span class="fas fa-copy fa-fw icon text-130"></span>
+				<span class="d-inline-block">
+					@lang('frontend.apps.notices.not_original_version', ['this' => $app->version_number, 'ori' => vo_($app->original_version_number)])
+					<br>
+					@lang('frontend.apps.notices.version_x_status', ['x' => $app->version_number]):
+					@include('components.app-version-status', ['status' => $app->version->status, 'class' => 'text-100 border border-secondary align-middle'])
+					<br>
+					<span>
+						@can('view-changelog', $ori)
+						<a href="{{ route('admin.apps.changes', ['app' => $ori->id, 'go_version' => $app->version_number, 'go_flash' => 1]) }}" class="alert-link" target="_blank">{{ ucfirst(__('frontend.apps.notices.check_details_for_this_version')) }}</a>
+						@lang('common.or')
+						<a href="{{ url()->current() }}" class="alert-link">@lang('frontend.apps.notices.go_back_to_original_version?')</a>
+						@else
+						<a href="{{ url()->current() }}" class="alert-link">{{ ucfirst(__('frontend.apps.notices.go_back_to_original_version?')) }}</a>
+						@endcan
+					</span>
+				</span>
+			</div>
+		</div>
+	@else
+		@if($app->is_unverified_new)
+		@php $notices_count++; @endphp
+		<div class="alert alert-info">
+			<span class="icon-text-pair icon-color-reset icon-2x">
+				<span class="fas fa-question fa-fw icon text-130"></span>
+				<span>@lang('frontend.apps.notices.unverified_new')</span>
+			</span>
+		</div>
+		@elseif($app->has_floating_changes)
+		@php $notices_count++; @endphp
+		<div class="alert alert-success">
+			<span class="icon-text-pair icon-color-reset icon-2x">
+				<span class="fas fa-code-branch fa-fw icon text-130"></span>
+				<span>@lang('frontend.apps.notices.has_floating_changes')</span>
+			</span>
+		</div>
+		@endif
+		@if(!$app->is_unverified_new && !$app->is_published)
+		@php $notices_count++; @endphp
+		<div class="alert alert-warning">
+			<span class="icon-text-pair icon-color-reset icon-2x">
+				<span class="fas fa-eye-slash fa-fw icon text-130"></span>
+				<span>@lang('frontend.apps.notices.not_published')</span>
+			</span>
+		</div>
+		@endif
+		@if($app->is_private)
+		@php $notices_count++; @endphp
+		<div class="alert alert-secondary">
+			<span class="icon-text-pair icon-color-reset icon-2x">
+				<span class="fas fa-lock fa-fw icon text-130"></span>
+				<span>@lang('frontend.apps.notices.is_private')</span>
+			</span>
+		</div>
+		@endif
+		@if($app->is_reported)
+		@php $notices_count++; @endphp
+		<div class="alert alert-danger">
+			<span class="icon-text-pair icon-color-reset icon-2x">
+				<span class="fas fa-exclamation-circle fa-fw icon text-130"></span>
+				<span>@lang('frontend.apps.notices.is_reported')</span>
+			</span>
+		</div>
+		@endif
+	@endif
+</div>
+@endsection
 
 @section('outer-content')
 <!-- TODO: meta tags -->
@@ -13,8 +103,10 @@ $show_report_form = $is_report_form ? 'show' : '';
 
 	<div class="app-header full-page-tabs">
 		<div class="container">
+			@if($notices_count > 0 && $view_mode != 'none')
+				@yield('app-notices')
+			@endif
 			<div class="app-with-logo">
-				<!-- TODO: use default app logo or not? -->
 				<div class="logo-wrapper">
 					@include('components.app-logo', ['logo' => $app->logo, 'exact' => '80x80', 'img_class' => 'app-logo', 'default' => true, 'as_link' => false])
 				</div>
@@ -27,8 +119,13 @@ $show_report_form = $is_report_form ? 'show' : '';
 					</h1>
 					<div class="app-subtitle segmented">
 						<span>@lang('frontend.apps.by') {{ $app->owner }}</span>
-						<span>@lang('frontend.apps.x_views', ['x' => $app->page_views])</span>
-						<span>@lang('frontend.apps.version_x', ['x' => vo_($app->version_number)])</span>
+						<span>@lang('frontend.apps.x_views', ['x' => vo_($app->page_views)])</span>
+						<span>
+							<span class="{{ !$app->is_original_version ? 'text-italic' : '' }}">@lang('frontend.apps.version_x', ['x' => vo_($app->version_number)])</span>
+							@if($view_mode == 'admin' && count($app->changelogs) > 0)
+							<a href="#app-{{ $app->id }}-version-selector" class="text-090 {{ $app->is_original_version ? 'text-primary' : 'text-danger' }} ml-2" data-toggle="modal"><span class="far fa-copy" title="{{ __('frontend.apps.notices.review_other_versions') }}" data-toggle="tooltip"></span></a>
+							@endif
+						</span>
 						<span class="text-muted">
 							@cuf('lcfirst', trans('frontend.apps.fields.published_at'))
 							@if($app->published_at)
@@ -37,6 +134,29 @@ $show_report_form = $is_report_form ? 'show' : '';
 							@vo_
 							@endif
 						</span>
+						@if($notices_count > 0 && $view_mode != 'none')
+						<span class="d-inline-flex align-middle" data-target="#app-{{ $app->id }}-notices" data-toggle="collapse" style="column-gap: 0.75rem;">
+							<a href="#app-{{ $app->id }}-notices" class="text-primary rounded-pill" id="app-{{ $app->id }}-notices-trigger" data-toggle="collapse"><span title="{{ __('frontend.apps.notices.show_app_notices') }}" data-toggle="tooltip" style="opacity: 0.75;"><span class="fas fa-info-circle"></span></span></a>
+							@if(!$app->is_original_version)
+							<span class="text-danger" title="{{ __('frontend.apps.notices.not_original_version_tip') }}" data-toggle="tooltip"><span class="fas fa-copy"></span></span>
+							@else
+								@if($app->is_unverified_new)
+								<span class="text-info" title="{{ __('frontend.apps.notices.unverified_new_tip') }}" data-toggle="tooltip"><span class="fas fa-question"></span></span>
+								@elseif($app->has_floating_changes)
+								<span class="text-success" title="{{ __('frontend.apps.notices.has_floating_changes_tip') }}" data-toggle="tooltip"><span class="fas fa-code-branch"></span></span>
+								@endif
+								@if(!$app->is_unverified_new && !$app->is_published)
+								<span class="text-dark" title="{{ __('frontend.apps.notices.not_published_tip') }}" data-toggle="tooltip"><span class="fas fa-eye-slash"></span></span>
+								@endif
+								@if($app->is_private)
+								<span class="text-secondary" title="{{ __('frontend.apps.notices.is_private_tip') }}" data-toggle="tooltip"><span class="fas fa-lock"></span></span>
+								@endif
+								@if($app->is_reported)
+								<span class="text-danger" title="{{ __('frontend.apps.notices.is_reported_tip') }}" data-toggle="tooltip"><span class="fas fa-exclamation-circle"></span></span>
+								@endif
+							@endif
+						</span>
+						@endif
 					</div>
 				</div>
 			</div>
@@ -57,57 +177,64 @@ $show_report_form = $is_report_form ? 'show' : '';
 				@if($report_message = session('report_message'))
 				@include('components.page-message', ['message' => $report_message['message'], 'status' => $report_message['type'].' scroll-to-me', 'dismiss' => true])
 				@endif
-				<form class="card mb-4 collapse collapse-scrollto {{ $show_report_form }}" id="reportAppForm" method="POST" action="{{ route('apps.report.save', ['slug' => $app->slug]) }}">
+				<div class="card mb-4 collapse collapse-scrollto {{ $show_report_form }}" id="app-report-section">
 					<div class="card-body">
 						<div class="row">
 							<div class="col-12 col-md-8 col-lg-7 col-xl-6 mx-auto">
-								<button type="button" class="close" data-toggle="collapse" data-target="#reportAppForm" aria-label="Close">
+								<button type="button" class="close" data-toggle="collapse" data-target="#app-report-section" aria-label="Close">
 									<span aria-hidden="true">&times;</span>
 								</button>
-								<h3 class="card-title text-danger">@lang('frontend.apps.report_app'): <strong class="text-danger">{{ $app->complete_name }}</strong></h3>
-								@csrf
-								@method('POST')
-								<input type="hidden" name="app_id" value="{{ $app->id }}" >
-								<input type="hidden" name="report_user" value="" >
+								<h4 class="card-title text-danger">@lang('frontend.apps.report_app'): <strong class="text-danger">{{ $app->complete_name }}</strong></h4>
 
-								@includeWhen($is_report_form, 'components.page-message', ['show_errors' => true])
+								@if($app->is_listed && $app->is_original_version)
+								<form class="" id="report-app-form" method="POST" action="{{ route('apps.report.save', ['slug' => $ori->slug]) }}">
+									@csrf
+									@method('POST')
+									<input type="hidden" name="app_id" value="{{ $app->id }}" >
+									<input type="hidden" name="report_user" value="" >
 
-								@if(!auth()->check())
-								<div class="alert alert-info py-2 mb-1">
-									<span class="icon-text-pair icon-color-reset icon-2x">
-										<span class="fa fa-info-circle icon"></span>
-										<span>@lang('frontend.apps.if_you_have_an_account_logging_in_will_increase_credibility_of_your_report')</span>
-									</span>
-								</div>
-								<div class="form-group mb-1">
-									<label for="reportEmail">@lang('frontend.apps.fields.email'):</label>
-									<input type="email" name="report_email" id="reportEmail" class="form-control" placeholder="@lang('frontend.apps.fields.reportee_email_placeholder')" value="{{ old('report_email') }}" required>
-								</div>
-								@else
-								<p class="mb-1">@lang('frontend.apps.reporting_as') <strong>{{ auth()->user()->name }}</strong> @if($email = auth()->user()->email) ({{ $email }}) @endif</p>
-								@endif
-								<div class="form-group mb-1">
-									<label class="d-block mb-0">@lang('frontend.apps.fields.report_categories'):</label>
-									<div class="d-flex flex-row flex-wrap">
-										@foreach($report_categories as $rc)
-										<div class="form-check form-check-inline" title="{{ $rc->description }}" data-toggle="tooltip" data-placement="top" data-custom-class="text-r090 tooltip-wider">
-											<input type="checkbox" name="report_categories[]" value="{{ $rc->id }}" id="reportCategory-{{ $rc->id }}" class="form-check-input" {!! old_checked('report_categories', NULL, $rc->id) !!}>
-											<label class="form-check-label" for="reportCategory-{{ $rc->id }}">{{ $rc->name }}</label>
-										</div>
-										@endforeach
+									@includeWhen($is_report_form, 'components.page-message', ['show_errors' => true])
+
+									@if(!auth()->check())
+									<div class="alert alert-info py-2 mb-1">
+										<span class="icon-text-pair icon-color-reset icon-2x">
+											<span class="fa fa-info-circle icon"></span>
+											<span>@lang('frontend.apps.if_you_have_an_account_logging_in_will_increase_credibility_of_your_report')</span>
+										</span>
 									</div>
-								</div>
-								<div class="form-group mb-1">
-									<label for="reportReason" class="d-block mb-0">@lang('frontend.apps.fields.report_reason'):</label>
-									<textarea name="report_reason" id="reportReason" class="form-control show-resize" placeholder="@lang('frontend.apps.fields.report_reason_placeholder')" rows="2" maxlength="{{ $report_reason_limit }}" required>{{ old('report_reason') }}</textarea>
-								</div>
-								<div class="text-center mt-3">
-									<button type="submit" class="btn btn-sm btn-primary btn-minw-100">@lang('frontend.apps.submit_report')</button>
-								</div>
+									<div class="form-group mb-1">
+										<label for="reportEmail">@lang('frontend.apps.fields.email'):</label>
+										<input type="email" name="report_email" id="reportEmail" class="form-control" placeholder="@lang('frontend.apps.fields.reportee_email_placeholder')" value="{{ old('report_email') }}" required>
+									</div>
+									@else
+									<p class="mb-1">@lang('frontend.apps.reporting_as') <strong>{{ auth()->user()->name }}</strong> @if($email = auth()->user()->email) ({{ $email }}) @endif</p>
+									@endif
+									<div class="form-group mb-1">
+										<label class="d-block mb-0">@lang('frontend.apps.fields.report_categories'):</label>
+										<div class="d-flex flex-row flex-wrap">
+											@foreach($report_categories as $rc)
+											<div class="form-check form-check-inline" title="{{ $rc->description }}" data-toggle="tooltip" data-placement="top" data-custom-class="text-r090 tooltip-wider">
+												<input type="checkbox" name="report_categories[]" value="{{ $rc->id }}" id="reportCategory-{{ $rc->id }}" class="form-check-input" {!! old_checked('report_categories', NULL, $rc->id) !!}>
+												<label class="form-check-label" for="reportCategory-{{ $rc->id }}">{{ $rc->name }}</label>
+											</div>
+											@endforeach
+										</div>
+									</div>
+									<div class="form-group mb-1">
+										<label for="reportReason" class="d-block mb-0">@lang('frontend.apps.fields.report_reason'):</label>
+										<textarea name="report_reason" id="reportReason" class="form-control show-resize" placeholder="@lang('frontend.apps.fields.report_reason_placeholder')" rows="2" maxlength="{{ $report_reason_limit }}" required>{{ old('report_reason') }}</textarea>
+									</div>
+									<div class="text-center mt-3">
+										<button type="submit" class="btn btn-sm btn-primary btn-minw-100">@lang('frontend.apps.submit_report')</button>
+									</div>
+								</form>
+								@else
+								<div class="alert alert-warning mb-0">{{ __('frontend.apps.app_cannot_be_reported_because_it_is_not_publicly_listed') }}</div>
+								@endif
 							</div>
 						</div>
 					</div>
-				</form>
+				</div>
 				<div class="row details-panel text-wrap-word">
 					<div class="col-12 mb-4 col-md-8 mb-md-0 col-lg-8 col-xl-9 details-panel-left">
 						@if($app->visuals->count() > 0)
@@ -164,7 +291,7 @@ $show_report_form = $is_report_form ? 'show' : '';
 								@if($app->url)
 								<div class="mb-2">
 									<span class="text-bold">@lang('frontend.apps.fields.app_url'):</span>
-									<a target="_blank" class="btn btn-link" href="{{ $app->url }}">{{ $app->url }} <span class="fas fa-external-link-alt"></span></a>
+									<a target="_blank" class="ml-1" href="{{ $app->url }}">{{ $app->url }} <span class="fas fa-external-link-alt"></span></a>
 								</div>
 								@endif
 								@if(trim($app->description))
@@ -184,7 +311,7 @@ $show_report_form = $is_report_form ? 'show' : '';
 								<p>number of apps, user details, etc.</p>
 								<p>@lang('frontend.apps.share_this_app'): --- TODO: socmed share buttons</p>
 								<div class="text-center">
-									<a href="#reportAppForm" class="btn btn-danger btn-sm px-3 btn-flex-row" data-toggle="collapse">
+									<a href="#app-report-section" class="btn btn-danger btn-sm px-3 btn-flex-row" data-toggle="collapse">
 										<span class="fas fa-exclamation-triangle mr-2 text-090"></span>
 										<span class="text-wrap-word">@lang('frontend.apps.report_this_app')</span>
 										<span class="fas fa-exclamation-triangle ml-2 text-090"></span>
@@ -197,8 +324,8 @@ $show_report_form = $is_report_form ? 'show' : '';
 								<h5>@lang('frontend.apps.additional_information')</h5>
 								<dl class="text-090">
 									<dt>@lang('frontend.apps.fields.last_updated')</dt>
-									@if($last_updated = ($app->updated_at ?? $app->created_at))
-									<dd>@include('components/date-with-tooltip', ['date' => $last_updated])</dd>
+									@if($app->last_changes_at)
+									<dd>@include('components/date-with-tooltip', ['date' => $app->last_changes_at])</dd>
 									@else
 									<dd>@vo_</dd>
 									@endif
@@ -261,17 +388,66 @@ $show_report_form = $is_report_form ? 'show' : '';
 
 @include('libraries.splide')
 
+@if($view_mode == 'admin' && count($app->changelogs) > 0)
+@push('scripts')
+<div class="modal fade" id="app-{{ $app->id }}-version-selector" tabindex="-1" role="dialog" aria-labelledby="app-{{ $app->id }}-version-selector-title" aria-hidden="true">
+	<div class="modal-dialog modal-sm" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title h4" id="app-{{ $app->id }}-version-selector-title">@lang('frontend.apps.notices.version_selector')</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">×</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form method="GET" action="{{ url()->current() }}" class="form-app-version-selector">
+					<select class="app-version-selector form-control" name="version" autocomplete="off">
+						<option value="">&ndash; {{ __('common.choose') }} &ndash;</option>
+						@foreach($app->changelogs as $cl)
+						<option value="{{ $cl->version }}" {!! old_selected('', request('version', $app->version_number), $cl->version) !!}>
+							{{ __('frontend.apps.version_x', ['x' => $cl->version]) }}
+							@if($cl->is_rejected)
+							({{ __('frontend.apps.notices.version_is_rejected') }})
+							@endif
+							@if($ori->version_number == $cl->version)
+							({{ __('frontend.apps.notices.app_current_version') }})
+							@endif
+							@if($cl->version == (request('version', $app->version_number)))
+							({{ __('frontend.apps.notices.being_previewed') }})
+							@endif
+						</option>
+						@endforeach
+					</select>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+jQuery(document).ready(function($) {
+	var curVer = @json(request('version', $app->version_number));
+	$(".form-app-version-selector").on("change", ".app-version-selector", function(e) {
+		var val = $(this).val();
+		if(!val || val == curVer) return;
+
+		$(".form-app-version-selector").submit();
+	});
+});
+</script>
+@endpush
+@endif
+
 @push('scripts')
 <script>
 jQuery(document).ready(function($) {
-	$(document).on('click', '[data-toggle="lightbox"]', function(e) {
-		e.preventDefault();
-		$(this).ekkoLightbox({
-			// alwaysShowClose: true
-		});
-	});
 	$('[data-toggle="popover"]').popover({
 		container: "body",
+	});
+
+	$("#app-{{ $app->id }}-notices").on("hidden.bs.collapse", function(e) {
+		Helpers.flashElement($("#app-{{ $app->id }}-notices-trigger"), {
+			variant: "blue",
+		});
 	});
 
 
@@ -282,7 +458,7 @@ jQuery(document).ready(function($) {
 	});
 
 	@if($is_report_form)
-	Helpers.scrollTo($("#reportAppForm"));
+	Helpers.scrollTo($("#report-app-form"));
 	@endif
 
 

@@ -18,7 +18,7 @@ class AppChangelog extends Model
 
 	public $timestamps = TRUE;
 	const CREATED_AT = 'created_at';
-	const UPDATED_AT = NULL;
+	const UPDATED_AT = 'updated_at';
 
 	const STATUS_PENDING	= 'pending';
 	const STATUS_APPROVED	= 'approved';
@@ -52,27 +52,32 @@ class AppChangelog extends Model
 		});
 	}
 
-	public function scopePending($query) {
-		$query->where('status', self::STATUS_PENDING);
+	public function scopePending($query, $state = true) {
+		$op = $state ? '=' : '!=';
+		$query->where('status', $op, self::STATUS_PENDING);
 	}
 
-	public function scopeRejected($query) {
-		$query->where('status', self::STATUS_REJECTED);
+	public function scopeRejected($query, $state = true) {
+		$op = $state ? '=' : '!=';
+		$query->where('status', $op, self::STATUS_REJECTED);
 	}
 
-	public function scopeApproved($query) {
+	public function scopeApproved($query, $state = true) {
+		$op = $state ? '=' : '!=';
 		// waiting to be committed
-		$query->where('status', self::STATUS_APPROVED);
+		$query->where('status', $op, self::STATUS_APPROVED);
 	}
 
-	public function scopeCommitted($query) {
+	public function scopeCommitted($query, $state = true) {
+		$op = $state ? '=' : '!=';
 		// waiting to be committed
-		$query->where('status', self::STATUS_COMMITTED);
+		$query->where('status', $op, self::STATUS_COMMITTED);
 	}
 
-	public function scopeFloating($query) {
+	public function scopeFloating($query, $state = true) {
+		$fn = $state ? 'whereIn' : 'whereNotIn';
 		// aka uncommitted, i.e pending or approved
-		$query->whereIn('status', [self::STATUS_PENDING, self::STATUS_APPROVED]);
+		$query->$fn('status', [self::STATUS_PENDING, self::STATUS_APPROVED]);
 	}
 
 	public function scopeInVerifIds($query, $ids) {

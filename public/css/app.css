@@ -323,6 +323,10 @@ img.app-logo {
   flex-flow: column nowrap;
   align-items: stretch;
 }
+.app-page .app-notices .alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.25rem;
+}
 .app-page > .app-header {
   padding-top: 2rem;
   background-color: rgba(0, 0, 0, 0.025);

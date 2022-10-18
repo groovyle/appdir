@@ -372,20 +372,36 @@ if(jQuery) {
 			if(options.variant) flashClass += "-"+ options.variant;
 
 			var $elm = $(element);
-			$elm.removeClass(flashClass).addClass(flashClass);
-			$elm.trigger("flashing.flashelement");
+			$elm.removeClass(flashClass);
+			var clearance = $elm.data("flashElementClearance");
+			if(clearance) clearTimeout(clearance);
 			setTimeout(function() {
-				$elm.removeClass(flashClass);
-				$elm.trigger("flashed.flashelement");
-			}, 3000);
+				$elm.addClass(flashClass);
+				$elm.trigger("flashing.flashelement");
+				$elm.data("flashElementClearance", setTimeout(function() {
+					$elm.removeClass(flashClass);
+					$elm.trigger("flashed.flashelement");
+				}, 3000 - 50));
+			}, 50);
 		};
 
 		var scrollAndFlash = function(element, scrollOptions, flashOptions) {
 			var $element = $(element);
-			$element.one("scrolled.scrollto", function(e) {
-				Helpers.flashElement($element, flashOptions);
-			});
-			Helpers.scrollTo($element, scrollOptions);
+			var scroll = scrollOptions !== false;
+			var flash = flashOptions !== false;
+			if(scroll && flash) {
+				$element.one("scrolled.scrollto", function(e) {
+					Helpers.flashElement($element, flashOptions);
+				});
+				Helpers.scrollTo($element, scrollOptions);
+			} else {
+				if(scroll) {
+					Helpers.scrollTo($element, scrollOptions);
+				}
+				if(flash) {
+					Helpers.flashElement($element, flashOptions);
+				}
+			}
 		}
 
 		// Remove a certain value in an array
@@ -1690,6 +1706,9 @@ if(jQuery) {
 				$error.find(".error-description").html(desc || null);
 				$body.append($error);
 			}
+			var hideError = function() {
+				$error.remove();
+			}
 			var showContent = function(content) {
 				$body.empty();
 				var $tmp;
@@ -1812,6 +1831,7 @@ if(jQuery) {
 				var postData = function() {
 					// Start posting data
 					toggleLoading($btnApprove, true);
+					hideError();
 					ajaxRequest = $.ajax({
 						url: url,
 						data: options.postData,

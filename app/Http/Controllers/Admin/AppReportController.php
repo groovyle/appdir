@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
+
 use App\Models\App;
 use App\Models\AppChangelog;
 use App\Models\AppChangelogCollection;
@@ -11,13 +13,14 @@ use App\Models\AppVerdict;
 use App\Models\UserBlock;
 use App\User;
 
+use App\DataManagers\AppManager;
 use App\DataManagers\AppReportManager;
 
-use App\Http\Controllers\Controller;
 
 use App\Rules\ModelExists;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Str;
 use Illuminate\Validation\Rule;
@@ -60,9 +63,17 @@ class AppReportController extends Controller
 		$query->leftJoin('app_verdicts as vd', function($query) {
 			$query->on('a.id', '=', 'vd.app_id');
 		});
+		$query->leftJoin('users as o', 'a.owner_id', '=', 'o.id');
+		$query->leftJoin('ref_prodi as prodi', 'o.prodi_id', '=', 'prodi.id');
 
 		// Do not include trashed/deleted items
 		$query->whereNull('a.deleted_at');
+
+		// Role/ability scoping filter
+		$view_mode = 'none';
+		AppManager::scopeListQuery($query, $view_mode, false);
+
+		$total = (clone $query)->count(DB::raw('distinct a.id'));
 
 
 		$query->select('a.*');
@@ -81,7 +92,7 @@ class AppReportController extends Controller
 			$query->whereNotNull('rur.id');
 			// $query->orderBy('last_unresolved_report', 'desc');
 			$query->orderBy('num_unresolved_reports', 'desc');
-			$filter_count++;
+			// $filter_count++;
 		} elseif($opt_filters['status'] == 'resolved') {
 			$query->whereNotNull('rr.id');
 			// $query->orderBy('last_resolved_report', 'desc');
@@ -104,13 +115,14 @@ class AppReportController extends Controller
 				$query->orWhere('a.short_name', 'like', $like);
 				$query->orWhere('a.description', 'like', $like);
 			});
+			$filter_count++;
 		}
 
 		$query->orderBy('num_verdicts', 'desc');
 		$query->orderBy('a.name', 'asc');
 		$query->orderBy('a.id', 'desc');
 
-		return [$query, $filters, $filter_count];
+		return compact('query', 'filters', 'filter_count', 'total', 'view_mode');
 	}
 
 	/**
@@ -123,15 +135,19 @@ class AppReportController extends Controller
 		$this->authorize('view-any', AppReport::class);
 		//
 		$data = [];
+		$user = Auth::user();
 
-		list($query, $filters, $filter_count) = static::listQuery(['keyword', 'status']);
+		extract( static::listQuery(['keyword', 'status']) );
 
 		$items = $query->paginate(10);
 		$items->appends($filters);
 
+		$data['total'] = $total;
 		$data['items'] = $items;
 		$data['filters'] = optional($filters);
 		$data['filter_count'] = $filter_count;
+		$data['view_mode'] = $view_mode;
+		$data['prodi'] = optional($user->prodi);
 
 		return view('admin/app_report/index', $data);
 	}

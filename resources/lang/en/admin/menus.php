@@ -16,9 +16,10 @@ return [
 	'app_tags'				=> 'Tags',
 
 	'header_system'			=> 'System',
+	'prodi'					=> 'Study Programs',
 	'users'					=> 'Users',
 	'user_roles'			=> 'User Roles',
 	'system_abilities'		=> 'Permissions',
-	'prodi'					=> 'Study Programs',
+	'system_settings'		=> 'System Settings',
 
 ];

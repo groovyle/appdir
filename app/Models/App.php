@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 class App extends Model
 {
 	use SoftDeletes, Concerns\HasCudActors {
@@ -70,14 +73,14 @@ class App extends Model
 			'verifications.status',
 		]);
 		$query->with([
-			'visuals',
+			// 'visuals',
 			'logo',
 			'categories',
 			'tags',
 			'owner',
 		]);
 		$query->withCount([
-			'visuals',
+			// 'visuals',
 		]);
 
 		$query->isListed();
@@ -89,17 +92,21 @@ class App extends Model
 		$query->where('is_verified', !$invert ? 1 : 0);
 		$query->where('is_published', !$invert ? 1 : 0);
 		$query->where('is_reported', !$invert ? 0 : 1);
-
-		// TODO: limit scope breadth depending on who the user is
 		$query->where('is_private', !$invert ? 0 : 1);
 	}
 
-	public static function getFrontendItem($slug) {
+	public static function getFrontendItem($slug, $fail = true, $scope = true) {
 		$item = null;
-		if(is_numeric($slug))
-			$item = static::frontend()->whereKey($slug)->first();
-		if(!$item)
-			$item = static::frontend()->where('slug', $slug)->firstOrFail();
+		$query = static::query();
+		if($scope) $query->frontend();
+
+		if(is_numeric($slug)) {
+			$item = (clone $query)->whereKey($slug)->first();
+		}
+		if(!$item) {
+			$fn = $fail ? 'firstOrFail' : 'first';
+			$item = (clone $query)->where('slug', $slug)->$fn();
+		}
 
 		return $item;
 	}
@@ -193,6 +200,10 @@ class App extends Model
 		return $this->hasMany('App\Models\AppChangelog', 'app_id');
 	}
 
+	public function non_rejected_changes() {
+		return $this->changelogs()->rejected(false);
+	}
+
 	public function pending_changes() {
 		$query = $this->changelogs()->pending();
 		$query = $this->_future_changes($query);
@@ -265,6 +276,10 @@ class App extends Model
 		return $this->changelogs()->count() > 1;
 	}
 
+	public function getHasNonRejectedHistoryAttribute() {
+		return $this->non_rejected_changes->count() > 1;
+	}
+
 	public function getHasCommittedAttribute() {
 		return $this->changelogs()->committed()->count() > 0;
 	}
@@ -334,9 +349,27 @@ class App extends Model
 		;
 	}
 
+	public function getLastChangesAtAttribute() {
+		return $this->version->updated_at
+			?? $this->updated_at
+			?? $this->created_at
+		;
+		// return $this->last_changes()->committed()->value('updated_at');
+	}
+
+	public function getIsOriginalVersionAttribute() {
+		return !array_key_exists('original_version_number', $this->attributes)
+			|| $this->version_number == $this->original_version_number
+		;
+	}
+
 	public function setToPublished($state = true) {
 		$this->is_published = $state;
-		$this->published_at = $state ? now() : null;
+		if(!$state)
+			$this->published_at = null;
+		elseif(!$this->published_at)
+			$this->published_at = now();
+
 		return $this;
 	}
 
@@ -354,8 +387,14 @@ class App extends Model
 	public function increasePageViews($save = true) {
 		$this->page_views += 1;
 		if($save) {
-			$this->dontLogNextAction();
-			return $this->save();
+			// $this->dontLogNextAction();
+			// return $this->save();
+
+			// Save using a query so that timestamps don't get touched
+			DB::table($this->getTable())
+				->where($this->getKeyName(), $this->getKey())
+				->update(['page_views' => $this->page_views])
+			;
 		}
 	}
 }

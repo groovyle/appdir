@@ -18,7 +18,7 @@ return [
 
 	'view_mode'			=> [
 		'all'	=> 'Viewing all apps in the system',
-		'prodi'	=> 'Viewing apps in your study program - :x',
+		'prodi'	=> 'Viewing your apps and apps in your study program - :x',
 		'owned'	=> 'Viewing your apps',
 	],
 ],
@@ -79,8 +79,8 @@ return [
 'man_pan'		=> [
 	'title'					=> 'Management Panel',
 
-	'app_is_private'		=> 'App is private (publicly listed)',
-	'app_is_not_private'	=> 'App is not private (hidden from public list, only owner can see)',
+	'app_is_private'		=> 'App is private (hidden from public list, only owner can see)',
+	'app_is_not_private'	=> 'App is not private (publicly listed)',
 	'make_private'			=> 'Make this app private (i.e hidden, just for you): :name ?',
 	'make_not_private'		=> 'Make this app not private (i.e publicly visible): :name ?',
 
@@ -171,6 +171,7 @@ return [
 	'publish_changes_now'			=> 'Publish changes now',
 	'publish_item'					=> 'Publish item',
 	'apply_changes_without_publishing'	=> 'Apply changes without publishing',
+	'cannot_load_version_preview'	=> 'Error occurred while trying to load version preview',
 
 	'statuses'	=> [
 		'pending'	=> 'Pending',
@@ -201,6 +202,15 @@ return [
 ],
 
 'messages'	=> [
+	'create_successful'			=> 'A new app has been created!',
+	'create_successful_pending'	=> 'Your new app will have to wait for verification first before it goes public.',
+	'create_failed'				=> 'An error occurred while creating new app.',
+	'update_successful'			=> 'App was updated!',
+	'update_successful_pending'	=> 'Your edits have been submitted for approval.',
+	'update_failed'				=> 'An error occurred while submitting app data.',
+	'delete_successful'			=> 'Successfully deleted the app!',
+	'delete_failed'				=> 'An error occurred while trying to delete the app.',
+
 	'form_showing_pending_changes'			=> 'This form shows your pending changes',
 	'new_items_will_be_staged'				=> 'Apps will not become public immediately, and has to go through verification first',
 	'edits_will_be_staged'					=> 'Any edits will be staged for verification and won\'t take immediate effect',
@@ -218,6 +228,11 @@ return [
 	'congrats!'								=> 'Congrats!',
 	'your_changes_have_been_published!'		=> 'Your changes have been published!',
 	'your_changes_have_been_applied!'		=> 'Your changes have been applied!',
+
+	'app_was_made_private'		=> 'App has been set to be private.',
+	'app_was_made_not_private'	=> 'App has been set to publicly available.',
+	'app_was_published'			=> 'App has been published.',
+	'app_was_unpublished'		=> 'App has been unpublished.',
 ],
 
 ];

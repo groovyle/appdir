@@ -39,6 +39,7 @@ return [
 'submit'			=> 'Submit',
 'clear'				=> 'Clear',
 'search'			=> 'Search',
+'choose'			=> 'Choose',
 'note'				=> 'Note',
 'or'				=> 'or',
 'and'				=> 'and',

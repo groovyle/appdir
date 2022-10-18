@@ -2,6 +2,17 @@
 
 return [
 
+'page_title'		=> [
+	'index'			=> 'App Moderation',
+
+	'view_mode'			=> [
+		'all'	=> 'Viewing all reported apps',
+		'prodi'	=> 'Viewing reported apps in your study program - :x',
+	],
+],
+
+'apps_list'						=> 'Apps List',
+'no_app_reports_yet'			=> 'No apps reported yet!',
 'app_versions'					=> 'App Versions',
 'is_current_app_version'		=> 'This is the app\'s current version',
 'version_x_app_information'		=> 'Version :x app details',

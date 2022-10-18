@@ -56,9 +56,12 @@ p:last-child {
 }
 
 .icon-text-pair {
-	display: inline-flex;
+	display: flex;
 	align-items: baseline;
 	column-gap: 0.35rem;
+}
+span.icon-text-pair {
+	display: inline-flex;
 }
 .icon-text-pair > .icon {
 	color: var(--gray);

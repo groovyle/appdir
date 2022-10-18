@@ -127,28 +127,9 @@ class AppController extends Controller
 
 		$total_all = $query->count(DB::raw('distinct a.id'));
 
-		// TODO: role/ability scoping filter
+		// Role/ability scoping filter
 		$view_mode = 'owned';
-		$query->where(function($query) use($user, &$view_mode) {
-			// Always able to view owned items
-			$query->where('a.owner_id', $user->id);
-
-			// More scope filters
-			$query->orWhere(function($query) use($user, &$view_mode) {
-				if($user->can('view-all', App::class)) {
-					// No scope filter, enable all
-					$view_mode = 'all';
-					$query->whereRaw('1');
-				} elseif($user->can('view-any-in-prodi', App::class)) {
-					// Only ones in the same prodi
-					$view_mode = 'prodi';
-					$query->where('prodi.id', $user->prodi_id);
-					$query->whereNotNull('prodi.id');
-				} else {
-					// Only owned
-				}
-			});
-		});
+		AppManager::scopeListQuery($query, $view_mode);
 		$total_scoped = $query->count(DB::raw('distinct a.id'));
 
 
@@ -309,8 +290,8 @@ class AppController extends Controller
 		// Validation rules
 		request_replace_nl($request);
 		$rules = [
-			'app_name'			=> ['required', 'max:100'],
-			'app_short_name'	=> ['nullable', 'max:20'],
+			'app_name'			=> ['required', 'min:10', 'max:100'],
+			'app_short_name'	=> ['nullable', 'min:3', 'max:20'],
 			'app_description'	=> ['nullable', 'string'],
 			'app_url'			=> ['nullable', 'string', 'url', new AppUrl],
 			// 'app_logo'			=> ['file', 'image', 'max:2048'], // NOTE: using filepond validation instead
@@ -350,17 +331,6 @@ class AppController extends Controller
 
 		if(!$is_edit) {
 			$app->owner_id		= $user_id;
-		} else {
-			// App has to be owned by user to edit.
-			// TODO: also allow superadmins and others to edit...?
-			if($user_id != $app->owner_id) {
-				// Not allowed
-				$request->session()->flash('flash_message', [
-					'message'	=> __('admin.app.message.edit_failed_not_owner'),
-					'type'		=> 'error'
-				]);
-				return redirect()->route('admin.apps.index');
-			}
 		}
 
 		$app->name			= $request->app_name;
@@ -659,7 +629,7 @@ class AppController extends Controller
 
 			// Pass a message
 			$request->session()->flash('flash_message', [
-				'message'	=> __('admin.app.message.create_failed'),
+				'message'	=> __('admin/apps.messages.create_failed'),
 				'type'		=> 'error'
 			]);
 
@@ -669,9 +639,12 @@ class AppController extends Controller
 
 			// Pass a message
 			$request->session()->flash('flash_message', [
-				'message'	=> __('admin.app.message.create_successful'),
+				'message'	=> __('admin/apps.messages.create_successful'),
 				'type'		=> 'success'
 			]);
+			if($verf_add) {
+				$request->session()->flash('messages', __('admin/apps.messages.create_successful_pending'));
+			}
 
 			if(Auth::user()->can('view', $store['app'])) {
 				return redirect()->route('admin.apps.show', [
@@ -763,12 +736,13 @@ class AppController extends Controller
 		}
 
 		$result = $store['result'];
+		$verf_edit = settings('app.modification_needs_verification', false);
 		if(!$result) {
 			DB::rollback();
 
 			// Pass a message
 			$request->session()->flash('flash_message', [
-				'message'	=> __('admin.app.message.update_failed'),
+				'message'	=> __('admin/apps.messages.update_failed'),
 				'type'		=> 'error'
 			]);
 
@@ -776,11 +750,17 @@ class AppController extends Controller
 		} else {
 			DB::commit();
 
-			// Pass a message
-			$request->session()->flash('flash_message', [
-				'message'	=> __('admin.app.message.update_successful'),
-				'type'		=> 'success'
-			]);
+			if( (!$verf_edit && $store['app']->wasChanged())
+				|| ($verf_edit && $store['app']->isDirty()) ) {
+				// Pass a message
+				$request->session()->flash('flash_message', [
+					'message'	=> __('admin/apps.messages.update_successful'),
+					'type'		=> 'success'
+				]);
+				if($verf_edit && !$app->is_unverified_new) {
+					$request->session()->flash('messages', __('admin/apps.messages.update_successful_pending'));
+				}
+			}
 
 			$backto = $request->input('backto');
 			if($backto == 'list' && Auth::user()->can('view-any', App::class)) {
@@ -812,12 +792,13 @@ class AppController extends Controller
 			$messages[] = $e->getMessage();
 		}
 
+		$result = false;
 		if($result) {
 			DB::commit();
 
 			// Pass a message
 			$request->session()->flash('flash_message', [
-				'message'	=> __('admin/common.messages.delete_successful'),
+				'message'	=> __('admin/apps.messages.delete_successful'),
 				'type'		=> 'success'
 			]);
 		} else {
@@ -825,7 +806,7 @@ class AppController extends Controller
 
 			// Pass a message
 			$request->session()->flash('flash_message', [
-				'message'	=> __('admin/common.messages.delete_failed'),
+				'message'	=> __('admin/apps.messages.delete_failed'),
 				'type'		=> 'danger'
 			]);
 		}
@@ -879,6 +860,7 @@ class AppController extends Controller
 		$page = request()->input('page', 1);
 		$go_current = request()->has('current');
 		$go_version = request()->input('go_version');
+		$go_flash = request()->input('go_flash');
 		if(($go_current && $app->version_id) || $go_version) {
 			// Find page
 			// https://stackoverflow.com/questions/9086719/mysql-paginated-results-find-page-for-specific-result
@@ -897,6 +879,8 @@ class AppController extends Controller
 				$page = ceil($offset / $per_page);
 				$data['goto_version'] = $target_version;
 			}
+
+			$data['goto_flash'] = $go_flash == 1;
 		}
 
 		$changelogs = $app->changelogs()->paginate($per_page, ['*'], 'page', $page);
@@ -977,12 +961,14 @@ class AppController extends Controller
 		return view('admin/app/visuals', $data);
 	}
 
+	// POST
 	public function updateVisuals(Request $request, App $app)
 	{
 		//
 		if($app->has_floating_changes) {
 			list($ori, $app) = AppManager::getPendingVersion($app, false, false);
 		}
+		$verf_edit = settings('app.modification_needs_verification', false);
 
 		request_replace_nl($request);
 		$rules = [
@@ -1256,11 +1242,16 @@ class AppController extends Controller
 		} else {
 			DB::commit();
 
-			// Pass a message
-			$request->session()->flash('flash_message', [
-				'message'	=> __('admin.message.save_successful'),
-				'type'		=> 'success'
-			]);
+			if(!empty($changes['changes'])) {
+				// Pass a message
+				$request->session()->flash('flash_message', [
+					'message'	=> __('admin/apps.messages.update_successful'),
+					'type'		=> 'success'
+				]);
+				if($verf_edit && !$app->is_unverified_new) {
+					$request->session()->flash('messages', __('admin/apps.messages.update_successful_pending'));
+				}
+			}
 
 			$back_after_save = $request->input('back_after_save', 0) == 1;
 			if($back_after_save && Auth::user()->can('view', $app)) {
@@ -1370,7 +1361,7 @@ class AppController extends Controller
 
 			// Pass a message...?
 			$request->session()->flash('flash_message', [
-				'message'	=> __('admin.app_verification.message.publish_failed'),
+				'message'	=> __('admin/apps.messages.update_failed'),
 				'type'		=> 'error'
 			]);
 
@@ -1381,7 +1372,7 @@ class AppController extends Controller
 			// Pass a message
 			// TODO: maybe different messages for when it's an edit/new thing?
 			$request->session()->flash('flash_message', [
-				'message'	=> __('admin.app_verification.message.changes_have_been_applied'),
+				'message'	=> __('admin/apps.messages.update_successful'),
 				'type'		=> 'success'
 			]);
 			$request->session()->flash('post_publish', true);
@@ -1404,13 +1395,14 @@ class AppController extends Controller
 		// Simple action, like delete
 
 		$private = $private === null ? 1 : intval($private);
+		$private = $private == 0 ? false : true;
 
 		DB::beginTransaction();
 
 		$result = true;
 		$messages = [];
 		try {
-			$app->setToPrivate($private != 0);
+			$app->setToPrivate($private);
 			$result = $app->save();
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = false;
@@ -1422,7 +1414,7 @@ class AppController extends Controller
 
 			// Pass a message
 			$request->session()->flash('flash_message', [
-				'message'	=> $private == 1
+				'message'	=> $private
 					? __('admin/apps.messages.app_was_made_private')
 					: __('admin/apps.messages.app_was_made_not_private'),
 				'type'		=> 'success'
@@ -1473,13 +1465,14 @@ class AppController extends Controller
 		// Simple action, like delete
 
 		$published = $published === null ? 1 : intval($published);
+		$published = $published == 0 ? false : true;
 
 		DB::beginTransaction();
 
 		$result = true;
 		$messages = [];
 		try {
-			$app->setToPublished($published != 0);
+			$app->setToPublished($published);
 			$result = $app->save();
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = false;
@@ -1491,7 +1484,7 @@ class AppController extends Controller
 
 			// Pass a message
 			$request->session()->flash('flash_message', [
-				'message'	=> $private == 1
+				'message'	=> $published
 					? __('admin/apps.messages.app_was_published')
 					: __('admin/apps.messages.app_was_unpublished'),
 				'type'		=> 'success'

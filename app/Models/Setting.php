@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Settings extends Model
+class Setting extends Model
 {
 	use Concerns\LoggedActions;
 	//
@@ -16,8 +16,8 @@ class Settings extends Model
 
 	protected $guarded = ['key'];
 
-	public function delete() {
+	/*public function delete() {
 		return false;
-	}
+	}*/
 
 }
