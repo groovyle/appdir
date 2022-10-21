@@ -2,7 +2,6 @@
 $is_report_form = old('is_report_form') ?? request()->has('report');
 $show_report_form = $is_report_form ? 'show' : '';
 
-// dump($app->is_original_version, $app->version_number, isset($app->original_version_number), $app->attributes);
 $notices_count = 0;
 ?>
 
@@ -307,7 +306,17 @@ $notices_count = 0;
 						<div class="card">
 							<div class="card-body">
 								<h4>@lang('frontend.apps.author')</h4>
-								<p><a href="{{ route('user.profile', ['user' => $app->owner->id]) }}">{{ $app->owner->name }}</a> TODO: clickable user to user page</p>
+								<div class="user-horizontal-display mb-2">
+									<div class="user-logo-wrapper inline-logo">
+										<img src="{{ $app->owner->profile_picture }}" rel="User image">
+									</div>
+									<div class="user-text">
+										<a href="{{ route('user.profile', ['user' => $app->owner->id]) }}">{{ $app->owner->name }}</a>
+										@if($app->owner->prodi)
+										<div class="text-secondary text-090 mt-1">{{ $app->owner->prodi->compact_name }}</div>
+										@endif
+									</div>
+								</div>
 								<p>number of apps, user details, etc.</p>
 								<p>@lang('frontend.apps.share_this_app'): --- TODO: socmed share buttons</p>
 								<div class="text-center">

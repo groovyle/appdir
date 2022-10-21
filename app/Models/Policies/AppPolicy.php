@@ -182,6 +182,8 @@ class AppPolicy
 	public function restore(User $user, App $app)
 	{
 		//
+		if($user->can('delete-all', App::class)) return true;
+		if(!$app->is_owned) return false;
 	}
 
 	/**
@@ -193,6 +195,7 @@ class AppPolicy
 	 */
 	public function forceDelete(User $user, App $app)
 	{
-		//
+		// No permanent deletion pls
+		return false;
 	}
 }

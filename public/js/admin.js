@@ -69,6 +69,13 @@ window.initDefaultClasses = function(context) {
 window.initDefaultClasses();
 
 
+var $logoutForm = $("#logout-form");
+$(document).on("click", ".btn-logout", function(e) {
+	e.preventDefault();
+	$logoutForm.submit();
+});
+
+
 var $mainContent = $(".main-content").first();
 if($mainContent.length > 0 && $mainContent.is(".scroll-to-me")) {
 	// Wait for the DOM to finish updating, like e.g select[multiple] with Select2

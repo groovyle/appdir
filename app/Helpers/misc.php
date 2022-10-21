@@ -60,9 +60,6 @@ function get_youtube_url($id, $short = true) {
 
 function notnull() {
 	$args = func_get_args();
-	if(count($args) == 1 && is_array($args[0]))
-		$args = $args[0];
-
 	foreach($args as $value) {
 		if($value)
 			return $value;
@@ -218,6 +215,18 @@ function self_redirect_url($query_except = [], $data = []) {
 
 function self_redirect($query_except = [], $data = []) {
 	return redirect(self_redirect_url($query_except, $data));
+}
+
+// A collection of headers to prevent caching
+// https://stackoverflow.com/a/1907705
+function no_cache_headers($response) {
+	$response
+		->header('Cache-Control', 'no-store, no-cache, must-revalidate', true)
+		->header('Pragma', 'no-cache', true)
+		->header('Date', 'Sat, 26 Jul 1997 05:00:00 GMT', true)
+		->header('Expires', '0', true)
+	;
+	return $response;
 }
 
 

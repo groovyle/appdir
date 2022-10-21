@@ -185,35 +185,34 @@ $generate_menus = function($menus) use(&$generate_menus, $menu_list) {
 		@endif
 <?php
 	endforeach;
-}
+};
 ?>
 	<!-- Main Sidebar Container -->
-	<aside class="main-sidebar sidebar-dark-primary elevation-4">
+	<aside class="main-sidebar sidebar-dark-lightblue elevation-4">
 		<!-- Brand Logo -->
-		<!-- TODO: logo -->
-		<a href="{{ route('admin.home') }}" class="brand-link">
-			<img src="../../dist/img/AdminLTELogo.png"
-					 alt="logo"
-					 class="brand-image img-circle elevation-3"
-					 style="opacity: .8">
-			<span class="brand-text font-weight-light">{{ config('app.short_name') }}</span>
+		<a href="{{ route('admin.home') }}" class="brand-link navbar-dark logo-switch position-relative">
+			<img src="{{ asset('img/fineprint-light.png') }}" alt="{{ config('app.name') }}" class="brand-image-xs logo-xl absolute-centered">
+			<img src="{{ asset('img/logo-square-light.png') }}" alt="{{ config('app.name') }}" class="brand-image-xl logo-xs">
 		</a>
 
 		<!-- Sidebar -->
 		<div class="sidebar">
+
+			{{--
 			<!-- Sidebar user (optional) -->
 			<div class="user-panel mt-3 pb-3 mb-3 d-flex">
 				<div class="image">
-					<img src="../../dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
+					<img src="{{ Auth::user()->profile_picture }}" class="img-circle elevation-2" alt="User Image">
 				</div>
 				<div class="info">
-					<a href="#" class="d-block">{{ Auth::user()->name }}</a>
+					<a href="{{ route('admin.profile.index') }}" class="d-block maxw-100 text-truncate">{{ Auth::user()->name }}</a>
 				</div>
 			</div>
+			--}}
 
 			<!-- Sidebar Menu -->
-			<nav class="mt-2">
-				<ul class="nav nav-pills nav-sidebar nav-treeview-lined flex-column pb-5" data-widget="treeview" role="menu" data-accordion="false">
+			<nav class="mt-4">
+				<ul class="nav nav-pills nav-sidebar flex-column nav-child-indent nav-flat pb-5" data-widget="treeview" role="menu" data-accordion="false">
 					<?php $generate_menus($menus); ?>
 				</ul>
 			</nav>

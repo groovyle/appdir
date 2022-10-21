@@ -56,7 +56,7 @@ class AppController extends Controller
 	protected function resourceAbilityMap()
 	{
 		return [
-			'index'		=> 'viewAny',
+			'index'		=> 'view-any',
 			'show'		=> 'view',
 			'create'	=> 'create',
 			'store'		=> 'create',
@@ -501,69 +501,6 @@ class AppController extends Controller
 				}
 			}
 			$result = $result && $logo_result;
-
-
-			// Visuals
-			if($is_edit && $result && $vis_del = $request->input('visual_delete')) {
-				foreach($vis_del as $vis_id) {
-					$vis = AppVisualMedia::find($vis_id);
-					if($vis) {
-						// No deleting files, because they are trashed and is kept...?
-						// $delete_files[] = $vis['media_path'];
-						if(!$is_edit) {
-							// No need to delete on edit because we make our own
-							// collection anyway below
-							// TODO: but deletion only exists in an edit lol
-							$vis->delete();
-						}
-					}
-				}
-			}
-			if($result && $visuals = $request->file('visuals')) {
-				$rel_visuals = elocollect();
-				foreach($visuals as $file) {
-					// Upload and store each file
-					$fpath = Storage::disk('public')->putFile('apps/'.$app->id.'/visuals', $file);
-					if($fpath) {
-						$fname = basename($fpath);
-
-						$vis = new AppVisualMedia;
-						$vis->caption = NULL; // DUMMY
-						$vis->media_name = $fname;
-						$vis->media_path = $fpath;
-						$vis->app_id = $app->id;
-
-						if($is_edit) {
-							// Default trashed, will need to apply diff to be up
-							// TODO: check staging config
-							// TODO: how does this interact with diffing? save now or later?
-							//  How would the differ diff between deleted items and new items
-							//  if we immediately delete new items?
-							//  Do we regress the app after diffing...?
-							//  Can we make our own collection here then discard it?
-							//  (instead of saving it because the differ does not
-							//  load a fresh relation, but just uses any existing ones)
-							$vis->deleted_at = $vis->freshTimestampString();
-						} else {
-							// Need the item to exist first on addition
-							$result = $result && $app->visuals()->save($vis);
-						}
-
-						$rel_visuals[] = $vis;
-						$uploaded_files[] = $fpath;
-					} else {
-						$result = FALSE;
-					}
-
-					if(!$result) {
-						break;
-					}
-				}
-
-				// Can't set like `$app->visuals = $value` because relations are
-				// dynamically accessed properties (not real object properties)
-				$app->setRelation('visuals', $rel_visuals);
-			}
 
 
 			// Generate app diff

@@ -10,8 +10,9 @@ class UserBlock extends Model
 {
 	protected $table = 'user_blocks';
 
-	use SoftDeletes,
-		Concerns\HasCudActors;
+	use SoftDeletes, Concerns\HasCudActors {
+		Concerns\HasCudActors::runSoftDelete insteadof SoftDeletes;
+	}
 
 	protected $casts = [
 		'details' => 'array',

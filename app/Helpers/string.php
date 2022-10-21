@@ -232,10 +232,14 @@ function text_truncate($text, $maxlen, $ellipsis = '…', $with_title = false) {
 }
 
 function truthy($value) {
-	return in_array($value, [true, 'true', '', null, 0, '0', 'yes', 'on'], true);
+	return (is_numeric($value) && $value > 0)
+		|| in_array(strtolower($value), [true, 'true', 1, '1', 'yes', 'on'], true)
+	;
 }
 function falsy($value) {
-	return in_array($value, [false, 'false', '', null, 0, '0', 'no', 'off'], true);
+	return (is_numeric($value) && $value <= 0)
+		|| in_array(strtolower($value), [false, 'false', '', null, 0, '0', 'no', 'off'], true)
+	;
 }
 
 function url_query_except($except, $data = []) {

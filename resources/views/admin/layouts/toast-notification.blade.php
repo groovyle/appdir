@@ -20,7 +20,7 @@ jQuery(document).ready(function($) {
 			closeButton: true,
 			preventDuplicates: false,
 			positionClass: "toast-bottom-right",
-			timeout: 8000,
+			timeout: 10000,
 			progressBar: true,
 		};
 		toastr[@json($msg_type)](@json($msg_text));

@@ -10,10 +10,14 @@ $is_self = $is_self ?? false;
 			<div class="card">
 				<div class="card-body">
 					<div class="user-logo-wrapper">
-						<img src="{{ asset('img/default-user-logo.png') }}" rel="TODO: user logo here">
+						<img src="{{ $user->profile_picture }}" rel="User image">
 					</div>
-					<h3>{{ $user->name }}</h3>
+					<h4>{{ $user->name }} @if($is_self) <span class="fas fa-user text-primary text-070 ml-1" title="{{ __('frontend.users.this_is_your_public_profile') }}" data-toggle="tooltip"></span> @endif</h4>
+					@if($user->prodi)
+					<p class="text-secondary">{{ $user->prodi->complete_name }}</p>
+					@endif
 					TODO: show more information here, e.g logo?
+					TODO: don't show user if blocked
 				</div>
 			</div>
 		</div>
@@ -67,7 +71,7 @@ $is_self = $is_self ?? false;
 										@endif
 									</div>
 								</div>
-								<p class="mt-1 mb-2">
+								<p class="mt-1 mb-3">
 									@lang('frontend.apps.by') {{ $app->owner }}
 								</p>
 								<?php

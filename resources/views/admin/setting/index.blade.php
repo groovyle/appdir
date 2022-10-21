@@ -1,6 +1,7 @@
 <?php
 $show_filters = $filter_count > 0;
 $hide_filters = !$show_filters;
+$scroll_content = !isset($goto_item) && ($show_filters || request()->has('page'));
 ?>
 @extends('admin.layouts.main')
 
@@ -55,7 +56,7 @@ $hide_filters = !$show_filters;
 	</form>
 
 	<!-- Card -->
-	<div class="card main-content @if($show_filters || request()->has('page')) scroll-to-me @endif">
+	<div class="card main-content @if($scroll_content) scroll-to-me @endif">
 		<div class="card-header">
 			<h3 class="card-title">{{ __('admin/settings.settings_list') }} ({{ count($list) }})</h3>
 			<div class="card-tools">

@@ -2,6 +2,13 @@
 
 return [
 
+'portal_button'			=> 'Portal',
+'user_profile_button'	=> 'Profile',
+'logout_button'			=> 'Logout',
+'home_title'			=> 'Home',
+'footer_text'			=> '&copy; 2022, Gagas AI',
+
+
 'filters'				=> 'Filters',
 'search'				=> 'Search',
 'reset'					=> 'Reset',
@@ -22,6 +29,7 @@ return [
 'sort_by'				=> 'Sort by',
 'default'				=> 'default',
 'yes_im_sure'			=> 'Yes, I\'m sure',
+'done'					=> 'Done',
 
 'fields'	=> [
 	'id'				=> 'ID',
@@ -31,13 +39,14 @@ return [
 	'number_of_apps'	=> 'Number of Apps',
 	'number_of_users'	=> 'Number of Users',
 	'last_updated'		=> 'Last Updated',
+	'status'			=> 'Status',
 ],
 
 'messages'	=> [
 	'create_successful'	=> 'A new item has been added.',
 	'create_failed'		=> 'An error occurred while attempting to create a new item.',
 	'update_successful'	=> 'The item has been edited.',
-	'update_failed'		=> 'An error occurred while attempting to update item data.',
+	'update_failed'		=> 'An error occurred while attempting to update data.',
 	'delete_successful'	=> 'Item has been deleted.',
 	'delete_failed'		=> 'An error occurred while attempting to delete item.',
 ],

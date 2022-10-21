@@ -1,0 +1,1 @@
+<div class="{{ $size ?? 'text-r200' }} box-copy-info">{{ $slot }}</div>

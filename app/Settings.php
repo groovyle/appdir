@@ -16,9 +16,10 @@ class Settings
 		if(is_numeric($value))
 			return $value + 0;
 
+		if(truthy($value)) return true;
+		if(falsy($value)) return false;
+
 		$lower = strtolower($value);
-		if(in_array($lower, ['true', 'false']))
-			return $lower == 'true';
 		if($lower === 'null')
 			return null;
 		if(preg_match('/^[0-9]+-[0-9]+$/', $value)) {

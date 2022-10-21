@@ -16,23 +16,50 @@ $rand = random_string(5);
 @section('page-title', __('admin/users.page_title.detail'))
 
 @section('content')
-<div class="mb-2">
-  @can('view-any', App\User::class)
-  <a href="{{ route('admin.users.index', ['goto_item' => $user->id]) }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
-  @endcan
-  @can('update', $user)
-  <a href="{{ route('admin.users.edit', ['user' => $user->id]) }}" class="btn btn-sm btn-primary">
-    <span class="fas fa-edit"></span>
-    {{ __('admin/users.edit_user') }}
-  </a>
-  @endcan
-  @can('delete', $user)
-  <a href="{{ route('admin.users.destroy', ['user' => $user->id]) }}" class="btn btn-danger btn-sm text-nowrap btn-ays-modal ml-3" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/users._self'), $user->name, __('admin/common.fields.id'), $user->id) }}">
-    <span class="fas fa-trash mr-1"></span>
-    {{ __('common.delete') }}
-  </a>
-  @endcan
+<form id="form-reset-password-{{ $rand }}" method="POST" action="{{ route('admin.users.reset_password.save', ['user' => $user->id]) }}" class="d-none">
+  @csrf
+  @method('PATCH')
+</form>
+
+<div class="d-flex flex-wrap text-nowrap mb-1">
+  <div class="details-nav-left mr-auto mb-1">
+    @can('view-any', App\User::class)
+    <a href="{{ route('admin.users.index', ['goto_item' => $user->id]) }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
+    @endcan
+    @can('update', $user)
+    <a href="{{ route('admin.users.edit', ['user' => $user->id]) }}" class="btn btn-sm btn-primary">
+      <span class="fas fa-edit"></span>
+      {{ __('admin/users.edit_user') }}
+    </a>
+    @endcan
+    @can('delete', $user)
+    <a href="{{ route('admin.users.destroy', ['user' => $user->id]) }}" class="btn btn-danger btn-sm text-nowrap btn-ays-modal ml-3" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/users._self'), $user->name, __('admin/common.fields.id'), $user->id) }}">
+      <span class="fas fa-trash mr-1"></span>
+      {{ __('common.delete') }}
+    </a>
+    @endcan
+  </div>
+  <div class="details-nav-right ml-auto mb-1">
+    @can('reset-password', $user)
+    <a href="{{ route('admin.users.reset_password.save', ['user' => $user->id]) }}" class="btn btn-warning btn-sm text-nowrap mr-1 btn-ays-modal btn-reset-password-{{ $rand }}" data-method="PATCH" data-description="{{ sprintf('<strong>%s</strong> %s (%s: %s)', __('admin/users.reset_password_for'), $user->name_email, __('admin/common.fields.id'), $user->id) }}" data-toggle="tooltip">
+      <span class="fas fa-fw fa-key mr-1"></span>
+      {{ __('admin/users.reset_password') }}
+    </a>
+    @endcan
+    @can('block', $user)
+    <a href="{{ route('admin.users.block', ['user' => $user->id]) }}" class="btn btn-dark btn-sm text-nowrap mr-1">
+      <span class="fas fa-fw fa-ban mr-1"></span>
+      {{ __('admin/users.block_user') }}
+    </a>
+    @elsecan('unblock', $user)
+    <a href="{{ route('admin.users.block_history', ['user' => $user->id]) }}" class="btn bg-purple btn-sm text-nowrap mr-1">
+      <span class="fas fa-fw fa-user-slash mr-1"></span>
+      {{ __('admin/users.blocks_history') }}
+    </a>
+    @endcan
+  </div>
 </div>
+
 <div class="main-content">
 <div class="card card-primary card-outline card-outline-tabs">
   <div class="card-header p-0 border-bottom-0">
@@ -58,7 +85,10 @@ $rand = random_string(5);
                 <tr>
                   <td class="pr-5">
                     <dt>@lang('admin/common.fields.id')</dt>
-                    <dd>{{ $user->id }}</dd>
+                    <dd>
+                      {{ $user->id }}
+                      @include('admin.user.components.is-me-icon')
+                    </dd>
                   </td>
                   <td class="pr-5">
                     <dt>@lang('admin/users.fields.entity_type')</dt>
@@ -87,6 +117,18 @@ $rand = random_string(5);
 
           <dt>@lang('admin/users.fields.prodi')</dt>
           <dd>@von($user->prodi->complete_name)</dd>
+
+          <dt>@lang('admin/users.fields.profile_picture')</dt>
+          <dd>
+            @if($user->pictureExists())
+            <img src="{{ $user->profile_picture }}" class="img-circle elevation-2" alt="User Image" style="width: 3rem; height: auto;">
+            @else
+            @von
+            @endif
+          </dd>
+
+          <dt>@lang('admin/common.fields.status')</dt>
+          <dd>@include('admin.user.components.status-block-icon', ['with_text' => true])</dd>
 
           <dt>@lang('admin/common.fields.number_of_apps')</dt>
           <dd class="@if($user->apps_count == 0) text-secondary @endif">
@@ -165,3 +207,23 @@ $rand = random_string(5);
 </div>
 </div>
 @endsection
+
+@push('scripts')
+
+<script>
+jQuery(document).ready(function($) {
+
+  var $btnResetPass = $(".btn-reset-password-{{ $rand }}");
+  var $formResetPass = $("#form-reset-password-{{ $rand }}");
+  $btnResetPass.data("onApprove", function() {
+    if($formResetPass.length == 0)
+      return false;
+
+    $formResetPass.submit();
+    return false;
+  });
+
+});
+</script>
+
+@endpush

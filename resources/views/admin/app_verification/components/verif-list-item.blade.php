@@ -42,10 +42,10 @@ $hide_edit = !!($hide_edit ?? true);
     @endif
   </div>
   <div class="verif-metas">
-    <div class="icon-text-pair text-muted">
+    <span class="icon-text-pair text-muted">
       @include('components.date-with-tooltip', ['date' => $verif->updated_at])
-    </div>
-    <div class="icon-text-pair">
+    </span>
+    <span class="icon-text-pair">
       @if($is_reported_guilty)
       <span class="fas fa-spell-check icon"></span>
       <span>@lang('admin/app_verifications.related_version'): @vo_((string) optional($verif->verdict->version)->version)</span>
@@ -56,7 +56,7 @@ $hide_edit = !!($hide_edit ?? true);
       <span class="far fa-copy icon"></span>
       <span>@lang('admin/app_verifications.related_versions'): @vo_((string) $verif->changelog_range)</span>
       @endif
-    </div>
+    </span>
   </div>
   <div class="verif-body">
   @if($is_reported_guilty)
@@ -95,7 +95,7 @@ $hide_edit = !!($hide_edit ?? true);
         @continue
         @endif
         <div class="icon-text-pair">
-          <span class="fas fa-comment text-light-gray text-090 icon"></span>
+          <span class="fas fa-comment text-gray text-090 icon"></span>
           <span>
             {{ __('admin/apps.fields.'.$field) }}:
             <div class="verif-value"><span class="init-readmore" data-max-lines="2">@voe($comment)</span></div>

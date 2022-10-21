@@ -205,7 +205,7 @@ function pretty_username($user, $is_an_owner = false) {
 	}
 
 	$atts['class'] = implode(' ', $atts['class']);
-	$text = sprintf('<span %s>%s</span>', html_attributes($atts), $user);
+	$text = sprintf('<span %s>%s</span>', html_attributes($atts), $name);
 	return $text;
 }
 

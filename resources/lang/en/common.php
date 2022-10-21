@@ -45,6 +45,9 @@ return [
 'and'				=> 'and',
 
 
+'messages'	=> [
+	'your_account_was_blocked'		=> "Your account was blocked. \nContact the administrators to settle problems on your account.",
+],
 
 
 'app_report_categories'		=> [

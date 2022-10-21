@@ -33,9 +33,9 @@
 			<p class="mt-0 mb-1">@lang('frontend.splash.hey_x_you_are_logged_in', ['x' => $user->name])</p>
 			<a href="#" class="btn btn-link btn-lg">{{ __('frontend.navs.submit_an_app') }}</a>
 			|
-			<a href="{{ url('/admin') }}" class="btn btn-link btn-lg">{{ __('frontend.navs.admin_panel') }}</a>
+			<a href="{{ route('admin') }}" class="btn btn-link btn-lg">{{ __('frontend.navs.admin_panel') }}</a>
 			|
-			<a href="{{ url('/admin/my_apps') }}" class="btn btn-link btn-lg">{{ __('frontend.splash.your_apps_x', ['x' => $user->apps->count()]) }}</a>
+			<a href="{{ route('admin.apps.index', ['owned' => 'mine']) }}" class="btn btn-link btn-lg">{{ __('frontend.splash.your_apps_x', ['x' => $user->apps->count()]) }}</a>
 			<br>
 			<a href="{{ route('logout') }}" class="btn btn-link mt-2 btn-logout">{{ __('frontend.navs.logout') }}</a>
 			@endguest

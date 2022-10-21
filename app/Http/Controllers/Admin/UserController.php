@@ -9,6 +9,9 @@ use App\Models\Prodi;
 use App\User;
 use App\Models\Role;
 use App\Models\Ability;
+use App\Models\UserBlock;
+
+use App\DataManagers\UserManager;
 
 use App\Rules\ModelExists;
 
@@ -33,6 +36,32 @@ class UserController extends Controller
 		$this->authorizeResource(User::class, 'user');
 	}
 
+	public static function scopeListQuery($query, &$view_mode, $user = null) {
+		if(!$user)
+			$user = Auth::user();
+
+		// Scope filters
+		$view_mode = UserManager::userViewMode($user);
+		$query->where(function($query) use($user, &$view_mode) {
+			if($view_mode == 'all') {
+				// No scope filter, enable all
+				$query->whereRaw('1');
+			} elseif($view_mode == 'prodi') {
+				// Only ones in the same prodi
+				$query->whereHas('prodi', function($query) use($user) {
+					$query->where('id', $user->prodi_id);
+					$query->whereNotNull('id');
+				});
+			} else {
+				// None
+			}
+		});
+
+		if($view_mode == 'none') {
+			$query->whereRaw('0 = 1');
+		}
+	}
+
 	/**
 	 * Display a listing of the resource.
 	 *
@@ -53,6 +82,9 @@ class UserController extends Controller
 		$query = User::withCount('apps')->withoutTrashed();
 		$query->with('roles');
 
+		$view_mode = '';
+		static::scopeListQuery($query, $view_mode);
+
 		if($keyword = trim($opt_filters['keyword'])) {
 			$str = escape_mysql_like_str($keyword);
 			$like = '%'.$str.'%';
@@ -62,24 +94,27 @@ class UserController extends Controller
 			});
 			$filter_count++;
 		}
-		switch($opt_filters['type']) {
-			case 'system':
-				$query->system();
+
+		if($view_mode == 'all') {
+			switch($opt_filters['type']) {
+				case 'system':
+					$query->system();
+					$filter_count++;
+					break;
+				case 'all':
+					// No filters
+					$filter_count++;
+					break;
+				case 'user':
+				default:
+					// Default
+					$query->regular();
+					break;
+			}
+			if($opt_filters['prodi_id'] && $opt_filters['prodi_id'] != 'all') {
+				$query->where('prodi_id', $opt_filters['prodi_id']);
 				$filter_count++;
-				break;
-			case 'all':
-				// No filters
-				$filter_count++;
-				break;
-			case 'user':
-			default:
-				// Default
-				$query->regular();
-				break;
-		}
-		if($opt_filters['prodi_id'] && $opt_filters['prodi_id'] != 'all') {
-			$query->where('prodi_id', $opt_filters['prodi_id']);
-			$filter_count++;
+			}
 		}
 		switch($opt_filters['sort_by']) {
 			case 'apps':
@@ -130,7 +165,6 @@ class UserController extends Controller
 			return redirect()->to( $list->url($list->lastPage()) );
 		}
 
-		// dd($filters);
 		$data['list']			= $list;
 		$data['total']			= User::withoutTrashed()->regular()->count();
 		$data['filters']		= $opt_filters;
@@ -139,6 +173,7 @@ class UserController extends Controller
 		$data['delete_params']	= array_merge($filters, ['page' => $page]);
 		$data['show_type_col']	= in_array($opt_filters['type'], ['all', 'system']);
 		$data['prodis']			= Prodi::all();
+		$data['view_mode']		= $view_mode;
 
 		return view('admin/user/index', $data);
 	}
@@ -150,6 +185,15 @@ class UserController extends Controller
 	 */
 	public function create()
 	{
+		// Get view mode
+		$view_mode = UserManager::userViewMode();
+
+		if($view_mode == 'all') {
+			$prodis = Prodi::all();
+		} else {
+			$prodis = optional($user->prodi)->name;
+		}
+
 		//
 		$back_url = null;
 		if(Auth::user()->can('view-any', User::class)) {
@@ -159,9 +203,11 @@ class UserController extends Controller
 		$data = [
 			// 'model'		=> new User,
 			'model'		=> optional(),
-			'prodis'	=> Prodi::all(),
-			'roles'		=> Role::defaultOrder()->get(),
+			'prodis'	=> $prodis,
+			'allow_role'	=> true,
+			'roles'		=> UserManager::getLowerRoles(true),
 			'is_edit'	=> false,
+			'view_mode'	=> $view_mode,
 			'action'	=> route('admin.users.store'),
 			'method'	=> 'POST',
 			'user'		=> Auth::user(),
@@ -263,6 +309,15 @@ class UserController extends Controller
 	 */
 	public function edit(User $user)
 	{
+		// Get view mode
+		$view_mode = UserManager::userViewMode();
+
+		if($view_mode == 'all') {
+			$prodis = Prodi::all();
+		} else {
+			$prodis = optional($user->prodi)->name;
+		}
+
 		//
 		$back_url = null;
 
@@ -277,11 +332,16 @@ class UserController extends Controller
 		$user->load(['roles']);
 		$user->roles_ids = $user->roles->modelKeys();
 
+		$allow_role = $user->is_me || Auth::user()->can('manipulate-account', [$user, true]);
+		$roles = UserManager::getLowerRoles(true);
+
 		$data = [
 			'model'		=> $user,
-			'prodis'	=> Prodi::all(),
-			'roles'		=> Role::defaultOrder()->get(),
+			'prodis'	=> $prodis,
+			'allow_role'	=> $allow_role,
+			'roles'		=> $roles,
 			'is_edit'	=> true,
+			'view_mode'	=> $view_mode,
 			'action'	=> route('admin.users.update', ['user' => $user->id]),
 			'method'	=> 'PATCH',
 			'user'		=> Auth::user(),
@@ -386,13 +446,15 @@ class UserController extends Controller
 			$result = $user->save();
 
 			// Roles
-			$input_role_ids = $request->input('roles', []);
-			$role_ids = [];
-			foreach($input_role_ids as $irole) {
-				if(!isset($irole['check'])) continue;
-				$role_ids[] = $irole['id'];
+			if(!$is_edit || $cuser->can('manipulate-account', $user)) {
+				$input_role_ids = $request->input('roles', []);
+				$role_ids = [];
+				foreach($input_role_ids as $irole) {
+					if(!isset($irole['check'])) continue;
+					$role_ids[] = $irole['id'];
+				}
+				Bouncer::sync($user)->roles($role_ids);
 			}
-			Bouncer::sync($user)->roles($role_ids);
 
 			// Refresh user authorization cache
 			Bouncer::refreshFor($user);
@@ -470,6 +532,291 @@ class UserController extends Controller
 			}
 		}
 	}
+
+
+	public function resetPassword(Request $request, User $user) {
+		$this->authorize('reset-password', $user);
+
+		// Reset a user's password to a random string
+
+		$new_pass = random_alpha(1).random_string(7);
+
+		DB::beginTransaction();
+
+		$result = true;
+		$messages = [];
+		try {
+			$user->password = Hash::make($new_pass);
+			$result = $user->save();
+		} catch(\Illuminate\Database\QueryException $e) {
+			$result = false;
+			$messages[] = $e->getMessage();
+		}
+
+		if($result) {
+			DB::commit();
+
+			// Pass a message
+			$request->session()->flash('flash_message', [
+				'message'	=> __('admin/users.messages.reset_password_successful'),
+				'type'		=> 'success'
+			]);
+			$request->session()->flash('user_'.$user->id.'_new_pass', $new_pass);
+
+			$backto = $request->input('backto');
+			return redirect()->route('admin.users.reset_password', ['user' => $user->id, 'backto' => $backto]);
+		} else {
+			DB::rollback();
+
+			// Pass a message
+			$request->session()->flash('flash_message', [
+				'message'	=> __('admin/users.messages.reset_password_failed'),
+				'type'		=> 'danger'
+			]);
+
+			return redirect()->route('admin.users.index', ['goto_item' => $user->id]);
+		}
+	}
+
+	public function afterResetPassword(Request $request, User $user) {
+		$this->authorize('reset-password', $user);
+
+		// Show a transient page about the new password
+		$new_pass_key = 'user_'.$user->id.'_new_pass';
+		if(!session()->has($new_pass_key)) {
+			// Redirect or just show 404?
+			// return abort(404);
+			return redirect()->route('admin.users.index', ['goto_item' => $user->id]);
+		}
+
+		$new_pass = session($new_pass_key);
+
+		$back_url = null;
+
+		if(Auth::user()->can('view', $user)) {
+			$back_url = route('admin.users.show', ['user' => $user->id]);
+		}
+		$backto = request()->query('backto');
+		if((!$back_url || $backto == 'list') && Auth::user()->can('view-any', User::class)) {
+			$back_url = route('admin.users.index', ['goto_item' => $user->id, 'goto_flash' => 1]);
+		}
+		$data = [
+			'user'		=> $user,
+			'new_pass'	=> $new_pass,
+			'back'		=> $back_url,
+		];
+
+		// Prevent caching of this page
+		// https://stackoverflow.com/a/1907705
+		$response = no_cache_headers(
+			response()->view('admin/user/after-reset-password', $data)
+		);
+		return $response;
+	}
+
+
+	/**
+	 * Show form to block the user.
+	 *
+	 * @param  User  $user
+	 * @return \Illuminate\Http\Response
+	 */
+	public function blockForm(User $user)
+	{
+		$this->authorize('block', $user);
+
+		$back_url = null;
+
+		if(Auth::user()->can('view', $user)) {
+			$back_url = route('admin.users.show', ['user' => $user->id]);
+		}
+		$backto = request()->query('backto');
+		if((!$back_url || $backto == 'list') && Auth::user()->can('view-any', User::class)) {
+			$back_url = route('admin.users.index', ['goto_item' => $user->id]);
+		}
+
+		$data = [
+			'model'		=> $user,
+			'ajax'		=> request()->ajax(),
+			'back'		=> $back_url,
+			'backto'	=> $backto,
+		];
+
+		return view('admin/user/block-form', $data);
+	}
+
+	/**
+	 * Block the specified user.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @param  User  $user
+	 * @return \Illuminate\Http\Response
+	 */
+	// POST
+	public function block(Request $request, User $user) {
+		$this->authorize('block', $user);
+
+		$cuser = $request->user();
+		$cuser_id = $cuser->id;
+
+		// Validation rules
+		request_replace_nl($request);
+		$rules = [
+			// 'dummy'			=> ['required'],
+			'reason'			=> ['required', 'string', 'min:20', 'max:200'],
+		];
+
+		$validData = $request->validate($rules);
+
+		$result = true;
+		$messages = [];
+
+		// Begin storing entries
+		DB::beginTransaction();
+		try {
+			$user->is_blocked = true;
+			$result = $user->save();
+
+			if($result) {
+				$block = new UserBlock;
+				$block->user_id = $user->id;
+				$block->reason = $request->input('reason');
+
+				$result = $block->save();
+			}
+		} catch(\Illuminate\Database\QueryException $e) {
+			$result = false;
+			$messages[] = $e->getMessage();
+		}
+
+		if(!$result) {
+			DB::rollback();
+
+			// Pass a message
+			$request->session()->flash('flash_message', [
+				'message'	=> __('admin/common.messages.update_failed'),
+				'type'		=> 'error'
+			]);
+
+			return redirect()->back()->withInput()->withErrors($messages);
+		} else {
+			DB::commit();
+
+			// Pass a message
+			$request->session()->flash('flash_message', [
+				'message'	=> __('admin/users.messages.block_successful'),
+				'type'		=> 'success'
+			]);
+
+			$backto = $request->input('backto');
+			if($backto == 'list' && Auth::user()->can('view-any', User::class)) {
+				return redirect()->route('admin.users.index', ['goto_item' => $user->id, 'goto_flash' => 1]);
+			} elseif(Auth::user()->can('view', $user)) {
+				return redirect()->route('admin.users.show', ['user' => $user->id]);
+			}
+
+			return redirect()->back();
+		}
+	}
+
+	/**
+	 * Show page about user's past blocks.
+	 *
+	 * @param  User  $user
+	 * @return \Illuminate\Http\Response
+	 */
+	public function blockHistory(User $user)
+	{
+		$this->authorize('view', $user);
+
+		$back_url = null;
+
+		if(Auth::user()->can('view', $user)) {
+			$back_url = route('admin.users.show', ['user' => $user->id]);
+		}
+		$backto = request()->query('backto');
+		if((!$back_url || $backto == 'list') && Auth::user()->can('view-any', User::class)) {
+			$back_url = route('admin.users.index', ['goto_item' => $user->id]);
+		}
+
+		$active_blocks = $user->blocks;
+		$inactive_blocks = $user->inactive_blocks;
+
+		$data = [
+			'model'		=> $user,
+			'ajax'		=> request()->ajax(),
+			'back'		=> $back_url,
+			'backto'	=> $backto,
+			'blocks_active'		=> $active_blocks,
+			'blocks_inactive'	=> $inactive_blocks,
+		];
+
+		return view('admin/user/block-history', $data);
+	}
+
+	/**
+	 * Unblock the specified user.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @param  User  $user
+	 * @return \Illuminate\Http\Response
+	 */
+	// POST
+	public function unblock(Request $request, User $user) {
+		$this->authorize('unblock', $user);
+
+		$cuser = $request->user();
+		$cuser_id = $cuser->id;
+
+		$result = true;
+		$messages = [];
+
+		// Begin storing entries
+		DB::beginTransaction();
+		try {
+			$user->is_blocked = false;
+			$result = $user->save();
+
+			if($result) {
+				$result = $user->blocks->every(function($item) {
+					return $item->delete();
+				});
+			}
+		} catch(\Illuminate\Database\QueryException $e) {
+			$result = false;
+			$messages[] = $e->getMessage();
+		}
+
+		if(!$result) {
+			DB::rollback();
+
+			// Pass a message
+			$request->session()->flash('flash_message', [
+				'message'	=> __('admin/common.messages.update_failed'),
+				'type'		=> 'error'
+			]);
+
+			return redirect()->back()->withInput()->withErrors($messages);
+		} else {
+			DB::commit();
+
+			// Pass a message
+			$request->session()->flash('flash_message', [
+				'message'	=> __('admin/users.messages.unblock_successful'),
+				'type'		=> 'success'
+			]);
+
+			$backto = $request->input('backto');
+			if($backto == 'list' && Auth::user()->can('view-any', User::class)) {
+				return redirect()->route('admin.users.index', ['goto_item' => $user->id, 'goto_flash' => 1]);
+			} elseif(Auth::user()->can('view', $user)) {
+				return redirect()->route('admin.users.show', ['user' => $user->id]);
+			}
+
+			return redirect()->back();
+		}
+	}
+
 
 	public function lookup(Request $request, $keyword = '') {
 		// No auth needed i guess? Since lookup is usually used in other model's forms

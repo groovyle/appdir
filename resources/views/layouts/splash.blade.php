@@ -10,6 +10,9 @@
 	@section('title', '')
 	<title>{{ make_title(View::yieldContent('title')) }}</title>
 
+	<!-- Favicon -->
+	<link rel="icon" type="image/png" href="{{ asset('img/favicon.png') }}" />
+
 	<link href="{{ asset('css/base.css') }}" rel="stylesheet">
 	<link href="{{ asset('css/login.css') }}" rel="stylesheet">
 	<link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
@@ -44,7 +47,7 @@
 		</footer>
 	</div>
 
-	@include('components.frontend-logout-form')
+	@include('components.logout-form')
 
 	<!-- Scripts -->
 	<script>

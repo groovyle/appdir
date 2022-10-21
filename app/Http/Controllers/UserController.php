@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\DB;
 class UserController extends Controller
 {
 
-	public function profile(User $user) {
+	public function profile($user_id) {
+		$user = User::getFrontendItem($user_id);
+
 		$data = [];
 		$self = Auth::user();
 		$filter_form = request('f');
@@ -46,7 +48,7 @@ class UserController extends Controller
 		$data['apps'] = $apps;
 		$data['user'] = $user;
 		$data['self'] = $self;
-		$data['is_self'] = $user->id == optional($self)->id;
+		$data['is_self'] = $user->is_me;
 		$data['apps_filter_count'] = $apps_filter_count;
 
 		return view('user/profile', $data);

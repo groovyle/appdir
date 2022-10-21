@@ -27,9 +27,17 @@ Route::get('/user/{user}', 'UserController@profile')->name('user.profile');
 
 Route::get('/color_test', 'TestColorsController@index')->name('color_test');
 
-Route::redirect('/admin', URL::to('/admin/home'));
+Route::redirect('/admin', URL::to('/admin/home'))->name('admin');
 Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
 	Route::get('home', 'HomeController@index')->name('home');
+
+	Route::get('profile', 'UserProfileController@show')->name('profile.index');
+	Route::get('profile/edit', 'UserProfileController@editProfile')->name('profile.edit');
+	Route::patch('profile/edit', 'UserProfileController@updateProfile')->name('profile.edit.save');
+	Route::get('profile/picture', 'UserProfileController@editPicture')->name('profile.picture');
+	Route::post('profile/picture', 'UserProfileController@updatePicture')->name('profile.picture.save');
+	Route::get('profile/password', 'UserProfileController@editPassword')->name('profile.password');
+	Route::patch('profile/password', 'UserProfileController@updatePassword')->name('profile.password.save');
 
 	Route::get('apps', 'AppController@index')->name('apps');
 	Route::resource('apps', 'AppController');
@@ -76,6 +84,12 @@ Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
 	Route::resource('prodi', 'ProdiController');
 
 	Route::get('users/lookup/{keyword?}', 'UserController@lookup')->name('users.lookup');
+	Route::patch('users/{user}/reset_password', 'UserController@resetPassword')->name('users.reset_password.save');
+	Route::get('users/{user}/reset_password', 'UserController@afterResetPassword')->name('users.reset_password');
+	Route::get('users/{user}/block', 'UserController@blockForm')->name('users.block');
+	Route::post('users/{user}/block', 'UserController@block')->name('users.block.save');
+	Route::post('users/{user}/unblock', 'UserController@unblock')->name('users.unblock.save');
+	Route::get('users/{user}/block_history', 'UserController@blockHistory')->name('users.block_history');
 	Route::resource('users', 'UserController');
 
 	Route::resource('roles', 'RoleController');

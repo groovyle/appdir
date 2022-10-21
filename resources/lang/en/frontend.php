@@ -19,6 +19,7 @@ return [
 	'login'					=> 'Login',
 	'register'				=> 'Register',
 	'logout'				=> 'Logout',
+	'profile'				=> 'Profile',
 	'admin_panel'			=> 'Admin Panel',
 	'account_settings'		=> 'Account Settings',
 ],
@@ -125,6 +126,7 @@ return [
 'users'	=> [
 	'this_users_apps_x_total'		=> 'This user\'s apps (:x total)',
 	'login_btn'						=> 'Login',
+	'this_is_your_public_profile'	=> 'This is your public profile',
 
 	'fields'	=> [
 		'username'				=> 'Username',

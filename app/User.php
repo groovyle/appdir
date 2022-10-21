@@ -4,6 +4,8 @@ namespace App;
 
 use App\SystemDataProviders\SystemDataBroker;
 
+use App\DataManagers\UserManager;
+
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,6 +13,9 @@ use Illuminate\Notifications\Notifiable;
 use Silber\Bouncer\Database\HasRolesAndAbilities;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use RahulHaque\Filepond\Traits\HasFilepond;
+
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -56,6 +61,11 @@ class User extends Authenticatable
 		'roles',
 	];
 
+	protected $withCount = [
+		'blocks',
+		'all_blocks',
+	];
+
 	public static function boot() {
 		parent::boot();
 
@@ -65,12 +75,28 @@ class User extends Authenticatable
 		});
 	}
 
-	public function scopeRegular($query) {
-		$query->where('entity', 'user');
+	public function scopeRegular($query, $state = true) {
+		$query->where('entity', $state ? '=' : '!=', 'user');
 	}
 
-	public function scopeSystem($query) {
-		$query->where('entity', 'system');
+	public function scopeSystem($query, $state = true) {
+		$query->where('entity', $state ? '=' : '!=', 'system');
+	}
+
+	public function scopeBlocked($query, $blocked = true) {
+		$query->where('is_blocked', $blocked ? 1 : 0);
+	}
+
+	public static function getFrontendItem($id, $fail = true) {
+		$query = static::query();
+		// $query->withoutGlobalScope('_with_trashed');
+		$query->whereKey($id);
+		$query->system(false);
+		$query->blocked(false);
+
+		$fn = $fail ? 'firstOrFail' : 'first';
+
+		return $query->$fn();
 	}
 
 	public function getIsSystemAttribute() {
@@ -123,7 +149,11 @@ class User extends Authenticatable
 	}
 
 	public function blocks() {
-		return $this->hasMany('App\Models\UserBlock', 'user_id');
+		return $this->hasMany('App\Models\UserBlock', 'user_id')->latest();
+	}
+
+	public function inactive_blocks() {
+		return $this->blocks()->onlyTrashed();
 	}
 
 	public function all_blocks() {
@@ -131,22 +161,64 @@ class User extends Authenticatable
 	}
 
 	public function getIsBlockedAttribute() {
-		return $this->attributes['is_blocked'] == 0
-			&& $this->blocks_count == 0
+		return $this->attributes['is_blocked'] == 1
+			|| $this->blocks_count > 0
 		;
 	}
 
+	public function getSortedRolesAttribute() {
+		return UserManager::getSortedRoles($this->roles);
+	}
+
+	public function getProfilePictureAttribute() {
+		return $this->getProfilePicture();
+	}
+
+	public function getStorageDir($relative = true) {
+		$relpath = 'users/'.$this->id.'/';
+		return $relative ? $relpath : Storage::disk('public')->path($relpath);
+	}
+
+	public function pictureExists($return_path = false) {
+		$pic = $this->attributes['picture'];
+		$picpath = /*$this->getStorageDir().*/$pic;
+		$exists = false;
+
+		if($pic) {
+			$exists = Storage::disk('public')->exists($picpath);
+		}
+
+		return $return_path && $exists ? $picpath : $exists;
+	}
+
+	public function getProfilePicture($with_default = true) {
+		$picpath = $this->pictureExists(true);
+
+		if(!$picpath) {
+			return !$with_default ? null : asset('img/default-user-logo.png');
+		} else {
+			return asset('storage/'.$picpath);
+		}
+	}
+
 	public function getRolesTextAttribute() {
-		$roles = $this->roles;
+		$roles = $this->sorted_roles;
 		$text = '';
 		if(count($roles) > 0) {
-			$text = $roles->pluck('name')->implode(', ');
+			$text = $roles->map(function($item) {
+				return $item->title ?: $item->name;
+			})->implode(', ');
+			// $text = $roles->pluck('name')->implode(', ');
 		} else {
 			// $text = vo_();
 			$text = null;
 		}
 
 		return $text;
+	}
+
+	public function getIsMeAttribute() {
+		return $this->exists && $this->id !== null && $this->id == Auth::id();
 	}
 
 	public function __toString() {

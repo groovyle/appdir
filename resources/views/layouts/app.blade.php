@@ -10,6 +10,9 @@
 	@section('title', '')
 	<title>{{ make_title(View::yieldContent('title')) }}</title>
 
+	<!-- Favicon -->
+	<link rel="icon" type="image/png" href="{{ asset('img/favicon.png') }}" />
+
 	<link href="{{ asset('css/base.css') }}" rel="stylesheet">
 	<link href="{{ asset('css/login.css') }}" rel="stylesheet">
 	<link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
@@ -66,13 +69,18 @@
 								@endif
 							@else
 								<li class="nav-item dropdown">
-									<a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-										{{ Auth::user()->name }} <span class="caret"></span>
+									<a id="navbarDropdown" class="nav-link dropdown-toggle nav-user" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+										<div class="nav-user-image">
+											<img src="{{ Auth::user()->profile_picture }}" alt="User image">
+										</div>
+										<span class="nav-user-text text-truncate">{{ Auth::user()->name }}</span>
+										<span class="caret"></span>
 									</a>
 
 									<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-										<a class="dropdown-item" href="{{ url('/admin') }}">{{ __('frontend.navs.admin_panel') }}</a>
-										<a class="dropdown-item" href="{{ url('/admin') }}">TODO: {{ __('frontend.navs.account_settings') }}</a>
+										<a class="dropdown-item" href="{{ route('user.profile', ['user' => Auth::id()]) }}">{{ __('frontend.navs.profile') }}</a>
+										<a class="dropdown-item" href="{{ route('admin') }}">{{ __('frontend.navs.admin_panel') }}</a>
+										<a class="dropdown-item" href="{{ route('admin.profile.index') }}">{{ __('frontend.navs.account_settings') }}</a>
 										<div class="dropdown-divider"></div>
 										<a class="dropdown-item btn-logout" href="{{ route('logout') }}">
 											{{ __('frontend.navs.logout') }}
@@ -101,7 +109,7 @@
 
 	<div id="to-top" title="@lang('frontend.back_to_top_button')"></div>
 
-	@include('components.frontend-logout-form')
+	@include('components.logout-form')
 
 	<!-- Scripts -->
 	<script>

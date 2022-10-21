@@ -15,6 +15,12 @@
 		<form method="POST" action="{{ route('login') }}" class="login-form">
 			@csrf
 
+			@if($errors->any())
+			<div class="text-center text-danger lh-110 mb-2">
+				{!! nl2br(implode("\n", $errors->all())) !!}
+			</div>
+			@endif
+
 			<div class="form-group">
 				<label for="loginEmail" class="sr-only">@lang('frontend.users.fields.email')</label>
 				<input id="loginEmail" type="text" class="login-form-control" name="email" value="{{ old('email') }}" placeholder="{{ __('frontend.users.fields.email') }}" required autocomplete="email" autofocus>

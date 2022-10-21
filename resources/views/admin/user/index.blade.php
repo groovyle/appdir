@@ -2,6 +2,7 @@
 $show_filters = $filter_count > 0;
 $hide_filters = !$show_filters;
 $show_type_col = $show_type_col ?? false;
+$scroll_content = !isset($goto_item) && ($show_filters || request()->has('page'));
 ?>
 @extends('admin.layouts.main')
 
@@ -38,6 +39,7 @@ $show_type_col = $show_type_col ?? false;
 						<input type="text" class="form-control" name="keyword" id="fKeyword" value="{{ $filters['keyword'] }}" placeholder="{{ __('admin/common.keyword') }}">
 					</div>
 				</div>
+				@if($view_mode == 'all')
 				<div class="form-group row">
 					<label for="fProdi" class="col-sm-3 col-lg-2">{{ __('admin/users.fields.prodi') }}</label>
 					<div class="col-sm-8 col-lg-5">
@@ -59,6 +61,7 @@ $show_type_col = $show_type_col ?? false;
 						</select>
 					</div>
 				</div>
+				@endif
 				<div class="form-group row">
 					<label for="fSort" class="col-sm-3 col-lg-2">{{ __('admin/common.sort_by') }}</label>
 					<div class="col-sm-8 col-lg-5">
@@ -80,7 +83,7 @@ $show_type_col = $show_type_col ?? false;
 	</form>
 
 	<!-- Card -->
-	<div class="card main-content @if($show_filters || request()->has('page')) scroll-to-me @endif">
+	<div class="card main-content @if($scroll_content) scroll-to-me @endif">
 		<div class="card-header">
 			<h3 class="card-title">{{ __('admin/users.users_list') }} ({{ $list->total() }})</h3>
 			<div class="card-tools">
@@ -109,6 +112,7 @@ $show_type_col = $show_type_col ?? false;
 							<th style="width: 15%;">{{ __('admin/users.fields.prodi') }}</th>
 							<th style="width: 20%;">{{ __('admin/users.fields.roles') }}</th>
 							<th class="text-center @if($filters['sort_by'] == 'apps') text-primary @endif" style="width: 10%;">{{ __('admin/common.fields.number_of_apps') }}</th>
+							<th class="text-center" style="width: 5%;">{{ __('admin/common.fields.status') }}</th>
 							<th style="width: 1%;">{{ __('common.actions') }}</th>
 						</tr>
 					</thead>
@@ -118,7 +122,10 @@ $show_type_col = $show_type_col ?? false;
 							<td class="text-right text-unitalic">{{ $list->firstItem() + $loop->index }}</td>
 							<td>
 								@if(!$item->is_system)
-								<div>{{ $item->name }}</div>
+								<div>
+									{{ $item->name }}
+									@include('admin.user.components.is-me-icon', ['user' => $item])
+								</div>
 								<div class="mt-n1">
 									<abbr class="d-inline-block text-085 pr-1" title="{{ __('admin/users.fields.email') }}" data-toggle="tooltip" data-placement="right">{{ $item->email }}</abbr>
 								</div>
@@ -138,25 +145,31 @@ $show_type_col = $show_type_col ?? false;
 								@vo_
 								@endif
 							</td>
+							<td class="text-unitalic text-center">
+								@include('admin.user.components.status-block-icon', ['user' => $item])
+							</td>
 							<td class="text-nowrap text-unitalic">
-								@can('view', $item)
-								<a href="{{ route('admin.users.show', ['user' => $item->id]) }}" class="btn btn-default btn-xs text-nowrap btn-ofa-modal" data-title="{{ __('admin/users.page_title.detail') }}: {{ text_truncate($item->name, 30) }}" data-footer="false">
-									<span class="fas fa-search mr-1"></span>
-									{{ __('common.view') }}
-								</a>
-								@endcan
-								@can('update', $item)
-								<a href="{{ route('admin.users.edit', ['user' => $item->id, 'backto' => 'list']) }}" class="btn btn-primary btn-xs text-nowrap">
-									<span class="fas fa-edit mr-1"></span>
-									{{ __('common.edit') }}
-								</a>
-								@endcan
-								@can('delete', $item)
-								<a href="{{ route('admin.users.destroy', ['user' => $item->id, 'backto' => 'back']) }}" class="btn btn-danger btn-xs text-nowrap btn-ays-modal" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/users._self'), $item->name, __('admin/common.fields.id'), $item->id) }}">
-									<span class="fas fa-trash mr-1"></span>
-									{{ __('common.delete') }}
-								</a>
-								@endcan
+								<div class="mb-1">
+									@can('view', $item)
+									<a href="{{ route('admin.users.show', ['user' => $item->id]) }}" class="btn btn-default btn-xs text-nowrap btn-ofa-modal" data-title="{{ __('admin/users.page_title.detail') }}: {{ text_truncate($item->name, 30) }}" data-footer="false" title="{{ __('common.view') }}" data-toggle="tooltip" data-size="lg"><span class="fas fa-fw fa-search"></span></a>
+									@endcan
+									@can('update', $item)
+									<a href="{{ route('admin.users.edit', ['user' => $item->id, 'backto' => 'list']) }}" class="btn btn-primary btn-xs text-nowrap" title="{{ __('common.edit') }}" data-toggle="tooltip"><span class="fas fa-fw fa-edit"></span></a>
+									@endcan
+								</div>
+								<div class="mt-1">
+									@can('reset-password', $item)
+									<a href="{{ route('admin.users.reset_password.save', ['user' => $item->id, 'backto' => 'list']) }}" class="btn btn-warning btn-xs text-nowrap btn-ays-modal btn-reset-password" title="{{ __('admin/users.reset_password') }}" data-method="PATCH" data-description="{{ sprintf('<strong>%s</strong> %s (%s: %s)', __('admin/users.reset_password_for'), $item->name_email, __('admin/common.fields.id'), $item->id) }}" data-toggle="tooltip"><span class="fas fa-fw fa-key"></span></a>
+									@endcan
+									@can('block', $item)
+									<a href="{{ route('admin.users.block', ['user' => $item->id, 'backto' => 'list']) }}" class="btn btn-dark btn-xs text-nowrap" title="{{ __('admin/users.block_user') }}" data-toggle="tooltip"><span class="fas fa-fw fa-ban"></span></a>
+									@elsecan('unblock', $item)
+									<a href="{{ route('admin.users.block_history', ['user' => $item->id, 'backto' => 'list']) }}" class="btn bg-purple btn-xs text-nowrap" title="{{ __('admin/users.blocks_history') }}" data-toggle="tooltip"><span class="fas fa-fw fa-user-slash"></span></a>
+									@endcan
+									@can('delete', $item)
+									<a href="{{ route('admin.users.destroy', ['user' => $item->id, 'backto' => 'back']) }}" class="btn btn-danger btn-xs text-nowrap btn-ays-modal" title="{{ __('common.delete') }}" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/users._self'), $item->name, __('admin/common.fields.id'), $item->id) }}" data-toggle="tooltip"><span class="fas fa-fw fa-trash"></span></a>
+									@endcan
+								</div>
 							</td>
 						</tr>
 						@endforeach
@@ -171,6 +184,11 @@ $show_type_col = $show_type_col ?? false;
 		</div>
 		@endif
 		@endif
+
+		<form id="form-reset-password" method="POST" action="#" class="d-none">
+			@csrf
+			@method('PATCH')
+		</form>
 	</div>
 @endsection
 
@@ -182,6 +200,22 @@ jQuery(document).ready(function($) {
 	$filterForm.on("expanded.lte.cardwidget", function(e) {
 		$filterForm.find("input, textarea, select").trigger("change");
 	});
+
+
+	var $resetPasswordForm = $("#form-reset-password");
+	$(".btn-reset-password").each(function() {
+		var $elm = $(this);
+		$elm.data("onApprove", function() {
+			var url = $elm.prop("href") || $elm.data("url");
+			if(!url || $resetPasswordForm.length == 0)
+				return false;
+
+			$resetPasswordForm.prop("action", url);
+			$resetPasswordForm.submit();
+			return false;
+		});
+	});
+
 
 	@isset($goto_item)
 	var $scrollTarget = $(@json('.user-item-'.$goto_item));

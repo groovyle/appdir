@@ -18,8 +18,22 @@
 	z-index: -1;
 }
 
+.navbar-nav > .user-menu > .dropdown-menu > li.user-header {
+	height: auto;
+	min-height: 175px;
+	max-height: 100%;
+}
+
 .content-wrapper {
 	position: relative;
+}
+
+.content-header .content-header-row {
+	justify-content: space-between;
+}
+.content-header .content-header-row > .col {
+	width: auto;
+	flex: 0 1 auto;
 }
 
 .breadcrumb-item {
@@ -598,6 +612,29 @@
 	}
 }
 
+
+.profile-user-img-edit {
+	position: absolute;
+	bottom: -0.25rem;
+	right: -0.75rem;
+	font-size: 1rem;
+}
+
+.box-copy-info {
+	display: block;
+	width: fit-content;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 1rem 2rem;
+	font-size: 2rem;
+	letter-spacing: 1px;
+	white-space: pre-wrap;
+	user-select: all;
+	font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+	background-color: #eee;
+	color: #111;
+	border: 1px solid #ccc;
+}
 
 .ofamodal .loading-wrapper .spinners > .spinner-grow {
 	margin-left: 0.15rem;

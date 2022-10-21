@@ -57,7 +57,10 @@ if(!$is_edit) {
       <div class="row gutter-lg">
         <div class="col-12 col-md-6">
           <div class="form-group">
-            <label for="inputUserName">{{ __('admin/common.fields.name') }}</label>
+            <label for="inputUserName">
+              {{ __('admin/common.fields.name') }}
+              @include('admin.user.components.is-me-icon', ['user' => $model])
+            </label>
             <input type="text" name="name" class="form-control" id="inputUserName" placeholder="{{ __('admin/users.fields.name_placeholder') }}" value="{{ old('name', $model->name) }}" maxlength="100" required>
           </div>
 
@@ -68,6 +71,7 @@ if(!$is_edit) {
 
           <div class="form-group">
             <label for="inputUserProdi">{{ __('admin/users.fields.prodi') }}</label>
+            @if($view_mode == 'all')
             <select name="prodi_id" class="form-control" id="inputUserProdi">
               <option value="" class="text-muted">&ndash; {{ __('admin/users.fields.prodi_placeholder') }} &ndash;</option>
               @forelse($prodis as $prodi)
@@ -76,6 +80,9 @@ if(!$is_edit) {
               <option value="" class="text-muted" disabled>&ndash; {{ __('admin/prodi.no_prodi_yet') }} &ndash;</option>
               @endforelse
             </select>
+            @else
+            <p class="form-control-plaintext" id="inputUserProdi">@vo_($prodis)</p>
+            @endif
           </div>
 
           @if(!$is_edit)
@@ -102,6 +109,7 @@ if(!$is_edit) {
         <div class="col-12 col-md-6">
           <div class="form-group">
             <label for="inputUserRoles">{{ __('admin/users.fields.roles') }}</label>
+            @if($allow_role)
             <div class="ofy-auto list-group user-roles" id="inputUserRoles" style="max-height: 250px;">
               @foreach($roles as $role)
               <label class="list-group-item list-group-item-action role-item cursor-pointer py-1 pr-2 pl-3 m-0" for="input-role-check-{{ $role->id }}">
@@ -113,6 +121,9 @@ if(!$is_edit) {
               </label>
               @endforeach
             </div>
+            @else
+            <p class="form-control-plaintext" id="inputUserRole">@vo_($model->roles_text)</p>
+            @endif
           </div>
         </div>
         <div class="col-12">
