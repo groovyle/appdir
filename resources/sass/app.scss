@@ -553,16 +553,19 @@ $app-item-margin-xs: 0.375rem;
 	// width/height)
 	// border: 1px solid $gray-300;
 	box-shadow: 0 0 1px rgba(0,0,0,0.5);
-	&.inline-logo, .user-horizontal-display & {
+	&.inline-logo, .user-display.horizontal & {
 		display: inline-flex;
 	}
-	&.smaller {
+	&.smaller, .user-display.vertical & {
 		width: 4rem;
 		height: 4rem;
 	}
-	&.much-smaller, .user-horizontal-display & {
+	&.much-smaller, .user-display.horizontal & {
 		width: 2.5rem;
 		height: 2.5rem;
+	}
+	.user-display.vertical & {
+		margin-bottom: 0.25rem;
 	}
 
 	> img {
@@ -572,27 +575,52 @@ $app-item-margin-xs: 0.375rem;
 	}
 }
 
-.user-horizontal-display {
+.user-display {
 	display: flex;
-	flex-flow: row nowrap;
-	column-gap: 0.75rem;
 	line-height: 1.05;
+	gap: 0.25rem 0.75rem;
 
-	.user-logo-wrapper {
-		margin-top: 0.5rem;
-		margin-bottom: 0;
-		flex-shrink: 0;
-		flex-grow: 0;
+	&.horizontal {
+		flex-flow: row nowrap;
+
+		.user-logo-wrapper {
+			margin-top: 0.5rem;
+			margin-bottom: 0;
+			flex-shrink: 0;
+			flex-grow: 0;
+		}
+
+		.user-text {
+			flex-grow: 1;
+			padding-top: 0.25rem;
+			padding-bottom: 0.25rem;
+			font-size: 1rem;
+
+			> a {
+				text-decoration: none;
+			}
+		}
 	}
 
-	.user-text {
-		flex-grow: 1;
-		padding-top: 0.25rem;
-		padding-bottom: 0.25rem;
-		font-size: 1rem;
+	&.vertical {
+		flex-flow: column nowrap;
+		justify-content: center;
+		text-align: center;
 
-		> a {
-			text-decoration: none;
+		.user-logo-wrapper {
+			flex-shrink: 0;
+			flex-grow: 0;
+		}
+
+		.user-text {
+			flex-grow: 1;
+			padding-left: 0.25rem;
+			padding-right: 0.25rem;
+			font-size: 1rem;
+
+			> a {
+				text-decoration: none;
+			}
 		}
 	}
 }
@@ -717,4 +745,35 @@ $input-group-with-icon-icon-width: $input-group-with-icon-padding-outer + $input
 		background: #45cadf;
 		height: 3px;
 	}
+}
+
+.share-links {
+	display: flex;
+	gap: 0.25rem 1rem;
+	font-size: 2.5rem;
+	line-height: 1;
+}
+.share-link-whatsapp {
+	color: #0dc143 !important;
+}
+.share-link-facebook {
+	color: #3b5998 !important;
+}
+.share-link-twitter {
+	color: #1c9aef !important;
+}
+.share-link-linkedin {
+	color: #0a66c2 !important;
+}
+.share-link-link {
+	color: #999 !important;
+	display: inline-block;
+	font-size: 0.5em;
+	line-height: 2;
+	width: 2em;
+	height: 2em;
+	text-align: center;
+	border-radius: 50%;
+	background-color: #f5f5f5;
+	border: 1px solid #ccc;
 }

@@ -552,16 +552,19 @@ img.app-logo {
   border-radius: 50%;
   box-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
 }
-.user-logo-wrapper.inline-logo, .user-horizontal-display .user-logo-wrapper {
+.user-logo-wrapper.inline-logo, .user-display.horizontal .user-logo-wrapper {
   display: inline-flex;
 }
-.user-logo-wrapper.smaller {
+.user-logo-wrapper.smaller, .user-display.vertical .user-logo-wrapper {
   width: 4rem;
   height: 4rem;
 }
-.user-logo-wrapper.much-smaller, .user-horizontal-display .user-logo-wrapper {
+.user-logo-wrapper.much-smaller, .user-display.horizontal .user-logo-wrapper {
   width: 2.5rem;
   height: 2.5rem;
+}
+.user-display.vertical .user-logo-wrapper {
+  margin-bottom: 0.25rem;
 }
 .user-logo-wrapper > img {
   max-width: 100%;
@@ -569,26 +572,45 @@ img.app-logo {
   border-radius: 50%;
 }
 
-.user-horizontal-display {
+.user-display {
   display: flex;
-  flex-flow: row nowrap;
-  -moz-column-gap: 0.75rem;
-       column-gap: 0.75rem;
   line-height: 1.05;
+  gap: 0.25rem 0.75rem;
 }
-.user-horizontal-display .user-logo-wrapper {
+.user-display.horizontal {
+  flex-flow: row nowrap;
+}
+.user-display.horizontal .user-logo-wrapper {
   margin-top: 0.5rem;
   margin-bottom: 0;
   flex-shrink: 0;
   flex-grow: 0;
 }
-.user-horizontal-display .user-text {
+.user-display.horizontal .user-text {
   flex-grow: 1;
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
   font-size: 1rem;
 }
-.user-horizontal-display .user-text > a {
+.user-display.horizontal .user-text > a {
+  text-decoration: none;
+}
+.user-display.vertical {
+  flex-flow: column nowrap;
+  justify-content: center;
+  text-align: center;
+}
+.user-display.vertical .user-logo-wrapper {
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+.user-display.vertical .user-text {
+  flex-grow: 1;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+  font-size: 1rem;
+}
+.user-display.vertical .user-text > a {
   text-decoration: none;
 }
 
@@ -697,4 +719,40 @@ img.app-logo {
 .splide .splide__progress__bar {
   background: #45cadf;
   height: 3px;
+}
+
+.share-links {
+  display: flex;
+  gap: 0.25rem 1rem;
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.share-link-whatsapp {
+  color: #0dc143 !important;
+}
+
+.share-link-facebook {
+  color: #3b5998 !important;
+}
+
+.share-link-twitter {
+  color: #1c9aef !important;
+}
+
+.share-link-linkedin {
+  color: #0a66c2 !important;
+}
+
+.share-link-link {
+  color: #999 !important;
+  display: inline-block;
+  font-size: 0.5em;
+  line-height: 2;
+  width: 2em;
+  height: 2em;
+  text-align: center;
+  border-radius: 50%;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
 }

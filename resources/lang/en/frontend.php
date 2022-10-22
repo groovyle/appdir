@@ -5,6 +5,17 @@ return [
 'footer_text'				=> '&copy; 2022, Gagas AI',
 'back_to_top_button'		=> 'back to top',
 
+
+'share'		=> [
+	'share_on'		=> 'Share on',
+	'whatsapp'		=> 'Share on WhatsApp',
+	'facebook'		=> 'Share on Facebook',
+	'twitter'		=> 'Share on Twitter',
+	'linkedin'		=> 'Share on LinkedIn',
+	'copy'			=> 'Copy',
+	'copy_link'		=> 'Copy link',
+],
+
 'splash'	=> [
 	'your_apps_x'						=> 'Your Apps (:x)',
 	'browse_through_x_amazing_apps'		=> 'Surf through <b>:x</b> amazing apps',
@@ -58,6 +69,8 @@ return [
 	'showing_search_results_from_x_to_y_of_z'	=> 'Showing search results from :x to :y (of total :z)',
 	'aka'					=> 'a.k.a',
 	'app_cannot_be_reported_because_it_is_not_publicly_listed'	=> 'This app cannot be reported because it is not publicly available.',
+	'share_description'		=> 'Take a look at this app showcase by :owner on :site!',
+	'share_this_app'		=> 'Share this app',
 
 	'notices'	=> [
 		'show_app_notices'			=> 'Show/hide notices about this app',
@@ -135,6 +148,7 @@ return [
 
 'users'	=> [
 	'this_users_apps_x_total'		=> 'This user\'s apps (:x total)',
+	'this_user_has_x_apps'			=> 'This user has :x apps',
 	'login_btn'						=> 'Login',
 	'this_is_your_public_profile'	=> 'This is your public profile',
 	'this_user_is_blocked'			=> 'This user was blocked. Only administrators can view this page.',

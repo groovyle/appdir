@@ -259,3 +259,18 @@ function make_url_query($url = null, $params = []) {
 
 	return unparse_url($parsed);
 }
+
+function get_words_before($str, $limit = 50, $minwords = 1) {
+	$parts = explode(' ', $str);
+	$words = [];
+	foreach($parts as $i => $p) {
+		$tmp = implode(' ', $words).' '.$p;
+		if($i >= $minwords && strlen($tmp) > $limit) {
+			break;
+		} else {
+			$words[] = $p;
+		}
+	}
+
+	return substr(implode(' ', $words), 0, $limit);
+}

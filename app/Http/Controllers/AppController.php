@@ -124,6 +124,7 @@ class AppController extends Controller
 		if($app->is_original_version) {
 			// Got through, can access
 			$app->increasePageViews();
+			$app->load('thumbnail');
 		}
 
 		$data = [];

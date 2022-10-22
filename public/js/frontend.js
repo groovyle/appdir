@@ -27,7 +27,7 @@ $(document).on("click", 'a[href="#"]', function(e) {
 	e.preventDefault();
 });
 
-$("#app").tooltip({
+$("body").tooltip({
 	'selector': '[data-toggle="tooltip"]',
 	'container': '#app',
 	// Use the .tooltip-adjust to adjust the tooltip (if needed)
@@ -61,6 +61,16 @@ $("#app").tooltip({
 	// Use the .popover-adjust to adjust the popover (if needed)
 	'template': '<div class="popover popover-adjust" role="tooltip"><div class="arrow"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>',
 });*/
+
+$(document).on("click", ".btn-copy-text", function(e) {
+	e.preventDefault();
+	var target = $(this).data("target"),
+		$target = $(target)
+	;
+	if(target && $target.length > 0 && $target.is(":visible")) {
+		Helpers.copyTextInInput($target);
+	}
+});
 
 
 var $logoutForm = $("#logout-form");

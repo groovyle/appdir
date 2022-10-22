@@ -755,6 +755,31 @@ if(jQuery) {
 			}
 		}
 
+		// https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
+		var copyText = function(text) {
+			if(!navigator.clipboard) {
+				return false;
+			}
+			navigator.clipboard.writeText(text);
+		}
+
+		var copyTextInInput = function(elm) {
+			var $elm = $(elm);
+
+			var copied = false;
+			try {
+				elm.focus();
+				elm.select();
+				document.execCommand("copy");
+				copied = true;
+			} catch(err) {
+			}
+
+			if(!copied) {
+				navigator.clipboard.writeText($elm.val());
+			}
+		}
+
 		return {
 			fillDataString,
 			fillDataClasses,
@@ -781,6 +806,8 @@ if(jQuery) {
 			isNumberKey,
 			clamp,
 			handleToggledParents,
+			copyText,
+			copyTextInInput,
 		};
 	}();
 

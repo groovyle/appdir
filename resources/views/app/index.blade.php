@@ -83,11 +83,7 @@ $filter_btn_class = $filter_count == 0 ? 'btn-light bordered' : 'btn-success';
 				<div class="app-item">
 					<a class="card" href="{{ $app->public_url }}">
 						<div class="card-img-top">
-							@if($app->thumbnail)
-							<img src="{{ $app->thumbnail->url }}" alt="thumbnail">
-							@else
-							<img src="{{ asset('img/image-where-sm.png') }}" alt="thumbnail">
-							@endif
+							<img src="{{ $app->small_thumbnail_url }}" alt="thumbnail">
 						</div>
 						<div class="app-number">#{{ $loop->index + $apps->firstItem() }}</div>
 						<div class="card-body app-item-body text-wrap-word">

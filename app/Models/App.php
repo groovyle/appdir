@@ -368,6 +368,14 @@ class App extends Model
 		;
 	}
 
+	public function getThumbnailUrlAttribute() {
+		return $this->thumbnail ? $this->thumbnail->url : asset('img/image-where.png');
+	}
+
+	public function getSmallThumbnailUrlAttribute() {
+		return $this->thumbnail ? $this->thumbnail->thumbnail_url : asset('img/image-where-sm.png');
+	}
+
 	public function setToPublished($state = true) {
 		$this->is_published = $state;
 		if(!$state)

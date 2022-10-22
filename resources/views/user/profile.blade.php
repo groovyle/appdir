@@ -23,8 +23,6 @@ $is_self = $is_self ?? false;
 					@if($user->prodi)
 					<p class="text-secondary">{{ $user->prodi->complete_name }}</p>
 					@endif
-					TODO: show more information here, e.g logo?
-					TODO: don't show user if blocked
 				</div>
 			</div>
 		</div>
@@ -61,11 +59,7 @@ $is_self = $is_self ?? false;
 					<div class="app-item app-item-sm">
 						<a class="card" href="{{ $app->public_url }}">
 							<div class="card-img-top">
-								@if ($app->thumbnail)
-								<img src="{{ $app->thumbnail->url }}" alt="thumbnail">
-								@else
-								<img src="{{ asset('img/image-where-sm.png') }}" alt="thumbnail">
-								@endif
+								<img src="{{ $app->small_thumbnail_url }}" alt="thumbnail">
 							</div>
 							<div class="app-number">#{{ $loop->iteration }}</div>
 							<div class="card-body app-item-body text-wrap-word">

@@ -150,6 +150,10 @@ class User extends Authenticatable
 		return $this->hasMany('App\Models\App', 'owner_id');
 	}
 
+	public function public_apps() {
+		return $this->apps()->isListed();
+	}
+
 	public function prodi() {
 		return $this->belongsTo('App\Models\Prodi', 'prodi_id')->withDefault();
 	}
@@ -225,6 +229,10 @@ class User extends Authenticatable
 
 	public function getIsMeAttribute() {
 		return $this->exists && $this->id !== null && $this->id == Auth::id();
+	}
+
+	public function getShareNameAttribute() {
+		return get_words_before($this->name, 20, 1);
 	}
 
 	public function __toString() {

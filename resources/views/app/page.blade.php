@@ -3,9 +3,23 @@ $is_report_form = old('is_report_form') ?? request()->has('report');
 $show_report_form = $is_report_form ? 'show' : '';
 
 $notices_count = 0;
+$share_enabled = $app->is_original_version;
+$share_description = __('frontend.apps.share_description', ['app' => $app->complete_name, 'owner' => $app->owner->share_name, 'site' => app_name()]);
 ?>
-
 @extends('layouts.app')
+
+@section('meta')
+@if($share_enabled)
+	<meta property="og:title" content="{{ text_truncate($app->complete_name, 70) }}">
+	<meta property="og:type" content="article" />
+	<meta property="og:image" content="{{ $app->thumbnail_url }}">
+	<meta property="og:url" content="{{ route('apps.page', ['slug' => $app->id]) }}">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta property="og:description" content="{{ $share_description }}">
+	<meta property="og:site_name" content="{{ app_name() }}">
+	<meta name="twitter:image:alt" content="Thumbnail">
+@endif
+@endsection
 
 @section('app-notices')
 <div class="app-notices collapse show mb-4" id="app-{{ $app->id }}-notices">
@@ -106,7 +120,6 @@ $notices_count = 0;
 @endsection
 
 @section('outer-content')
-<!-- TODO: meta tags -->
 <main class="flex-grow-1 app-page">
 
 	<div class="app-header full-page-tabs">
@@ -169,6 +182,11 @@ $notices_count = 0;
 						</span>
 						@endif
 					</div>
+					@if($share_enabled)
+					<div class="mt-1">
+						<a href="#app-{{ $app->id }}-share-modal" class="text-primary text-r100 text-decoration-none" data-toggle="modal"><span class="fas fa-share-alt mr-1"></span> {{ __('frontend.apps.share_this_app') }}</a>
+					</div>
+					@endif
 				</div>
 			</div>
 		</div>
@@ -326,8 +344,8 @@ $notices_count = 0;
 						<div class="card">
 							<div class="card-body">
 								<h4>@lang('frontend.apps.author')</h4>
-								<div class="user-horizontal-display mb-2">
-									<div class="user-logo-wrapper inline-logo">
+								<div class="user-display vertical mb-2">
+									<div class="user-logo-wrapper">
 										<img src="{{ $app->owner->profile_picture }}" rel="User image">
 									</div>
 									<div class="user-text">
@@ -337,9 +355,13 @@ $notices_count = 0;
 										@endif
 									</div>
 								</div>
-								<p>number of apps, user details, etc.</p>
-								<p>@lang('frontend.apps.share_this_app'): --- TODO: socmed share buttons</p>
-								<div class="text-center">
+								<p class="text-center text-090">{{ __('frontend.users.this_user_has_x_apps', ['x' => $app->owner->public_apps()->count()]) }}</p>
+								@if($share_enabled)
+								<div class="text-center mt-2">
+									<a href="#app-{{ $app->id }}-share-modal" class="btn btn-primary btn-sm px-3 btn-flex-row" data-toggle="modal"><span class="fas fa-share-alt mr-2"></span> {{ __('frontend.apps.share_this_app') }}</a>
+								</div>
+								@endif
+								<div class="text-center mt-3">
 									<a href="#app-report-section" class="btn btn-danger btn-sm px-3 btn-flex-row" data-toggle="collapse">
 										<span class="fas fa-exclamation-triangle mr-2 text-090"></span>
 										<span class="text-wrap-word">@lang('frontend.apps.report_this_app')</span>
@@ -466,6 +488,57 @@ jQuery(document).ready(function($) {
 @endpush
 @endif
 
+@if($share_enabled)
+<?php
+$share_url = url()->current();
+$whatsapp_params = http_build_query([
+	'text'			=> $share_url."\n".$share_description,
+]);
+$facebook_params = http_build_query([
+	'u'					=> $share_url,
+	'display'		=> 'popup',
+	'quote'			=> $share_description,
+]);
+$twitter_params = http_build_query([
+	'url'				=> $share_url,
+	'text'			=> $share_description,
+]);
+$linkedin_params = http_build_query([
+	'mini'			=> 'true',
+	'url'				=> $share_url,
+]);
+?>
+@push('scripts')
+<div class="modal fade" id="app-{{ $app->id }}-share-modal" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-body pb-1">
+				<h5>{{ __('frontend.share.share_on') }}:</h5>
+				<div class="share-links justify-content-center align-items-center py-2">
+					<a class="share-link-whatsapp" target="_blank" data-toggle="tooltip" title="{{ __('frontend.share.whatsapp') }}" href="https://api.whatsapp.com/send?{{ $whatsapp_params }}"><span class="fab fa-whatsapp"></span></a>
+					<a class="share-link-facebook" target="_blank" data-toggle="tooltip" title="{{ __('frontend.share.facebook') }}" href="https://www.facebook.com/sharer/sharer.php?{{ $facebook_params }}"><span class="fab fa-facebook-square"></span></a>
+					<a class="share-link-twitter" target="_blank" data-toggle="tooltip" title="{{ __('frontend.share.twitter') }}" href="https://twitter.com/intent/tweet?{{ $twitter_params }}"><span class="fab fa-twitter"></span></a>
+					<a class="share-link-linkedin" target="_blank" data-toggle="tooltip" title="{{ __('frontend.share.linkedin') }}" href="https://www.linkedin.com/shareArticle?{{ $twitter_params }}"><span class="fab fa-linkedin"></span></a>
+					<a class="share-link-link btn-copy-text" data-toggle="tooltip" title="{{ __('frontend.share.copy_link') }}" data-target="#app-{{ $app->id }}-share-url" href="{{ $share_url }}"><span class="fas fa-link"></span></a>
+				</div>
+				<div class="mt-2">
+					<div class="input-group">
+						<input type="text" class="form-control" value="{{ $share_url }}" id="app-{{ $app->id }}-share-url" readonly>
+						<div class="input-group-append">
+							<button type="button" class="btn btn-primary btn-copy-text" data-target="#app-{{ $app->id }}-share-url">{{ __('frontend.share.copy') }}</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer py-1">
+				<button type="button" class="btn btn-secondary btn-sm btn-block" data-dismiss="modal">{{ __('common.close') }}</button>
+			</div>
+		</div>
+	</div>
+</div>
+@endpush
+@endif
+
 @push('scripts')
 <script>
 jQuery(document).ready(function($) {
@@ -506,7 +579,8 @@ jQuery(document).ready(function($) {
 		keyboard: true,
 		autoplay: 'pause',
 		interval: 8000,
-			intersection: {
+		intersection: {
+			once: true,
 			inView: {
 				autoplay: true,
 				video: true,
