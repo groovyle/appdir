@@ -409,7 +409,7 @@ $rand = random_alpha(5);
                 </div>
                 <div class="d-none" id="inputDetailsContent">
                   <div class="input-group">
-                    <textarea class="form-control input-comment-text" rows="1" placeholder="{{ __('admin/app_verifications.fields.comment_placeholder') }}" autocomplete="off" maxlength="200"></textarea>
+                    <textarea class="form-control input-comment-text text-r090 lh-120" rows="1" placeholder="{{ __('admin/app_verifications.fields.comment_placeholder') }}" autocomplete="off" maxlength="200" style="max-height: 100px;"></textarea>
                   </div>
                 </div>
               </div>
@@ -436,21 +436,6 @@ $rand = random_alpha(5);
 
 @endsection
 
-@push('head-additional')
-<style>
-  textarea.input-comment-text {
-    /*height: 60px;*/
-    max-height: 100px;
-    font-size: 0.9rem;
-    line-height: 1.2;
-  }
-  .close.other-icon {
-    font-size: 1rem;
-    line-height: 1.5;
-  }
-</style>
-@endpush
-
 @include('admin.app.changes.btn-view-version')
 @include('admin.app_verification.btn-view-verif')
 
@@ -474,7 +459,7 @@ jQuery(document).ready(function($) {
       $tip.popover("hide");
     }
   });
-  var $popTrashBtn = '<button type="button" class="close other-icon text-danger text-sm mx-2"><span class="fas fa-trash"></span></button>';
+  var $popTrashBtn = '<button type="button" class="close other-icon text-danger mx-2"><span class="fas fa-trash"></span></button>';
   $popTrashBtn = $($popTrashBtn);
   $popTrashBtn.on("click", function(e) {
     var $tip = $(this).closest(".popover");

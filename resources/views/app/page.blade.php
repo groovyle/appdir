@@ -224,7 +224,7 @@ $notices_count = 0;
 										<textarea name="report_reason" id="reportReason" class="form-control show-resize" placeholder="@lang('frontend.apps.fields.report_reason_placeholder')" rows="2" maxlength="{{ $report_reason_limit }}" required>{{ old('report_reason') }}</textarea>
 									</div>
 									<div class="text-center mt-3">
-										<button type="submit" class="btn btn-sm btn-primary btn-minw-100">@lang('frontend.apps.submit_report')</button>
+										<button type="submit" class="btn btn-sm btn-primary btn-min-100">@lang('frontend.apps.submit_report')</button>
 									</div>
 								</form>
 								@else

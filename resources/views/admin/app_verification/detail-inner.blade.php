@@ -16,15 +16,6 @@ $comments = optional($verif->details ?? null);
 $rand = random_alpha(5);
 ?>
 
-@push('head-additional')
-<style>
-  .table-horizontal th,
-  .table-horizontal td {
-    vertical-align: top;
-  }
-</style>
-@endpush
-
 @section('detail-content')
       <dl class="row">
         <dt class="col-12 col-sm-3 col-xl-2">{{ __('admin/apps.fields.owner') }}</dt>
