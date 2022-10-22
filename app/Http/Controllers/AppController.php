@@ -27,6 +27,7 @@ class AppController extends Controller
 		$data = [];
 
 		$query = App::frontend();
+		$query->with(['thumbnail']);
 		$filter_count = 0;
 		$filters = request(['s', 'c', 't']);
 		$total_all = $query->count();

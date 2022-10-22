@@ -93,12 +93,18 @@ class App extends Model
 		$query->where('is_published', !$invert ? 1 : 0);
 		$query->where('is_reported', !$invert ? 0 : 1);
 		$query->where('is_private', !$invert ? 0 : 1);
+
+		$query->whereHas('owner', function($query) {
+			$query->blocked(false);
+		});
 	}
 
 	public static function getFrontendItem($slug, $fail = true, $scope = true) {
 		$item = null;
 		$query = static::query();
-		if($scope) $query->frontend();
+		if($scope) {
+			$query->frontend();
+		}
 
 		if(is_numeric($slug)) {
 			$item = (clone $query)->whereKey($slug)->first();
@@ -134,8 +140,7 @@ class App extends Model
 	}
 
 	public function thumbnail() {
-		// TODO
-		return $this->visual();
+		return $this->visual()->image();
 	}
 	// Alias
 	public function visual() {

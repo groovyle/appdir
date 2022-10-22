@@ -24,6 +24,15 @@ $notices_count = 0;
 		</span>
 	</div>
 	@endif
+	@if($app->owner && $app->owner->is_blocked)
+	@php $notices_count++; @endphp
+	<div class="alert alert-danger">
+		<span class="icon-text-pair icon-color-reset icon-2x">
+			<span class="fas fa-user-slash fa-fw icon text-130"></span>
+			<span>@lang('frontend.apps.notices.owner_blocked')</span>
+		</span>
+	</div>
+	@endif
 	@if(!$app->is_original_version)
 		@php $notices_count++; @endphp
 		<div class="alert alert-danger">
@@ -136,6 +145,9 @@ $notices_count = 0;
 						@if($notices_count > 0 && $view_mode != 'none')
 						<span class="d-inline-flex align-middle" data-target="#app-{{ $app->id }}-notices" data-toggle="collapse" style="column-gap: 0.75rem;">
 							<a href="#app-{{ $app->id }}-notices" class="text-primary rounded-pill" id="app-{{ $app->id }}-notices-trigger" data-toggle="collapse"><span title="{{ __('frontend.apps.notices.show_app_notices') }}" data-toggle="tooltip" style="opacity: 0.75;"><span class="fas fa-info-circle"></span></span></a>
+							@if($app->owner && $app->owner->is_blocked)
+							<span class="text-danger" title="{{ __('frontend.apps.notices.owner_blocked_tip') }}" data-toggle="tooltip"><span class="fas fa-user-slash"></span></span>
+							@endif
 							@if(!$app->is_original_version)
 							<span class="text-danger" title="{{ __('frontend.apps.notices.not_original_version_tip') }}" data-toggle="tooltip"><span class="fas fa-copy"></span></span>
 							@else
@@ -248,18 +260,26 @@ $notices_count = 0;
 												<div class="splide__slide__container">
 													<img src="{{ $item->thumbnail_url }}" >
 												</div>
-												<div class="splide-caption has-arrow">{{ trim($item->caption) }}</div>
+												<div class="splide-caption has-arrow text-pre-wrap">{{ trim($item->caption) }}</div>
 											</li>
 											@elseif($item->type == 'video')
 											<li class="splide__slide splide-video" data-splide-youtube="{{ $item->embed_url }}">
 												<div class="splide__slide__container">
 													<img src="{{ $item->thumbnail_url }}" >
 												</div>
-												<div class="splide-caption has-arrow">{{ trim($item->caption) }}</div>
+												<div class="splide-caption has-arrow text-pre-wrap">{{ trim($item->caption) }}</div>
 											</li>
 											@endif
 											@endforeach
 										</ul>
+									</div>
+									<button class="splide__toggle" type="button" title="{{ __('frontend.slideshow.play/pause') }}" data-toggle="tooltip" style="position: absolute; bottom: 0; left: -3rem;">
+										<svg class="splide__toggle__play" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m22 12-20 11v-22l10 5.5z"></path></svg>
+										<svg class="splide__toggle__pause" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m2 1v22h7v-22zm13 0v22h7v-22z"></path></svg>
+									</button>
+									<div class="splide__progress mt-1">
+										<div class="splide__progress__bar">
+										</div>
 									</div>
 								</div>
 							</div>
@@ -479,27 +499,34 @@ jQuery(document).ready(function($) {
 		width: "600px",
 		height: "350px",
 		autoHeight: true,
-		// autoWidth: true,
 		heightRatio: 9/16,
 		arrows: false,
 		pagination: false,
-		drag: false,
+		drag: true,
 		keyboard: true,
-		// snap: true,
-		// autoplay: true,
-		interval: 10000,
+		autoplay: 'pause',
+		interval: 8000,
+			intersection: {
+			inView: {
+				autoplay: true,
+				video: true,
+			},
+			outView: {
+				autoplay: false,
+				video: false,
+			},
+		},
 		video: {
-			// autoplay: true,
+			autoplay: true,
 			loop: false,
+			// HTML standards dictate that videos that autoplay should start muted
 			mute: true,
+			volume: 0.4,
 		},
 	};
 
 	var splideOptionsSmall = {
 		type: "slide",
-		// gap: 5,
-		// padding: "4rem",
-		// width: "600px",
 		rewind: true,
 		fixedWidth: 100,
 		fixedHeight: 65,
@@ -508,10 +535,6 @@ jQuery(document).ready(function($) {
 		pagination: false,
 		isNavigation: true,
 		keyboard: true,
-		// focus: "center",
-		// trimSpace: "move",
-		// autoplay: true,
-		// interval: 10000,
 		breakpoints: {
 			767: {
 				fixedWidth: 75,

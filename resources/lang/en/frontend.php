@@ -65,6 +65,9 @@ return [
 		'go_to_admin_panel'			=> 'go to app admin panel',
 		'hide_these_messages'		=> 'hide these messages',
 
+		'owner_blocked'				=> 'The owner of this app has been blocked. Only administrators can view this page.',
+		'owner_blocked_tip'			=> 'Blocked owner',
+
 		'unverified_new'			=> 'This is a newly submitted app. It will go public after it has been verified.',
 		'unverified_new_tip'		=> 'This app is unverified',
 
@@ -123,10 +126,17 @@ return [
 	],
 ],
 
+'slideshow'	=> [
+	'play'			=> 'Play',
+	'pause'			=> 'Pause',
+	'play/pause'	=> 'Play/pause',
+],
+
 'users'	=> [
 	'this_users_apps_x_total'		=> 'This user\'s apps (:x total)',
 	'login_btn'						=> 'Login',
 	'this_is_your_public_profile'	=> 'This is your public profile',
+	'this_user_is_blocked'			=> 'This user was blocked. Only administrators can view this page.',
 
 	'fields'	=> [
 		'username'				=> 'Username',

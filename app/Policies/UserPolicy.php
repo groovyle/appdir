@@ -165,4 +165,17 @@ class UserPolicy
 			return $this->deny(__('admin/users.messages.user_is_not_blocked'));
 		}
 	}
+
+
+	public function viewPublic(User $user, User $model) {
+		if(!$model)
+			return false;
+
+		$is_admin = $user && $user->isA('superadmin', 'admin');
+		if($model->is_blocked) {
+			if(!$is_admin) {
+				return false;
+			}
+		}
+	}
 }

@@ -12,9 +12,9 @@ jQuery(document).ready(function($) {
 			if(slide.matches(".splide__slide--has-video")
 				|| slide.querySelectorAll(".splide__slide__container--has-video").length > 0 ) {
 				Autoplay.pause();
-			} else if(Autoplay.isPaused()) {
+			}/* else if(Autoplay.isPaused()) {
 				Autoplay.play();
-			}
+			}*/
 		}).on("video:play", function() {
 			clearTimeout(pauseTimer);
 

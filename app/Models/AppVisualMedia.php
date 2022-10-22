@@ -22,6 +22,10 @@ class AppVisualMedia extends AppVisualBase
 		});
 	}
 
+	public function scopeImage($query) {
+		$query->where('type', static::TYPE_IMAGE);
+	}
+
 	public function getMediaUrl($media_name = '') {
 		return asset('storage/apps/'.$this->app_id.'/'.$media_name);
 	}
@@ -73,5 +77,9 @@ class AppVisualMedia extends AppVisualBase
 					break;
 			}
 		}
+	}
+
+	public function getIsImageAttribute() {
+		return $this->type == static::TYPE_IMAGE;
 	}
 }

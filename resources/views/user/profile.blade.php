@@ -5,6 +5,13 @@ $is_self = $is_self ?? false;
 
 @section('content')
 <div class="container user-profile">
+
+	@if($user->is_blocked)
+	<div class="alert alert-danger">
+		@lang('frontend.users.this_user_is_blocked')
+	</div>
+	@endif
+
 	<div class="row">
 		<div class="col-12 col-md-4 col-xl-3">
 			<div class="card">
@@ -54,8 +61,8 @@ $is_self = $is_self ?? false;
 					<div class="app-item app-item-sm">
 						<a class="card" href="{{ $app->public_url }}">
 							<div class="card-img-top">
-								@if ($app->visuals_count > 0)
-								<img src="{{ $app->visuals[0]->url }}" alt="thumbnail">
+								@if ($app->thumbnail)
+								<img src="{{ $app->thumbnail->url }}" alt="thumbnail">
 								@else
 								<img src="{{ asset('img/image-where-sm.png') }}" alt="thumbnail">
 								@endif

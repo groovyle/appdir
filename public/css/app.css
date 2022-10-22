@@ -664,3 +664,37 @@ img.app-logo {
   line-height: 1.5;
   border-radius: 0.2rem;
 }
+
+.splide .splide__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  margin-right: 0.5rem;
+  background: #697c80;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  border: 0 none;
+  padding: 0;
+  outline: none;
+}
+.splide .splide__toggle__play {
+  margin-left: 2px;
+}
+.splide .splide__toggle svg {
+  fill: #e5eeee;
+  height: 46%;
+  transition: fill 0.2s ease;
+  width: 46%;
+}
+.splide .splide__toggle:hover {
+  background: #45cadf;
+}
+.splide .splide__toggle:hover svg {
+  fill: #f5f5f5;
+}
+.splide .splide__progress__bar {
+  background: #45cadf;
+  height: 3px;
+}

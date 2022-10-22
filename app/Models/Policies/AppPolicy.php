@@ -5,6 +5,7 @@ namespace App\Models\Policies;
 use App\Models\App;
 use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Gate;
 
 class AppPolicy
 {
@@ -116,13 +117,23 @@ class AppPolicy
 				return $return();
 			}
 
+			if($user->cannot('view-public', $app->owner)) {
+				$result['status'] = false;
+				return $return();
+			}
+
 			// Owner
 			if($is_owner) {
 				$result['status'] = true;
 				$result['view_mode'] = 'owner';
 				return $return();
 			}
+		}
 
+		// Check app owner
+		if(Gate::forUser($user)->denies('view-public', $app->owner)) {
+			$result['status'] = false;
+			return $return();
 		}
 
 		$result['status'] = $app->is_verified

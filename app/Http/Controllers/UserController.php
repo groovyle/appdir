@@ -14,13 +14,16 @@ class UserController extends Controller
 {
 
 	public function profile($user_id) {
-		$user = User::getFrontendItem($user_id);
+		$user = User::getFrontendItem($user_id, false, false);
+
+		$this->authorize('view-public', $user);
 
 		$data = [];
 		$self = Auth::user();
 		$filter_form = request('f');
 
 		$query = App::frontend();
+		$query->with(['thumbnail']);
 		$query->where('owner_id', $user->id);
 		$apps_total = $query->count();
 

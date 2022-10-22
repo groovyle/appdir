@@ -85,14 +85,20 @@ class User extends Authenticatable
 
 	public function scopeBlocked($query, $blocked = true) {
 		$query->where('is_blocked', $blocked ? 1 : 0);
+
+		$has_fn = $blocked ? 'whereHas' : 'whereDoesntHave';
+		$query->$has_fn('blocks');
 	}
 
-	public static function getFrontendItem($id, $fail = true) {
+	public static function getFrontendItem($id, $fail = true, $scope = true) {
 		$query = static::query();
 		// $query->withoutGlobalScope('_with_trashed');
 		$query->whereKey($id);
 		$query->system(false);
-		$query->blocked(false);
+
+		if($scope) {
+			$query->blocked(false);
+		}
 
 		$fn = $fail ? 'firstOrFail' : 'first';
 
