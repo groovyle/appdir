@@ -9,7 +9,7 @@ $user = Auth::user();
 				<a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
 			</li>
 			<li class="nav-item">
-				<a class="btn btn-sm btn-default btn-flat my-1 ml-1" href="{{ route('home') }}" target="_blank">{{ __('admin/common.portal_button') }}</a>
+				<a class="btn btn-sm btn-default btn-flat my-1 ml-1" href="{{ route('index') }}" target="_blank">{{ __('admin/common.portal_button') }}</a>
 			</li>
 		</ul>
 

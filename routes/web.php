@@ -24,6 +24,7 @@ Route::get('/apps/{slug}', 'AppController@page')->name('apps.page');
 Route::get('/apps/{slug}/preview', 'AppController@preview')->name('apps.preview');
 Route::post('/apps/{slug}/submit_report', 'AppController@postReport')->name('apps.report.save');
 Route::get('/user/{user}', 'UserController@profile')->name('user.profile');
+Route::get('/login/error', 'Auth\\LoginController@errorPage')->name('login_error');
 
 Route::get('/color_test', 'TestColorsController@index')->name('color_test');
 

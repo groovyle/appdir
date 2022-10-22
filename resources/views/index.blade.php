@@ -1,15 +1,18 @@
+<?php
+list($theme, $counter_theme) = theme_timely();
+?>
 @extends('layouts.splash')
 
 @section('content')
 <div class="container px-4">
 	<div class="text-center mb-4">
-		<img src="{{ asset('img/logo-light.png') }}" class="logo" rel="{{ app_name() }}" style="max-width: 200px;">
+		<img src="{{ asset('img/logo-'.$counter_theme.'.png') }}" class="logo" rel="{{ app_name() }}" style="max-width: 200px;">
 		<br>
-		<img src="{{ asset('img/fineprint-light.png') }}" class="logo" rel="{{ app_name() }}" style="max-width: 150px;">
+		<img src="{{ asset('img/fineprint-'.$counter_theme.'.png') }}" class="logo" rel="{{ app_name() }}" style="max-width: 150px;">
 	</div>
 	<div class="text-center">
 		<div class="text-r110">
-			<a href="{{ route('apps') }}" class="btn btn-outline-light btn-lg rounded-0 text-110">{{ __('frontend.navs.browse_apps') }} &raquo;</a>
+			<a href="{{ route('apps') }}" class="btn btn-outline-{{ $counter_theme }} btn-lg rounded-0 text-110">{{ __('frontend.navs.browse_apps') }} &raquo;</a>
 			<p class="mt-2 mb-0">
 				@if($total_apps > 0)
 				@lang('frontend.splash.browse_through_x_amazing_apps', ['x' => $total_apps])

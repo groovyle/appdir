@@ -80,8 +80,8 @@ class LoginController extends Controller
 					// login form with an error message.
 					$this->incrementLoginAttempts($request);
 					return redirect()
-						->back()
-						->withInput($request->only($this->username(), 'remember'))
+						->route('login_error')
+						// ->withInput($request->only($this->username(), 'remember'))
 						->withErrors(['blocked' => __('common.messages.your_account_was_blocked')]);
 				}
 
@@ -114,5 +114,11 @@ class LoginController extends Controller
 		if($was_on_admin) {
 			return redirect()->route('login');
 		}
+	}
+
+	public function errorPage(Request $request) {
+		$data = [];
+
+		return view('auth.error-page');
 	}
 }

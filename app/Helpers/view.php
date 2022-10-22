@@ -240,3 +240,27 @@ function active_menu_by_route($route, $exact = false) {
 function menu_active($state) {
 	return $state ? 'active' : '';
 }
+
+function theme_random() {
+	$theme = \Arr::random(['light', 'dark']);
+	$counter_theme = counter_theme($theme);
+
+	return [$theme, $counter_theme];
+}
+
+function theme_timely() {
+	/**
+	 * Determine time:
+	 * 06-18	light
+	 * 18-06	dark
+	 * */
+	$time = intval(date('Hi'));
+	$theme = ($time >= 600 && $time < 1800) ? 'light' : 'dark';
+	$counter_theme = counter_theme($theme);
+
+	return [$theme, $counter_theme];
+}
+
+function counter_theme($theme) {
+	return $theme == 'dark' ? 'light' : 'dark';
+}

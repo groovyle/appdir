@@ -19,7 +19,7 @@ class CheckUserStatus
 			if($user->is_blocked) {
 				// Maybe the user got blocked mid app usage.
 				return $this->redirectOut(
-					'login',
+					'login_error',
 					['blocked' => __('common.messages.your_account_was_blocked')]
 				);
 			}

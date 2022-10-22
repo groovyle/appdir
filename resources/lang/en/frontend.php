@@ -15,6 +15,7 @@ return [
 ],
 
 'navs'		=> [
+	'home'					=> 'Home',
 	'browse_apps'			=> 'Browse Apps',
 	'login'					=> 'Login',
 	'register'				=> 'Register',
@@ -146,6 +147,13 @@ return [
 		'forgot_your_password'	=> 'Forgot your password?',
 		'register_an_account'	=> 'Register an account',
 	],
+],
+
+'auth'	=> [
+	'your_login_failed'			=> 'Your login failed',
+	'error_accessing_account'	=> 'Error accessing your account',
+	'message_error_login'		=> 'An error occurred while trying to get you logged in.',
+	'back_to_login_page'		=> 'Back to login page',
 ],
 
 ];
