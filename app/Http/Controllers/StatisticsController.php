@@ -54,7 +54,7 @@ class StatisticsController extends Controller
 		$tags->keyBy('id');
 		$sum_tags = $tags->sum('apps_count');
 
-		$cutoff = 5;
+		$cutoff = 10;
 		$tmp_tag = new AppTag;
 		$tmp_tag->id = '__others';
 		$tmp_tag->cat_count = 0;

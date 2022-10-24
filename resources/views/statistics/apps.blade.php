@@ -30,9 +30,9 @@ $menu_active_stats = true;
 							<h4 class="m-4">{{ __('frontend.statistics.apps.no_categories_yet') }}</h4>
 							@else
 							<h3 class="text-center mb-2">{{ __('frontend.statistics.apps.apps_by_category') }}</h3>
-							<div class="mb-2">
-								<div class="maxw-100 position-relative mx-auto" style="width: 400px; height: 300px;">
-									<canvas id="app-stats-by-cat-pie" width="300" height="200"></canvas>
+							<div class="mb-4">
+								<div class="maxw-100 position-relative mx-auto" style="height: 300px;">
+									<canvas id="app-stats-by-cat-pie" width="600"></canvas>
 								</div>
 							</div>
 							<div>
@@ -41,7 +41,7 @@ $menu_active_stats = true;
 									<table class="table table-hover border w-fit-content mx-auto lh-120">
 										<thead>
 											<tr class="bg-light">
-												<th class="text-right pr-3" style="width: 1%;">#</th>
+												<th class="text-right pr-2" style="width: 1%;">#</th>
 												<th>{{ __('frontend.statistics.apps.category') }}</th>
 												<th class="text-nowrap" colspan="2" style="width: 10%;">{{ __('frontend.statistics.apps.fields.total_apps') }}</th>
 											</tr>
@@ -68,8 +68,8 @@ $menu_active_stats = true;
 							@else
 							<h3 class="text-center mb-2">{{ __('frontend.statistics.apps.apps_by_tag') }}</h3>
 							<div class="mb-2">
-								<div class="maxw-100 position-relative mx-auto" style="width: 400px; height: 300px;">
-									<canvas id="app-stats-by-tag-pie" width="300" height="200"></canvas>
+								<div class="maxw-100 position-relative mx-auto" style="height: 300px;">
+									<canvas id="app-stats-by-tag-pie" width="600"></canvas>
 								</div>
 							</div>
 							<div>
@@ -78,7 +78,7 @@ $menu_active_stats = true;
 									<table class="table table-hover border w-fit-content mx-auto lh-120">
 										<thead>
 											<tr class="bg-light">
-												<th class="text-right pr-3" style="width: 1%;">#</th>
+												<th class="text-right pr-2" style="width: 1%;">#</th>
 												<th>{{ __('frontend.statistics.apps.tag') }}</th>
 												<th class="text-nowrap" colspan="2" style="width: 10%;">{{ __('frontend.statistics.apps.fields.total_apps') }}</th>
 											</tr>
@@ -151,6 +151,8 @@ jQuery(document).ready(function($) {
 			percentages: catPiePercents,
 		},
 		options: {
+			responsive: true,
+			maintainAspectRatio: false,
 			tooltips: {
 				enabled: true,
 				callbacks: {
@@ -185,6 +187,8 @@ jQuery(document).ready(function($) {
 			percentages: tagPiePercents,
 		},
 		options: {
+			responsive: true,
+			maintainAspectRatio: false,
 			tooltips: {
 				enabled: true,
 				callbacks: {

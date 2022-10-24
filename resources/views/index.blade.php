@@ -1,5 +1,7 @@
 <?php
 list($theme, $counter_theme) = theme_timely();
+// $theme = 'dark';
+// $counter_theme = counter_theme($theme);
 ?>
 @extends('layouts.splash')
 
