@@ -1,4 +1,20 @@
-<!doctype html>
+<?php
+$theme = $theme ?? 'light';
+extract(theme_vars($theme));
+
+$transparent_navs = $transparent_navs ?? false;
+if(!$transparent_navs) {
+	$body_theme = $body_theme ?? 'bgf-'.$theme_bg;
+	$navbar_bg = $navbar_bg ?? 'bg-'.$theme_bg;
+	$navbar_theme = $navbar_theme ?? $navbar_bg.' navbar-'.$theme.' shadow-sm';
+	$footer_theme = $footer_theme ?? 'bg-'.$theme_bg;
+} else {
+	$body_theme = $body_theme ?? '';
+	$navbar_bg = $navbar_bg ?? 'bg-transparent';
+	$navbar_theme = $navbar_theme ?? $navbar_bg.' navbar-'.$theme.' shadow-none';
+	$footer_theme = $footer_theme ?? 'bg-transparent shadow-none';
+}
+?><!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100">
 <head>
 	<meta charset="utf-8">
@@ -22,7 +38,6 @@
 	<link href="{{ asset('plugins/ekko-lightbox/ekko-lightbox.css') }}" rel="stylesheet">
 
 	<!-- Fonts -->
-	<!-- TODO: use CDN instead -->
 	<link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
 	<link rel="dns-prefetch" href="//fonts.gstatic.com">
 	<link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
@@ -39,12 +54,12 @@
 	@stack('head-additional')
 </head>
 <body class="h-100">
-	<div id="app" class="d-flex flex-column minh-100 bgf-fragrant-clouds">
+	<div id="app" class="d-flex flex-column minh-100 {{ $body_theme }}">
 		<header>
-			<nav class="navbar navbar-expand-md bg-fragrant-clouds navbar-light shadow-sm" id="navbar">
+			<nav class="navbar navbar-expand-md {{ $navbar_theme }}" id="navbar">
 				<div class="container">
 					<a class="navbar-brand" href="{{ route('index') }}" title="{{ app_name() }}">
-						<img src="{{ asset('img/fineprint-dark.png') }}" >
+						<img src="{{ asset('img/fineprint-'.$counter_theme.'.png') }}" >
 					</a>
 					<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
 						<span class="navbar-toggler-icon"></span>
@@ -54,7 +69,10 @@
 						<!-- Left Side Of Navbar -->
 						<ul class="navbar-nav mr-auto">
 							<li class="nav-item">
-								<a class="nav-link" href="{{ route('apps') }}">{{ __('frontend.navs.browse_apps') }}</a>
+								<a class="nav-link {{ $menu_active_browse ?? false ? 'active' : '' }}" href="{{ route('apps') }}">{{ __('frontend.navs.browse_apps') }}</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link {{ $menu_active_stats ?? false ? 'active' : '' }}" href="{{ route('stats.apps') }}">{{ __('frontend.navs.statistics') }}</a>
 							</li>
 						</ul>
 
@@ -103,7 +121,7 @@
 		</main>
 		@show
 
-		<footer class="footer main-footer mt-auto bg-fragrant-clouds" id="footer">
+		<footer class="footer main-footer mt-auto {{ $footer_theme }}" id="footer">
 			<div class="container">
 				<div class="text-center">@lang('frontend.footer_text')</div>
 			</div>

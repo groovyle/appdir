@@ -780,6 +780,18 @@ if(jQuery) {
 			}
 		}
 
+		var chartColors = function(length) {
+			// https://stackoverflow.com/a/45489530
+			var palette = ["#0074D9", "#FF4136", "#2ECC40", "#FF851B", "#7FDBFF", "#B10DC9", "#FFDC00", "#001f3f", "#39CCCC", "#01FF70", "#85144b", "#F012BE", "#3D9970", "#111111", "#AAAAAA"];
+			var colors = [];
+
+			for(var i = 0; i < length; i++) {
+				colors.push(palette[i % palette.length]);
+			}
+
+			return colors;
+		}
+
 		return {
 			fillDataString,
 			fillDataClasses,
@@ -808,6 +820,7 @@ if(jQuery) {
 			handleToggledParents,
 			copyText,
 			copyTextInInput,
+			chartColors,
 		};
 	}();
 

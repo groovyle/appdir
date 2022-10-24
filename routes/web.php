@@ -26,6 +26,8 @@ Route::post('/apps/{slug}/submit_report', 'AppController@postReport')->name('app
 Route::get('/user/{user}', 'UserController@profile')->name('user.profile');
 Route::get('/login/error', 'Auth\\LoginController@errorPage')->name('login_error');
 
+Route::get('/stats/apps', 'StatisticsController@apps')->name('stats.apps');
+
 Route::get('/color_test', 'TestColorsController@index')->name('color_test');
 
 Route::redirect('/admin', URL::to('/admin/home'))->name('admin');

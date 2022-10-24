@@ -113,6 +113,9 @@ class LoginController extends Controller
 		$was_on_admin = \Str::startsWith( url()->previous(), url('/admin') );
 		if($was_on_admin) {
 			return redirect()->route('login');
+		} else {
+			// If on portal just go back
+			return redirect()->back();
 		}
 	}
 

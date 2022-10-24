@@ -264,3 +264,11 @@ function theme_timely() {
 function counter_theme($theme) {
 	return $theme == 'dark' ? 'light' : 'dark';
 }
+
+function theme_vars($theme) {
+	$counter_theme = counter_theme($theme);
+	$theme_bg = $theme == 'dark' ? 'clear-sky' : 'fragrant-clouds';
+	$theme_text = $theme == 'dark' ? 'text-light' : 'text-dark';
+
+	return compact('theme', 'counter_theme', 'theme_bg', 'theme_text');
+}

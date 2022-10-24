@@ -28,6 +28,7 @@ return [
 'navs'		=> [
 	'home'					=> 'Home',
 	'browse_apps'			=> 'Browse Apps',
+	'statistics'			=> 'Statistics',
 	'login'					=> 'Login',
 	'register'				=> 'Register',
 	'logout'				=> 'Logout',
@@ -59,6 +60,7 @@ return [
 	'search_by_this_tag_x'	=> 'Search by this tag: :x',
 
 	'browse_apps'			=> 'Browse Apps',
+	'showcase'				=> 'App Showcase',
 	'filter'				=> 'Filter',
 	'filters'				=> 'Filters',
 	'search_placeholder'	=> 'Search...',
@@ -160,6 +162,34 @@ return [
 		'remember_login'		=> 'Remember my login',
 		'forgot_your_password'	=> 'Forgot your password?',
 		'register_an_account'	=> 'Register an account',
+	],
+],
+
+'statistics'	=> [
+	'apps'		=> [
+		'_title'			=> 'App Statistics',
+		'_description'		=> 'Summary of the apps showcased on '.app_name(),
+
+		'by_category'		=> 'By category',
+		'no_categories_yet'	=> 'There are no app categories yet',
+		'apps_by_category'	=> 'Apps by category',
+		'list_of_categories'	=> 'List of categories',
+		'category'			=> 'Category',
+		'other_categories'	=> 'Other categories',
+		'x_other_categories'	=> ':x other categories',
+
+		'by_tag'			=> 'By tag',
+		'no_tags_yet'		=> 'There are no app tags yet',
+		'apps_by_tag'		=> 'Apps by tag',
+		'list_of_tags'		=> 'List of tags',
+		'tag'				=> 'Tag',
+		'other_tags'		=> 'Other tags',
+		'x_other_tags'		=> ':x other tags',
+
+		'fields'	=> [
+			'total_apps'	=> 'Total Apps',
+			'percentage'	=> 'Percentage',
+		],
 	],
 ],
 

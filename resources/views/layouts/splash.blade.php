@@ -1,7 +1,6 @@
 <?php
 $theme = $theme ?? 'dark';
-$theme_bg = $theme == 'dark' ? 'bg-clear-sky' : 'bg-fragrant-clouds';
-$theme_text = $theme == 'dark' ? 'text-light' : 'text-dark';
+extract(theme_vars($theme));
 ?><!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100">
 <head>
@@ -39,7 +38,7 @@ $theme_text = $theme == 'dark' ? 'text-light' : 'text-dark';
 	@stack('head-additional')
 </head>
 <body class="h-100">
-	<div id="app" class="minh-100 splash-page {{ $theme_bg }} {{ $theme_text }}">
+	<div id="app" class="minh-100 splash-page bg-{{ $theme_bg }} {{ $theme_text }}">
 		@section('outer-content')
 		<main class="flex-shrink-0 pt-3 pb-4 mt-auto">
 			@yield('content')

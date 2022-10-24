@@ -8,6 +8,8 @@ $share_description = __('frontend.apps.share_description', ['app' => $app->compl
 ?>
 @extends('layouts.app')
 
+@section('title', text_truncate($app->complete_name, 50).' | '.__('frontend.apps.showcase'))
+
 @section('meta')
 @if($share_enabled)
 	<meta property="og:title" content="{{ text_truncate($app->complete_name, 70) }}">

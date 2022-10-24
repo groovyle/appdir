@@ -22,9 +22,10 @@ jQuery(document).ready(function($) {
 		}).on("video:pause", function() {
 			// wait on the pause event because pause action and buffering video
 			// (e.g skipping ahead then buffering) count as pause action
-			pauseTimer = setTimeout(function() {
+			/*pauseTimer = setTimeout(function() {
 				Autoplay.play();
-			}, 10000);
+			}, 10000);*/
+			// Autoplay.play();
 		}).on("video:ended", function() {
 			clearTimeout(pauseTimer);
 

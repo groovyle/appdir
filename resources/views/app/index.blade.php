@@ -1,5 +1,6 @@
 <?php
-// dd(explode(',', request('t', '')));
+$menu_active_browse = true;
+
 $selected_in_compiled = function($value, $data_key) {
 	return in_array($value, explode(',', request($data_key))) ? 'selected="selected"' : '';
 };
@@ -8,6 +9,8 @@ $filter_btn_class = $filter_count == 0 ? 'btn-light bordered' : 'btn-success';
 ?>
 
 @extends('layouts.app')
+
+@section('title', __('frontend.apps.browse_apps'))
 
 @section('content')
 <div class="container">

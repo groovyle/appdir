@@ -1,8 +1,12 @@
 <?php
-// dd($errors);
+list($theme, $counter_theme) = theme_timely();
+extract(theme_vars($theme));
+$body_theme = 'bg-'.$theme_bg;
+$transparent_navs = true;
 ?>
-
 @extends('layouts.app')
+
+@section('title', __('frontend.navs.login'))
 
 @section('outer-content')
 <div class="flex-grow-1 d-flex flex-column">
