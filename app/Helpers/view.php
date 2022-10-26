@@ -194,7 +194,7 @@ function pretty_username($user, $is_an_owner = false) {
 	if( !($user instanceof \App\User) ) {
 		$name = $user;
 	} else {
-		$name = $user->name;
+		$name = $user->display_name ?? $user->name;
 		if($user->is_system) {
 			$color = 'text-purple';
 		}

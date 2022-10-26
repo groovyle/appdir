@@ -174,7 +174,7 @@ if(jQuery) {
 
 		// Scroll to element, factoring in the navbar height and a little offset
 		var scrollTo = function(element, options) {
-			options = $.extend(scrollToDefaultOptions, options);
+			options = $.extend({}, scrollToDefaultOptions, options);
 
 			var offset = 0 + options.offset;
 			var $element = $(element);
@@ -203,7 +203,7 @@ if(jQuery) {
 
 		// Scroll to element relative to its overflow parent, not the page
 		var parentScrollTo = function(element, options, $parentContext) {
-			options = $.extend(scrollToDefaultOptions, {
+			options = $.extend({}, scrollToDefaultOptions, {
 				// e.g put 50 or "50%" to make the element
 				// appear in the middle of its parent
 				percentageOffset: 0,
@@ -270,7 +270,7 @@ if(jQuery) {
 
 		// Scroll to element (horizontally), factoring in the sidebar width and a little offset
 		var hScrollTo = function(element, options) {
-			options = $.extend(scrollToDefaultOptions, options);
+			options = $.extend({}, scrollToDefaultOptions, options);
 
 			var offset = 0 + options.offset;
 			var $element = $(element);
@@ -300,7 +300,7 @@ if(jQuery) {
 
 		// Scroll to element horizontally relative to its overflow parent, not the page
 		var parentHScrollTo = function(element, options, $parentContext) {
-			options = $.extend(scrollToDefaultOptions, {
+			options = $.extend({}, scrollToDefaultOptions, {
 				// e.g put 50 or "50%" to make the element
 				// appear in the middle of its parent
 				percentageOffset: 0,
@@ -389,6 +389,12 @@ if(jQuery) {
 			var $element = $(element);
 			var scroll = scrollOptions !== false;
 			var flash = flashOptions !== false;
+
+			scrollOptions = $.extend({
+				// Default to center of screen (kinda)
+				offset: $(window).height() / 2 - 100,
+			}, scrollOptions)
+
 			if(scroll && flash) {
 				$element.one("scrolled.scrollto", function(e) {
 					Helpers.flashElement($element, flashOptions);

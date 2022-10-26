@@ -30,6 +30,10 @@ return [
 'default'				=> 'default',
 'yes_im_sure'			=> 'Yes, I\'m sure',
 'done'					=> 'Done',
+'by'					=> 'by',
+'new'					=> 'new',
+'edit'					=> 'edit',
+'you'					=> 'you',
 
 'fields'	=> [
 	'id'				=> 'ID',
@@ -40,6 +44,8 @@ return [
 	'number_of_users'	=> 'Number of Users',
 	'last_updated'		=> 'Last Updated',
 	'status'			=> 'Status',
+	'range'				=> 'Range',
+	'at'				=> 'At',
 ],
 
 'messages'	=> [

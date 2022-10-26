@@ -109,6 +109,8 @@ $hide_edit = !!($hide_edit ?? true);
     @lang('admin/app_verifications.new_item_submitted')
   @elseif($verif->concern == 'edit')
     @lang('admin/app_verifications.item_edited')
+  @elseif($verif->concern == 'delete')
+    @lang('admin/app_verifications.item_deleted')
   @elseif($verif->concern == 'commit')
     @lang('admin/app_verifications.pending_changes_applied')
   @elseif($verif->concern == 'publish')

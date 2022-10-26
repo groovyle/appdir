@@ -10,6 +10,7 @@ $append_breadcrumb = [
   ]
 ];
 $goto_version = $goto_version ?? false;
+$goto_flash = $goto_flash ?? false;
 $page_title = __('admin/apps.page_title.changes');
 if(($count = $app->changelogs()->count()) > 0) {
   $page_title .= ' ('. $count .')';

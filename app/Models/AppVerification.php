@@ -19,6 +19,8 @@ class AppVerification extends Model
 	const CONCERN_COMMIT		= 'commit'; // for applying approved changes
 	const CONCERN_PUBLISH_ITEM	= 'publish'; // for publishing item, usually also applying changes
 	const CONCERN_REPORT		= 'report'; // for verifications concerning reports
+	const CONCERN_DELETE_ITEM	= 'delete'; // for item deletion
+	const CONCERN_RESTORE_ITEM	= 'restore'; // for item restoration
 	const CONCERN_VERIFICATION	= 'verification'; // else
 
 	protected $attributes = [

@@ -87,6 +87,19 @@ $scroll_content = !isset($goto_item) && ($show_filters || request()->has('page')
             </select>
           </div>
         </div>
+        @if($view_mode == 'all')
+        <div class="form-group row">
+          <label for="fProdi" class="col-sm-3 col-lg-2">{{ __('admin/apps.fields.prodi') }}</label>
+          <div class="col-sm-8 col-lg-5">
+            <select class="form-control" name="prodi_id" id="fProdi">
+              <option value="">&ndash; {{ __('admin/common.all') }} &ndash;</option>
+              @foreach($prodis as $prodi)
+              <option value="{{ $prodi->id }}" {!! old_selected('', $filters['prodi_id'], $prodi->id) !!}>{{ $prodi->complete_name }}</option>
+              @endforeach
+            </select>
+          </div>
+        </div>
+        @endif
         @if($view_mode != 'owned')
         <div class="form-group row">
           <label for="fOwned" class="col-sm-3 col-lg-2">{{ __('admin/apps.fields.filter_is_owned') }}</label>

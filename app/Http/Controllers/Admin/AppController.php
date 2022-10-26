@@ -13,6 +13,7 @@ use App\Models\AppVisualMedia;
 use App\Models\AppType;
 use App\Models\AppVerification;
 use App\Models\LogActions;
+use App\Models\Prodi;
 use App\Models\VerificationStatus;
 use App\Models\SystemUsers\Automator;
 use App\Settings;
@@ -85,7 +86,7 @@ class AppController extends Controller
 		$user = Auth::user();
 		// $apps = Auth::user()->apps()->get();
 
-		$filters = get_filters(['keyword', 'status', 'published', 'categories', 'tags', 'owned']);
+		$filters = get_filters(['keyword', 'status', 'published', 'categories', 'tags', 'owned', 'prodi_id']);
 		$opt_filters = optional($filters);
 		$filter_count = 0;
 
@@ -128,7 +129,7 @@ class AppController extends Controller
 		$total_all = $query->count(DB::raw('distinct a.id'));
 
 		// Role/ability scoping filter
-		$view_mode = 'owned';
+		$view_mode = '';
 		AppManager::scopeListQuery($query, $view_mode);
 		$total_scoped = $query->count(DB::raw('distinct a.id'));
 
@@ -169,6 +170,13 @@ class AppController extends Controller
 			// operator AND (match all)
 			$query->havingRaw('count(distinct atag.tag) = ?', [count($tags)]);
 			$filter_count++;
+		}
+
+		if($view_mode == 'all') {
+			if($opt_filters['prodi_id'] && $opt_filters['prodi_id'] != 'all') {
+				$query->where('prodi.id', $opt_filters['prodi_id']);
+				$filter_count++;
+			}
 		}
 
 		switch($opt_filters['status']) {
@@ -225,6 +233,7 @@ class AppController extends Controller
 		$data['filter_count'] = $filter_count;
 		$data['categories'] = AppCategory::all();
 		$data['tags'] = AppTag::all();
+		$data['prodis'] = Prodi::all();
 
 		return view('admin/app/index', $data);
 	}
@@ -687,8 +696,7 @@ class AppController extends Controller
 		} else {
 			DB::commit();
 
-			if( (!$verf_edit && $store['app']->wasChanged())
-				|| ($verf_edit && $store['app']->isDirty()) ) {
+			if( $store['app']->wasChanged() || $store['app']->isDirty() ) {
 				// Pass a message
 				$request->session()->flash('flash_message', [
 					'message'	=> __('admin/apps.messages.update_successful'),
@@ -723,7 +731,19 @@ class AppController extends Controller
 		$result = true;
 		$messages = [];
 		try {
-			$result = $app->delete();
+			// Generate verification item
+			$verif = new AppVerification;
+			$verif->app_id = $app->id;
+			$verif->base_changes_id = $app->version_id;
+			$verif->status_id = 'deleted';
+			$verif->concern = AppVerification::CONCERN_DELETE;
+
+			$result = $verif->save();
+			/*if($result && $app->version) {
+				$verif->changelogs()->attach($app->version);
+			}*/
+
+			$result = $result && $app->delete();
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = false;
 			$messages[] = $e->getMessage();
@@ -784,6 +804,9 @@ class AppController extends Controller
 		$data['app'] = $app;
 
 		$app->load(['verifications.verifier', 'verifications.status']);
+
+		$data['goto_item'] = request()->input('go_item');
+		$data['goto_flash'] = request()->input('go_flash') == 1;
 
 		return view('admin/app/verifications', $data);
 	}
@@ -1465,6 +1488,194 @@ class AppController extends Controller
 			}
 		}
 	}
+
+
+	public function activityLog(Request $request) {
+		$this->authorize('view-any', App::class);
+
+		//
+		$data = [];
+		$user = Auth::user();
+
+		$filters = get_filters(['keyword', 'owned']);
+		$opt_filters = optional($filters);
+		$filter_count = 0;
+
+		$query = (new AppVerification)->newQueryWithoutScopes()->withoutGlobalScopes();
+
+		$query->from('app_verifications as av');
+		$query->leftJoin('apps as a', 'av.app_id', '=', 'a.id');
+
+		// ===== CONSECUTIVE-NEXT
+		// Find next different status actions
+		$query->leftJoin('app_verifications as avn3', function($query) {
+			$query->on('av.app_id', '=', 'avn3.app_id');
+			$query->on('av.status_id', '!=', 'avn3.status_id');
+			$query->on('av.updated_at', '<=', 'avn3.updated_at');
+			$query->on('av.id', '<', 'avn3.id');
+		});
+		// Find prevs of the avn3 above
+		$query->leftJoin('app_verifications as avn4', function($query) {
+			$query->on('av.app_id', '=', 'avn4.app_id');
+			$query->on('av.status_id', '!=', 'avn4.status_id');
+			$query->on('av.updated_at', '<=', 'avn4.updated_at');
+			$query->on('av.id', '<', 'avn4.id');
+			$query->on('avn3.updated_at', '>=', 'avn4.updated_at');
+			$query->on('avn3.id', '>', 'avn4.id');
+		});
+		// Invert findings so that we get avn3 that does NOT have prevs - meaning
+		// we get the first avn3 - the first next different status action.
+		$query->whereNull('avn4.id');
+		// Find same status *consecutive* actions
+		$query->leftJoin('app_verifications as avn2', function($query) {
+			$query->on('av.app_id', '=', 'avn2.app_id');
+			$query->on('av.status_id', '=', 'avn2.status_id');
+			$query->on('av.updated_at', '<=', 'avn2.updated_at');
+			$query->on('av.id', '<', 'avn2.id');
+			$query->on(function($query) {
+				// Need to check for avn3 existence because next different action
+				// may not exist
+				$query->on(function($query) {
+					$query->on('avn2.updated_at', '<=', 'avn3.updated_at');
+					$query->on('avn2.id', '<', 'avn3.id');
+				});
+				$query->orWhereNull('avn3.id');
+			});
+		});
+
+		// ===== CONSECUTIVE-PREV
+		// Find prev different status actions
+		$query->leftJoin('app_verifications as avp3', function($query) {
+			$query->on('av.app_id', '=', 'avp3.app_id');
+			$query->on('av.status_id', '!=', 'avp3.status_id');
+			$query->on('av.updated_at', '>=', 'avp3.updated_at');
+			$query->on('av.id', '>', 'avp3.id');
+		});
+		// Find nexts of the avp3 above
+		$query->leftJoin('app_verifications as avp4', function($query) {
+			$query->on('av.app_id', '=', 'avp4.app_id');
+			$query->on('av.status_id', '!=', 'avp4.status_id');
+			$query->on('av.updated_at', '>=', 'avp4.updated_at');
+			$query->on('av.id', '>', 'avp4.id');
+			$query->on('avp3.updated_at', '<=', 'avp4.updated_at');
+			$query->on('avp3.id', '<', 'avp4.id');
+		});
+		// Invert findings so that we get avp3 that does NOT have nexts - meaning
+		// we get the first avp3 - the first prev different status action.
+		$query->whereNull('avp4.id');
+		// Find same status *consecutive* actions
+		$query->leftJoin('app_verifications as avp2', function($query) {
+			$query->on('av.app_id', '=', 'avp2.app_id');
+			$query->on('av.status_id', '=', 'avp2.status_id');
+			$query->on('av.updated_at', '>=', 'avp2.updated_at');
+			$query->on('av.id', '>', 'avp2.id');
+			$query->on(function($query) {
+				// Need to check for avp3 existence because prev different action
+				// may not exist
+				$query->on(function($query) {
+					$query->on('avp2.updated_at', '>=', 'avp3.updated_at');
+					$query->on('avp2.id', '>', 'avp3.id');
+				});
+				$query->orWhereNull('avp3.id');
+			});
+		});
+
+		$query->leftJoin('ref_verification_status as vs', 'av.status_id', '=', 'vs.id');
+		$query->leftJoin('users as uv', 'av.verifier_id', '=', 'uv.id');
+
+		$query->with(['app' => function($query) {
+			$query->withTrashed();
+		}]);
+
+		// Get the first item only in each series of same status consecutive actions
+		// $query->whereNull('avp2.id');
+		// Get the last item only in each series of same status consecutive actions
+		$query->whereNull('avn2.id');
+
+		$query->select('av.*');
+		$query->selectRaw('count(distinct avn2.id) as consecutive_next');
+		$query->selectRaw('count(distinct avp2.id) as consecutive_prev');
+		$query->selectRaw('av.updated_at as action_at');
+		$query->selectRaw('max(avn2.updated_at) as action_at_last');
+		$query->selectRaw('min(avp2.updated_at) as action_at_first');
+
+
+		$query->leftJoin('users as o', 'a.owner_id', '=', 'o.id');
+		$query->leftJoin('ref_prodi as prodi', 'o.prodi_id', '=', 'prodi.id');
+
+		// Count after using the HAVING clause - use subquery
+		$total_all = $query->count(DB::raw('distinct av.id'));
+		// $total_all = DB::query()->fromSub(clone $query, 'av')->count(DB::raw('distinct av.id'));
+
+		// Role/ability scoping filter
+		$view_mode = '';
+		AppManager::scopeListQuery($query, $view_mode);
+		$total_scoped = $query->count(DB::raw('distinct av.id'));
+
+
+		$query->groupBy('av.id');
+
+		$query->orderBy('av.updated_at', 'desc');
+		$query->orderBy('av.id', 'desc');
+
+		if($keyword = trim($opt_filters['keyword'])) {
+			$str = escape_mysql_like_str($keyword);
+			$like = '%'.$str.'%';
+			$query->where(function($query) use($like) {
+				$query->where('a.name', 'like', $like);
+				$query->orWhere('a.short_name', 'like', $like);
+				$query->orWhere('a.description', 'like', $like);
+				$query->orWhere('vs.name', 'like', $like);
+				$query->orWhere('uv.name', 'like', $like);
+			});
+			$filter_count++;
+		}
+
+		switch($opt_filters['owned']) {
+			case 'mine':
+				$query->where('a.owner_id', '=', $user->id);
+				$filter_count++;
+				break;
+			case 'others':
+				$query->where('a.owner_id', '!=', $user->id);
+				$filter_count++;
+				break;
+		}
+
+		$per_page = 20;
+		$page = request()->input('page', 1);
+
+		$list = $query->paginate($per_page);
+		$list->appends($filters);
+
+		// Redirect if over page. This can happen when e.g the last item in the
+		// last page gets deleted. Redirect to last available page.
+		if($list->total() > 0 && $page > $list->lastPage()) {
+			return redirect()->to( $list->url($list->lastPage()) );
+		}
+
+		// Prepare items
+		$list->getCollection()->transform(function($item) {
+			$item->view_url = null;
+			if(Gate::allows('view-verifications', $item->app))
+				$item->view_url = route('admin.apps.verifications', ['app' => $item->app_id, 'go_item' => $item->id, 'go_flash' => 1]);
+			elseif(Gate::allows('view', $item->app))
+				$item->view_url = route('admin.apps.show', ['app' => $item->app_id]);
+
+			return $item;
+		});
+
+		$data['view_mode'] = $view_mode;
+		$data['prodi'] = optional($user->prodi);
+		$data['list'] = $list;
+		$data['total_all'] = $total_all;
+		$data['total_scoped'] = $total_scoped;
+		$data['filters'] = $opt_filters;
+		$data['filter_count'] = $filter_count;
+
+		return view('admin/app/activities', $data);
+	}
+
 
 	public function snippetVisualsComparison(Request $request, $app = null, $version = null)
 	{

@@ -20,6 +20,7 @@ return [
 	'your_apps_x'						=> 'Your Apps (:x)',
 	'browse_through_x_amazing_apps'		=> 'Surf through <b>:x</b> amazing apps',
 	'looking_for_something_specific_x?'	=> 'Looking for something specific? You can apply <a href=":x">filters</a>!',
+	'or_look_at_site_wide_stats'		=> 'Take a glance at our <a href=":x">site wide stats</a> for something more general',
 	'there_are_no_apps_yet'				=> 'There are no apps yet in our listing (exactly zero). Consider submitting yours?',
 	'you_are_not_logged_in_yet'			=> 'You\'re not logged in yet. Submit your own app into our listing! <br>Login to your account. Don\'t have one yet? Register an account for free.',
 	'hey_x_you_are_logged_in'			=> 'Hey <b>:x</b>, you are logged in. Time to do amazing stuff!',

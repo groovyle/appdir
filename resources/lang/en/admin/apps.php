@@ -15,6 +15,7 @@ return [
 	'review_changes'	=> 'Review Changes',
 	'publish_changes'	=> 'Publish Changes',
 	'publish_app'		=> 'Publish App',
+	'activities'		=> 'Activities on Apps',
 
 	'view_mode'			=> [
 		'all'	=> 'Viewing all apps in the system',
@@ -75,6 +76,7 @@ return [
 'you_own_this_app'			=> 'You own this app',
 'app_is_private'		=> 'App is private',
 'app_is_not_private'	=> 'App is not private',
+'activities'			=> 'Activities',
 
 'man_pan'		=> [
 	'title'					=> 'Management Panel',
@@ -136,6 +138,8 @@ return [
 	'is_published'				=> 'Published',
 	'is_private'				=> 'Is Private?',
 	'filter_is_owned'			=> 'Whose Apps',
+	'activity'					=> 'Activity',
+	'prodi'						=> 'Study Program',
 ],
 
 'changes'	=> [

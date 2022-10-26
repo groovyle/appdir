@@ -43,6 +43,8 @@ Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
 	Route::patch('profile/password', 'UserProfileController@updatePassword')->name('profile.password.save');
 
 	Route::get('apps', 'AppController@index')->name('apps');
+	Route::get('apps/activities', 'AppController@activityLog')->name('app_activities.index');
+
 	Route::resource('apps', 'AppController');
 	Route::get('apps/{app}/verifications', 'AppController@verifications')->name('apps.verifications');
 	Route::get('apps/{app}/changes', 'AppController@changes')->name('apps.changes');
@@ -105,6 +107,8 @@ Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
 	Route::resource('log_actions', 'LogActionController')->only(['index', 'show'])->parameters([
 		'log_actions'	=> 'log',
 	]);
+
+	Route::get('stats/app_activities', 'StatisticsController@app_activities')->name('stats.app_activities');
 });
 
 Route::group(['middleware' => config('filepond.middleware', ['web', 'auth'])], function() {

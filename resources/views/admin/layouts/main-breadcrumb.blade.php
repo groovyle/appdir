@@ -38,7 +38,7 @@ if(!isset($paths)) {
 					if(!Route::has($path_route)) {
 						$path_route .= '.index';
 					}
-					$path['url'] = route($path_route);
+					$path['url'] = Route::has($path_route) ? route($path_route) : false;
 				} else {
 					if(isset($append_breadcrumb)) {
 						$paths = array_merge($paths, $append_breadcrumb);

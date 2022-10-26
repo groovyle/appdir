@@ -9,7 +9,8 @@ $append_breadcrumb = [
     'text'    => __('admin/apps.page_title.verifications'),
   ]
 ];
-$goto_version = $goto_version ?? false;
+$goto_item = $goto_item ?? false;
+$goto_flash = $goto_flash ?? false;
 $page_title = __('admin/apps.page_title.verifications');
 if(($count = $app->verifications->count()) > 0) {
   $page_title .= ' ('. $count .')';
@@ -63,6 +64,20 @@ jQuery(document).ready(function($) {
   $('[data-toggle="popover"]').popover({
     container: "body",
   });
+
+  @if($goto_item)
+  @if($goto_flash)
+  Helpers.scrollAndFlash(@json('.verif-item-'.$goto_item), {
+    animate: true,
+    offset: 30,
+  }, {});
+  @else
+  Helpers.scrollTo(@json('.verif-item-'.$goto_item), {
+    animate: true,
+    offset: 30,
+  });
+  @endif
+  @endif
 });
 </script>
 @endpush

@@ -329,6 +329,10 @@ class App extends Model
 		return $this->short_name ? $this->name .' ('.$this->short_name.')' : $this->name;
 	}
 
+	public function getCompactNameAttribute() {
+		return $this->short_name ?: $this->name;
+	}
+
 	public function getPublicNameAttribute() {
 		return $this->short_name ?: $this->name;
 	}

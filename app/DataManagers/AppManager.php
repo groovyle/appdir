@@ -1011,6 +1011,7 @@ class AppManager {
 					$query->whereNotNull('prodi.id');
 				} else {
 					// Only owned
+					$view_mode = 'owned';
 				}
 			});
 		});

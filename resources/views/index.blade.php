@@ -15,15 +15,19 @@ list($theme, $counter_theme) = theme_timely();
 	<div class="text-center">
 		<div class="text-r110">
 			<a href="{{ route('apps') }}" class="btn btn-outline-{{ $counter_theme }} btn-lg rounded-0 text-110">{{ __('frontend.navs.browse_apps') }} &raquo;</a>
-			<p class="mt-2 mb-0">
-				@if($total_apps > 0)
+			@if($total_apps > 0)
+			<p class="mt-2 mb-2">
 				@lang('frontend.splash.browse_through_x_amazing_apps', ['x' => $total_apps])
 				<br>
 				@lang('frontend.splash.looking_for_something_specific_x?', ['x' => route('apps', ['show_filter' => 1])])
-				@else
-				@lang('frontend.splash.there_are_no_apps_yet')
-				@endif
+				<br>
+				<span class="text-085 d-inline-block mt-2">@lang('frontend.splash.or_look_at_site_wide_stats', ['x' => route('stats.apps')]).</span>
 			</p>
+			@else
+			<p class="mt-2 mb-0">
+				@lang('frontend.splash.there_are_no_apps_yet')
+			</p>
+			@endif
 		</div>
 
 		<hr class="my-4">

@@ -38,6 +38,13 @@ $menu_list = [
 		'extra'	=> '<span class="badge badge-danger ml-2 text-090">'.badge_number($app_reports_count).'</span>',
 		'check'	=> Gate::allows('view-any', App\Models\AppVerdict::class),
 	],
+	'app_activities'	=> [
+		'text'	=> __('admin/menus.app_activities'),
+		'icon'	=> 'fas fa-chart-line',
+		'route'	=> 'admin.app_activities.index',
+		'match'	=> ['admin.app_activities.index', true],
+		'check'	=> Gate::allows('view-any', App\Models\App::class),
+	],
 
 	'app_categories'	=> [
 		'text'	=> __('admin/menus.app_categories'),
@@ -96,6 +103,14 @@ $menu_list = [
 		'match'	=> 'admin.log_actions.',
 		'check'	=> Gate::allows('view-any', App\Models\LogAction::class),
 	],
+
+	'stats_app_activities'	=> [
+		'text'	=> __('admin/menus.stats_app_activities'),
+		'icon'	=> 'fas fa-chart-line',
+		'route'	=> 'admin.stats.app_activities',
+		'match'	=> ['admin.stats.app_activities', true],
+		'check'	=> Gate::allows('view', App\Models\StatsAppActivities::class),
+	],
 ];
 
 // TODO: different menus based on role
@@ -107,6 +122,11 @@ $menus = [
 		'app_list',
 		'app_verif',
 		'app_report',
+		'app_activities',
+	],
+
+	'header:admin/menus.header_statistics' => [
+		'stats_app_activities',
 	],
 
 	'header:admin/menus.header_base_data' => [
@@ -114,10 +134,13 @@ $menus = [
 		'app_tags',
 	],
 
-	'header:admin/menus.header_system' => [
+	'header:admin/menus.header_users' => [
 		'prodi',
 		'users',
 		'user_roles',
+	],
+
+	'header:admin/menus.header_system' => [
 		'system_abilities',
 		'system_settings',
 		'log_actions',
@@ -129,7 +152,7 @@ $generate_menus = function($menus) use(&$generate_menus, $menu_list) {
 		$menu_is_active = function($item) {
 			return !isset($item['match']) ? false : ( is_bool($item['match'])
 				? $item['match']
-				: active_menu_by_route((array) $item['match']) )
+				: call_user_func_array('active_menu_by_route', (array) $item['match']) )
 			;
 		};
 		$has_subs = is_array($value);

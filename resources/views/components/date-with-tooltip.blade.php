@@ -1,5 +1,8 @@
 @if(isset($date) || isset($text))
 <?php
+if(isset($date) && is_string($date))
+	$date = \Carbon\Carbon::parse($date);
+
 $format = $format ?? 'j F Y, H:i';
 $tip_classes = $tip_classes ?? '';
 if(isset($date) && !isset($text)) {

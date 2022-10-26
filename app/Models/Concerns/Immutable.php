@@ -19,6 +19,10 @@ trait Immutable {
 	{
 		// Boot
 
+		static::registerModelEvent('saving', function($model) {
+			return false;
+		});
+
 		static::registerModelEvent('updating', function($model) {
 			return false;
 		});
@@ -30,6 +34,10 @@ trait Immutable {
 		static::registerModelEvent('restoring', function($model) {
 			return false;
 		});
+	}
+
+	public function save(array $options = []) {
+		return false;
 	}
 
 	public function update(array $attributes = [], array $options = []) {

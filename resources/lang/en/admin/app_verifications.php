@@ -47,6 +47,7 @@ return [
 
 'new_item_submitted'	=> 'New item submitted',
 'item_edited'			=> 'Item edited',
+'item_deleted'			=> 'Item deleted',
 'pending_changes_applied'	=> 'Pending data applied',
 'item_published'		=> 'Item published',
 'changes_verified'		=> 'Changes verified',
