@@ -1657,7 +1657,10 @@ class AppController extends Controller
 		// Prepare items
 		$list->getCollection()->transform(function($item) {
 			$item->view_url = null;
-			if(Gate::allows('view-verifications', $item->app))
+			if($item->concern == 'edit'
+				&& Gate::allows('view-changelog', $item->app))
+				$item->view_url = route('admin.apps.changes', ['app' => $item->app_id, 'go_version' => optional($item->changelogs()->first())->version, 'go_flash' => 1]);
+			elseif(Gate::allows('view-verifications', $item->app))
 				$item->view_url = route('admin.apps.verifications', ['app' => $item->app_id, 'go_item' => $item->id, 'go_flash' => 1]);
 			elseif(Gate::allows('view', $item->app))
 				$item->view_url = route('admin.apps.show', ['app' => $item->app_id]);

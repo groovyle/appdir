@@ -11,6 +11,7 @@ return [
 
 'filters'				=> 'Filters',
 'search'				=> 'Search',
+'apply'					=> 'Apply',
 'reset'					=> 'Reset',
 'keyword'				=> 'Keyword',
 'all'					=> 'All',

@@ -40,7 +40,7 @@ $menu_list = [
 	],
 	'app_activities'	=> [
 		'text'	=> __('admin/menus.app_activities'),
-		'icon'	=> 'fas fa-chart-line',
+		'icon'	=> 'fas fa-tasks',
 		'route'	=> 'admin.app_activities.index',
 		'match'	=> ['admin.app_activities.index', true],
 		'check'	=> Gate::allows('view-any', App\Models\App::class),
@@ -120,9 +120,9 @@ $menus = [
 
 	'header:admin/menus.header_app_management' => [
 		'app_list',
+		'app_activities',
 		'app_verif',
 		'app_report',
-		'app_activities',
 	],
 
 	'header:admin/menus.header_statistics' => [

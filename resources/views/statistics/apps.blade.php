@@ -35,7 +35,7 @@ $menu_active_stats = true;
 									<canvas id="app-stats-by-cat-pie" width="600"></canvas>
 								</div>
 							</div>
-							<div>
+							<div class="mt-4">
 								<h5 class="text-center mb-2">{{ __('frontend.statistics.apps.list_of_categories') }} ({{ count($categories) }})</h5>
 								<div class="table-responsive">
 									<table class="table table-hover border w-fit-content mx-auto lh-120">
@@ -67,12 +67,12 @@ $menu_active_stats = true;
 							<h4 class="m-4">{{ __('frontend.statistics.apps.no_tags_yet') }}</h4>
 							@else
 							<h3 class="text-center mb-2">{{ __('frontend.statistics.apps.apps_by_tag') }}</h3>
-							<div class="mb-2">
+							<div class="mb-4">
 								<div class="maxw-100 position-relative mx-auto" style="height: 300px;">
 									<canvas id="app-stats-by-tag-pie" width="600"></canvas>
 								</div>
 							</div>
-							<div>
+							<div class="mt-4">
 								<h5 class="text-center mb-2">{{ __('frontend.statistics.apps.list_of_tags') }} ({{ count($tags) }})</h5>
 								<div class="table-responsive">
 									<table class="table table-hover border w-fit-content mx-auto lh-120">
@@ -145,7 +145,7 @@ jQuery(document).ready(function($) {
 		data: {
 			datasets: [{
 				data: catPieData,
-				backgroundColor: Helpers.chartColors(catPieData.length),
+				// backgroundColor: Helpers.getChartColors("so-luca-mastro", catPieData.length),
 			}],
 			labels: catPieLabels,
 			percentages: catPiePercents,
@@ -164,8 +164,13 @@ jQuery(document).ready(function($) {
 					},
 				},
 			},
-			legend	: {
-				enabled: true,
+			legend: {
+				display: true,
+			},
+			plugins: {
+				colorschemes: {
+					scheme: "brewer.SetOne9",
+				}
 			},
 		},
 	});
@@ -181,7 +186,7 @@ jQuery(document).ready(function($) {
 		data: {
 			datasets: [{
 				data: tagPieData,
-				backgroundColor: Helpers.chartColors(tagPieData.length),
+				// backgroundColor: Helpers.getChartColors("so-luca-mastro", catPieData.length),
 			}],
 			labels: tagPieLabels,
 			percentages: tagPiePercents,
@@ -200,8 +205,13 @@ jQuery(document).ready(function($) {
 					},
 				},
 			},
-			legend	: {
-				enabled: true,
+			legend: {
+				display: true,
+			},
+			plugins: {
+				colorschemes: {
+					scheme: "brewer.DarkTwo8",
+				}
 			},
 		},
 	});

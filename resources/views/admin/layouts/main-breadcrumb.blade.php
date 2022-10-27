@@ -1,17 +1,18 @@
 <?php
-if(!isset($paths)) {
+$home_path = [
+	'text'		=> sprintf('<span class="fas fa-home" title="%s"></span>', __('admin/common.home_title')),
+	'url'			=> route('admin.home'),
+	'active'	=> false,
+];
+if(!isset($breadcrumb_paths)) {
 	// Dynamically determine breadcrumb based on route path if param is not passed in.
 	$paths = array();
 	$route = Route::currentRouteName();
 	if($route) {
 		$route = explode('.', $route);
 		if($route[0] === 'admin') {
-			$paths[] = array(
-				// 'text'    => __('common.home.page-title'),
-				'text'		=> sprintf('<span class="fas fa-home" title="%s"></span>', __('admin/common.home_title')),
-				'url'			=> route('admin.home'),
-				'active'	=> count($route) == 1,
-			);
+			$home_path['active'] = count($route) == 1;
+			$paths[] = $home_path;
 
 			$parts = array_slice($route, 1);
 			$lastkey = array_key_last($parts);
@@ -63,6 +64,8 @@ if(!isset($paths)) {
 			}
 		}
 	}
+} else {
+	$paths = array_merge([$home_path], $breadcrumb_paths);
 }
 ?>
 @if (!empty($paths))
@@ -70,8 +73,8 @@ if(!isset($paths)) {
 @foreach ($paths as $path)
 	<?php
 	$contents = $path['text'];
-	$classes = $path['active'] ? 'active' : '';
-	if($path['url']) {
+	$classes = ($path['active'] ?? false) ? 'active' : '';
+	if(!empty($path['url'])) {
 		$contents = sprintf('<a href="%s">%s</a>', $path['url'], $contents);
 	}
 	?>

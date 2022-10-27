@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Carbon;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,7 +26,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         // Locale
-        setlocale(LC_TIME, config('locale'), config('fallback_locale'));
+        setlocale(LC_TIME, config('app.locale'), config('app.fallback_locale'));
+        Carbon::setLocale(config('app.locale'));
+        Carbon::setFallbackLocale(config('app.fallback_locale'));
 
         //
         Blade::directive('tabtitle', function($title = '') {
