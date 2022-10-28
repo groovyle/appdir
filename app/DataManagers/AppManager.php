@@ -988,10 +988,30 @@ class AppManager {
 
 	}
 
+	public static function getViewMode($user = null) {
+		if(!$user)
+			$user = Auth::user();
+
+		$view_mode = '';
+		if($user->can('view-all', App::class)) {
+			// No scope filter, enable all
+			$view_mode = 'all';
+		} elseif($user->can('view-any-in-prodi', App::class)) {
+			// Only ones in the same prodi
+			$view_mode = 'prodi';
+		} else {
+			// Only owned
+			$view_mode = 'owned';
+		}
+
+		return $view_mode;
+	}
+
 	public static function scopeListQuery($query, &$view_mode, $owned = true, $user = null) {
 		if(!$user)
 			$user = Auth::user();
 
+		$view_mode = static::getViewMode($user);
 		$query->where(function($query) use($user, &$view_mode, $owned) {
 			if($owned) {
 				// Always able to view owned items
@@ -1000,18 +1020,15 @@ class AppManager {
 
 			// More scope filters
 			$query->orWhere(function($query) use($user, &$view_mode, $owned) {
-				if($user->can('view-all', App::class)) {
+				if($view_mode == 'all') {
 					// No scope filter, enable all
-					$view_mode = 'all';
 					$query->whereRaw('1');
-				} elseif($user->can('view-any-in-prodi', App::class)) {
+				} elseif($view_mode == 'prodi') {
 					// Only ones in the same prodi
-					$view_mode = 'prodi';
 					$query->where('prodi.id', $user->prodi_id);
 					$query->whereNotNull('prodi.id');
 				} else {
 					// Only owned
-					$view_mode = 'owned';
 				}
 			});
 		});

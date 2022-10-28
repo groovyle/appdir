@@ -20,7 +20,7 @@ return [
 	'prodi'					=> 'Study Programs',
 	'users'					=> 'Users',
 	'user_roles'			=> 'User Roles',
-	'system_abilities'		=> 'Permissions',
+	'system_abilities'		=> 'Abilities',
 
 	'header_system'			=> 'Internal System',
 	'system_settings'		=> 'System Settings',

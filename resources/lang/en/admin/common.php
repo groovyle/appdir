@@ -35,6 +35,7 @@ return [
 'new'					=> 'new',
 'edit'					=> 'edit',
 'you'					=> 'you',
+'no_data_available'		=> 'No data available',
 
 'fields'	=> [
 	'id'				=> 'ID',

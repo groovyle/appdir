@@ -142,12 +142,16 @@ if(!$is_edit) {
               <label class="list-group-item list-group-item-action role-item cursor-pointer py-1 pr-2 pl-3 m-0" for="input-role-check-{{ $role->id }}">
                 <input type="hidden" name="roles[{{ $role->id }}][id]" class="input-role-id" value="{{ $role->id }}" id="input-role-id-{{ $role->id }}">
                 <div class="form-check">
-                  <input type="checkbox" name="roles[{{ $role->id }}][check]" class="form-check-input input-role-check" value="{{ $role->id }}" id="input-role-check-{{ $role->id }}" {!! old_checked('roles.'.$role->id.'.check', $abl->roles_ids, $role->id) !!}>
-                  <select name="roles[{{ $role->id }}][mode]" class="form-control form-control-xs d-inline-block w-auto input-role-mode mr-1">
-                    <option value="allow" {!! old_selected('roles.'.$role->id.'.mode', $abl->roles_modes[$role->id] ?? null, 'allow') !!}>{{ __('admin/abilities.details.mode_allow') }}</option>
-                    <option value="forbid" {!! old_selected('roles.'.$role->id.'.mode', $abl->roles_modes[$role->id] ?? null, 'forbid') !!}>{{ __('admin/abilities.details.mode_forbid') }}</option>
-                  </select>
-                  <span class="d-inline-block form-check-label input-role-text text-unbold">{{ $role->title }} ({{ $role->name }})</span>
+                  <span class="icon-text-pair">
+                    <span class="icon d-inline-block">
+                      <input type="checkbox" name="roles[{{ $role->id }}][check]" class="form-check-input input-role-check" value="{{ $role->id }}" id="input-role-check-{{ $role->id }}" {!! old_checked('roles.'.$role->id.'.check', $abl->roles_ids, $role->id) !!}>
+                      <select name="roles[{{ $role->id }}][mode]" class="form-control form-control-xs d-inline-block w-auto input-role-mode mr-1">
+                        <option value="allow" {!! old_selected('roles.'.$role->id.'.mode', $abl->roles_modes[$role->id] ?? null, 'allow') !!}>{{ __('admin/abilities.details.mode_allow') }}</option>
+                        <option value="forbid" {!! old_selected('roles.'.$role->id.'.mode', $abl->roles_modes[$role->id] ?? null, 'forbid') !!}>{{ __('admin/abilities.details.mode_forbid') }}</option>
+                      </select>
+                    </span>
+                    <span class="d-inline-block form-check-label input-role-text text-unbold">{{ $role->title }} ({{ $role->name }})</span>
+                  </span>
                 </div>
               </label>
               @endforeach

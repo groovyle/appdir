@@ -32,15 +32,15 @@
 					@endif
 				</h3>
 
+				@if($user->roles_text)
+				<p class="text-secondary text-center mb-1">{{ $user->roles_text }}</p>
+				@endif
+
 				@if(!$user->is_system && $user->prodi)
 				<p class="text-center mb-1">{{ $user->prodi->complete_name }}</p>
 				@endif
 
-				@if($user->roles_text)
-				<p class="text-secondary text-center">{{ $user->roles_text }}</p>
-				@endif
-
-				<a href="{{ route('user.profile', ['user' => $user->id]) }}" class="btn btn-primary btn-block btn-sm" target="_blank">{{ __('admin/profile.see_public_profile') }}</a>
+				<a href="{{ route('user.profile', ['user' => $user->id]) }}" class="btn btn-primary btn-block btn-sm mt-4" target="_blank">{{ __('admin/profile.see_public_profile') }}</a>
 			</div>
 			<!-- /.card-body -->
 		</div>

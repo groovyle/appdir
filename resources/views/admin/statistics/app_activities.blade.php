@@ -4,6 +4,9 @@ $breadcrumb_paths = [
 		'text'	=> __('admin/stats.app_activities.page_title'),
 	],
 ];
+
+$edits_total = $edits->sum('total');
+$reports_total = $reports->sum('total');
 ?>
 @extends('admin.layouts.main')
 
@@ -82,6 +85,9 @@ $breadcrumb_paths = [
 			</div>
 		</div>
 		<div class="card-body">
+			@if($edits_total == 0)
+			<h4 class="text-center">&ndash; {{ __('admin/common.no_data_available') }} &ndash;</h4>
+			@else
 			<div class="row">
 				<div class="col-12 col-lg-4">
 					<h5 class="text-center">{{ __('admin/stats.app_activities.number_of_edits') }}</h5>
@@ -96,6 +102,7 @@ $breadcrumb_paths = [
 					</div>
 				</div>
 			</div>
+			@endif
 		</div>
 	</div>
 
@@ -108,6 +115,9 @@ $breadcrumb_paths = [
 			</div>
 		</div>
 		<div class="card-body">
+			@if($reports_total == 0)
+			<h4 class="text-center">&ndash; {{ __('admin/common.no_data_available') }} &ndash;</h4>
+			@else
 			<div class="row">
 				<div class="col-12">
 					<h5 class="text-center">{{ __('admin/stats.app_activities.number_of_reported_apps') }}</h5>
@@ -130,6 +140,7 @@ $breadcrumb_paths = [
 					</div>
 				</div>
 			</div>
+			@endif
 		</div>
 	</div>
 
@@ -160,7 +171,7 @@ jQuery(document).ready(function($) {
 		return arr.reduce((a, b) => Math.max(a, b), -Infinity);
 	}
 	var graceMaxValue = function(value) {
-		return value + Math.pow(10, Math.floor(Math.log10(value)));
+		return value == 0 ? undefined : value + Math.pow(10, Math.floor(Math.log10(value)));
 	}
 
 	<?php
@@ -380,6 +391,7 @@ jQuery(document).ready(function($) {
 		},
 	});
 
+	@if($reports_total > 0)
 	<?php
 	$reports_data = [];
 	foreach($reports as $i => $rp) {
@@ -449,7 +461,7 @@ jQuery(document).ready(function($) {
 	foreach($report_categories as $rpc) {
 		$report_categories_pie_data[] = $rpc->total;
 		$report_categories_pie_labels[] = $rpc->name;
-		$report_categories_pie_percentages[] = round($rpc->total / $report_categories_pie_total * 100, 1);
+		$report_categories_pie_percentages[] = $report_categories_pie_total > 0 ? round($rpc->total / $report_categories_pie_total * 100, 1) : 0;
 	}
 	?>
 	var $reportCategoriesChart = $("#report-categories-chart");
@@ -495,7 +507,7 @@ jQuery(document).ready(function($) {
 	foreach($report_statuses as $rpc) {
 		$report_statuses_pie_data[] = $rpc->total;
 		$report_statuses_pie_labels[] = $rpc->name;
-		$report_statuses_pie_percentages[] = round($rpc->total / $report_statuses_pie_total * 100, 1);
+		$report_statuses_pie_percentages[] = $report_statuses_pie_total > 0 ? round($rpc->total / $report_statuses_pie_total * 100, 1) : 0;
 	}
 	?>
 	var $reportStatusesChart = $("#report-statuses-chart");
@@ -528,6 +540,7 @@ jQuery(document).ready(function($) {
 			},
 		},
 	});
+	@endif
 
 
 });

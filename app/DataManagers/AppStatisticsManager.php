@@ -55,6 +55,14 @@ class AppStatisticsManager {
 		}
 	}
 
+	public static function applyAccessScope($query) {
+		$query->leftJoin('users as o', 'a.owner_id', '=', 'o.id');
+		$query->leftJoin('ref_prodi as prodi', 'o.prodi_id', '=', 'prodi.id');
+
+		$view_mode = '';
+		AppManager::scopeListQuery($query, $view_mode);
+	}
+
 	public static function generatePeriods($items, $filters, $sub_items = false) {
 		$filters = static::parseFilters($filters);
 
@@ -125,6 +133,7 @@ class AppStatisticsManager {
 		$query->from('apps as a');
 
 		static::applyDateFilters($query, $filters, 'a.created_at');
+		static::applyAccessScope($query);
 
 		$query->selectRaw('count(distinct a.id) as `total`');
 
@@ -156,6 +165,7 @@ class AppStatisticsManager {
 		$query->whereNull('av2.id'); // where no prev approved verifs (i.e gets only the first approved verif)
 
 		static::applyDateFilters($query, $filters, 'av.updated_at');
+		static::applyAccessScope($query);
 
 		$query->selectRaw('count(distinct if(av.id is not null, a.id, null)) as `total`');
 
@@ -174,6 +184,7 @@ class AppStatisticsManager {
 
 		$query = DB::query();
 		$query->from('app_changelogs as ac');
+		$query->join('apps as a', 'ac.app_id', '=', 'a.id');
 		$query->leftJoin('app_changelogs as ac2', function($query) {
 			$query->on('ac.app_id', '=', 'ac2.app_id');
 			$query->on('ac2.id', '<', 'ac.id');
@@ -181,6 +192,7 @@ class AppStatisticsManager {
 		$query->whereNotNull('ac2.id'); // where not the first version of every app
 
 		static::applyDateFilters($query, $filters, 'ac.created_at');
+		static::applyAccessScope($query);
 
 		$query->selectRaw('count(distinct ac.id) as `total`');
 
@@ -199,6 +211,7 @@ class AppStatisticsManager {
 
 		$query = DB::query();
 		$query->from('app_changelogs as ac');
+		$query->join('apps as a', 'ac.app_id', '=', 'a.id');
 		$query->leftJoin('app_changelogs as ac2', function($query) {
 			$query->on('ac.app_id', '=', 'ac2.app_id');
 			$query->on('ac2.id', '<', 'ac.id');
@@ -206,6 +219,7 @@ class AppStatisticsManager {
 		$query->whereNotNull('ac2.id'); // where not the first version of every app
 
 		static::applyDateFilters($query, $filters, 'ac.updated_at');
+		static::applyAccessScope($query);
 
 		$query->selectRaw('count(distinct if(ac.status in(?, ?), ac.id, null)) as `total_approved`', ['approved', 'committed']);
 		$query->selectRaw('count(distinct if(ac.status = ?, ac.id, null)) as `total_rejected`', ['rejected']);
@@ -229,6 +243,7 @@ class AppStatisticsManager {
 		$query->join('app_reports as ar', 'a.id', '=', 'ar.app_id');
 
 		static::applyDateFilters($query, $filters, 'ar.created_at');
+		static::applyAccessScope($query);
 
 		$query->selectRaw('count(distinct ar.id) as `total`');
 		$query->selectRaw('count(distinct a.id) as `total_apps`');
@@ -248,12 +263,14 @@ class AppStatisticsManager {
 
 		$query = DB::query();
 		$query->from('app_reports as ar');
+		$query->join('apps as a', 'ar.app_id', '=', 'a.id');
 		$query->join('app_report_categories as arc', 'ar.id', '=', 'arc.report_id');
 		$query->join('ref_app_report_categories as rarc', 'arc.category_id', '=', 'rarc.id');
 
 		$query->select('rarc.*');
 
 		static::applyDateFilters($query, $filters, 'ar.created_at');
+		static::applyAccessScope($query);
 
 		$query->selectRaw('count(distinct ar.id) as `total`');
 
@@ -290,9 +307,11 @@ class AppStatisticsManager {
 
 		$query = DB::query();
 		$query->from('app_reports as ar');
+		$query->join('apps as a', 'ar.app_id', '=', 'a.id');
 		$query->leftJoin('app_verdicts as avd', 'ar.id', '=', 'avd.id');
 
 		static::applyDateFilters($query, $filters, 'ar.created_at');
+		static::applyAccessScope($query);
 
 		$query->selectRaw('count(distinct if(ar.status = ?, ar.id, null)) as `total_unresolved`', ['submitted']);
 		$query->selectRaw('count(distinct if(ar.status = ?, ar.id, null)) as `total_valid`', ['validated']);

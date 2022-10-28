@@ -43,8 +43,11 @@ $user = Auth::user();
 								@if($user->email)
 								<small class="text-080 text-light-gray">{{ $user->email }}</small>
 								@endif
+								@if($user->roles_text)
+								<span class="text-090 text-light-gray d-block mt-1">{{ $user->roles_text }}</span>
+								@endif
 								@if($user->prodi)
-								<span class="text-100 mt-1">{{ $user->prodi->compact_name }}</span>
+								<span class="text-100 d-block mt-1">{{ $user->prodi->compact_name }}</span>
 								@endif
 							@else
 							@endif

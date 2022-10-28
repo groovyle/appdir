@@ -76,6 +76,9 @@ class BouncerSeeder extends Seeder
 		Bouncer::allow('admin')->toManage(\App\Models\AppReport::class);
 		Bouncer::allow('admin')->toManage(\App\Models\AppVerdict::class);
 
+		// Stats
+		Bouncer::allow('admin')->to('view', \App\Models\StatsAppActivities::class);
+
 		// Admins shouldn't be able to force delete SoftDeletes
 		Bouncer::forbid('admin')->to('force-delete', '*');
 
