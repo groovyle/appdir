@@ -108,8 +108,7 @@
 	}
 }
 
-.login-form-control {
-	text-align: center;
+.login-form-control, .login-form-select {
 	width: 100%;
 	height: 2.5rem;
 	min-width: 6rem;
@@ -119,7 +118,6 @@
 	font-weight: 400;
 	line-height: 1.5;
 	vertical-align: middle;
-	background: rgba(192, 192, 192, 0.15);
 	color: black;
 	// border-width: 0 0 0.25rem;
 	// border-style: solid;
@@ -128,13 +126,21 @@
 	outline: none;
 	border-radius: 0;
 	transition: 0.15s all;
-	&:hover, &:focus, &:active {
-		background: rgba(192, 192, 192, 0.4);
-		// border-color: $gray-700;
-		color: #000;
-	}
+
 	&:focus, &:active {
 		box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.2);
+		border-color: $gray-500;
+	}
+}
+.login-form-control {
+	&.grayed {
+		background-color: rgba(192, 192, 192, 0.15);
+	}
+
+	&:hover, &:focus, &:active {
+		// border-color: $gray-700;
+		color: #000;
+		background-color: rgba(192, 192, 192, 0.3);
 	}
 }
 

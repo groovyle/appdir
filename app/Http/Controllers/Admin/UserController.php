@@ -36,32 +36,6 @@ class UserController extends Controller
 		$this->authorizeResource(User::class, 'user');
 	}
 
-	public static function scopeListQuery($query, &$view_mode, $user = null) {
-		if(!$user)
-			$user = Auth::user();
-
-		// Scope filters
-		$view_mode = UserManager::userViewMode($user);
-		$query->where(function($query) use($user, &$view_mode) {
-			if($view_mode == 'all') {
-				// No scope filter, enable all
-				$query->whereRaw('1');
-			} elseif($view_mode == 'prodi') {
-				// Only ones in the same prodi
-				$query->whereHas('prodi', function($query) use($user) {
-					$query->where('id', $user->prodi_id);
-					$query->whereNotNull('id');
-				});
-			} else {
-				// None
-			}
-		});
-
-		if($view_mode == 'none') {
-			$query->whereRaw('0 = 1');
-		}
-	}
-
 	/**
 	 * Display a listing of the resource.
 	 *
@@ -83,7 +57,8 @@ class UserController extends Controller
 		$query->with('roles');
 
 		$view_mode = '';
-		static::scopeListQuery($query, $view_mode);
+		UserManager::scopeListQuery($query, $view_mode);
+		$total_scoped = $query->count();
 
 		if($keyword = trim($opt_filters['keyword'])) {
 			$str = escape_mysql_like_str($keyword);
@@ -166,7 +141,7 @@ class UserController extends Controller
 		}
 
 		$data['list']			= $list;
-		$data['total']			= User::withoutTrashed()->regular()->count();
+		$data['total']			= $total_scoped;
 		$data['filters']		= $opt_filters;
 		$data['filter_count']	= $filter_count;
 		$data['goto_flash']		= $goto_flash;

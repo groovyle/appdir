@@ -61,6 +61,18 @@ class UserManager {
 		return Bouncer::is($user)->a(static::$role_order[0]);
 	}
 
+	public static function userHighestRole(User $user = null, $as_model = false) {
+		if(!$user)
+			$user = Auth::user();
+
+		$sorted = static::getSortedRoles($user->roles);
+		$role = null;
+		if(isset($sorted[0]))
+			return $as_model ? $sorted[0] : $sorted[0]->name;
+
+		return null;
+	}
+
 	public static function roleIsHighestLevel($role = null) {
 		if(is_numeric($role))
 			$role = Role::find($role);
@@ -115,6 +127,32 @@ class UserManager {
 
 	public static function userRoleCompare(User $a, User $b) {
 		return static::userRoleLevel($a) <=> static::userRoleLevel($b);
+	}
+
+	public static function scopeListQuery($query, &$view_mode, $user = null) {
+		if(!$user)
+			$user = Auth::user();
+
+		// Scope filters
+		$view_mode = static::userViewMode($user);
+		$query->where(function($query) use($user, &$view_mode) {
+			if($view_mode == 'all') {
+				// No scope filter, enable all
+				$query->whereRaw('1');
+			} elseif($view_mode == 'prodi') {
+				// Only ones in the same prodi
+				$query->whereHas('prodi', function($query) use($user) {
+					$query->where('id', $user->prodi_id);
+					$query->whereNotNull('id');
+				});
+			} else {
+				// None
+			}
+		});
+
+		if($view_mode == 'none') {
+			$query->whereRaw('0 = 1');
+		}
 	}
 
 }

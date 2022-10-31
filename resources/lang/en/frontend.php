@@ -152,18 +152,8 @@ return [
 'users'	=> [
 	'this_users_apps_x_total'		=> 'This user\'s apps (:x total)',
 	'this_user_has_x_apps'			=> 'This user has :x apps',
-	'login_btn'						=> 'Login',
 	'this_is_your_public_profile'	=> 'This is your public profile',
 	'this_user_is_blocked'			=> 'This user was blocked. Only administrators can view this page.',
-
-	'fields'	=> [
-		'username'				=> 'Username',
-		'email'					=> 'Email Address',
-		'password'				=> 'Password',
-		'remember_login'		=> 'Remember my login',
-		'forgot_your_password'	=> 'Forgot your password?',
-		'register_an_account'	=> 'Register an account',
-	],
 ],
 
 'statistics'	=> [
@@ -195,10 +185,34 @@ return [
 ],
 
 'auth'	=> [
+	'login_header'				=> 'Login to your account',
+	'login_btn'					=> 'Login',
+	'register_header'			=> 'Registration Form',
+	'register_btn'				=> 'Register',
 	'your_login_failed'			=> 'Your login failed',
 	'error_accessing_account'	=> 'Error accessing your account',
 	'message_error_login'		=> 'An error occurred while trying to get you logged in.',
 	'back_to_login_page'		=> 'Back to login page',
+	'back_to_home'				=> 'Back to site homepage',
+
+	'fields'	=> [
+		'name'					=> 'Name',
+		'username'				=> 'Username',
+		'email'					=> 'Email Address',
+		'prodi'					=> 'Study Program',
+		'choose_prodi'			=> 'Choose one study program',
+		'password'				=> 'Password',
+		'password_confirm'		=> 'Confirm Password',
+		'remember_login'		=> 'Remember my login',
+		'forgot_your_password'	=> 'Forgot your password?',
+		'register_an_account'	=> 'Register an account',
+	],
+
+	'messages'	=> [
+		'registration_successful'		=> 'Your registration is successful!',
+		'registration_successful_sub'	=> 'You are now registered with an account. Enjoy :app!',
+		'registration_failed'			=> 'Error occurred while trying to register your account.',
+	],
 ],
 
 ];

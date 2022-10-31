@@ -74,7 +74,7 @@ $scroll_content = !isset($goto_item) && ($show_filters || request()->has('page')
     @if($list->isEmpty())
     <div class="card-body">
       @if($total_scoped == 0)
-      <h4 class="text-left">&ndash; {{ __('admin/apps.no_app_submissions_yet') }} &ndash;</h4>
+      <h4 class="text-left">&ndash; {{ __('admin/apps.no_app_activities_yet') }} &ndash;</h4>
       @else
       <h5 class="text-left">&ndash; {{ __('admin/apps.no_apps_matches') }} &ndash;</h5>
       @endif

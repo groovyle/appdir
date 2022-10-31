@@ -37,6 +37,9 @@ class AppStatisticsManager {
 	}
 
 	public static function applyDateFilters($query, $filters, $column) {
+		if(isset($filters['_no_dates']) && $filters['_no_dates'])
+			return;
+
 		if(!empty($filters['date_start']))
 			$query->where($column, '>=', $filters['date_start']);
 		if(!empty($filters['date_end']))
@@ -65,6 +68,8 @@ class AppStatisticsManager {
 
 	public static function generatePeriods($items, $filters, $sub_items = false) {
 		$filters = static::parseFilters($filters);
+		if(isset($filters['_no_dates']) && $filters['_no_dates'])
+			return $items;
 
 		// Generate each group even though it may be empty, so that listings
 		// will always show sequential groups instead of being patchy.
@@ -126,7 +131,7 @@ class AppStatisticsManager {
 		return $groups;
 	}
 
-	public static function newApps($filters = [], $query_only = false) {
+	public static function newApps($filters = [], $query_only = false, $query_callback = null) {
 		$filters = static::parseFilters($filters);
 
 		$query = DB::query();
@@ -134,6 +139,10 @@ class AppStatisticsManager {
 
 		static::applyDateFilters($query, $filters, 'a.created_at');
 		static::applyAccessScope($query);
+
+		if(is_callable($query_callback)) {
+			$query_callback($query);
+		}
 
 		$query->selectRaw('count(distinct a.id) as `total`');
 
@@ -147,7 +156,7 @@ class AppStatisticsManager {
 		return $items;
 	}
 
-	public static function verifiedApps($filters = [], $query_only = false) {
+	public static function verifiedApps($filters = [], $query_only = false, $query_callback = null) {
 		$filters = static::parseFilters($filters);
 
 		$query = DB::query();
@@ -167,6 +176,10 @@ class AppStatisticsManager {
 		static::applyDateFilters($query, $filters, 'av.updated_at');
 		static::applyAccessScope($query);
 
+		if(is_callable($query_callback)) {
+			$query_callback($query);
+		}
+
 		$query->selectRaw('count(distinct if(av.id is not null, a.id, null)) as `total`');
 
 		if($query_only) {
@@ -179,7 +192,33 @@ class AppStatisticsManager {
 		return $items;
 	}
 
-	public static function edits($filters = [], $query_only = false) {
+	public static function changes($filters = [], $query_only = false, $query_callback = null) {
+		$filters = static::parseFilters($filters);
+
+		$query = DB::query();
+		$query->from('app_changelogs as ac');
+		$query->join('apps as a', 'ac.app_id', '=', 'a.id');
+
+		static::applyDateFilters($query, $filters, 'ac.created_at');
+		static::applyAccessScope($query);
+
+		if(is_callable($query_callback)) {
+			$query_callback($query);
+		}
+
+		$query->selectRaw('count(distinct ac.id) as `total`');
+
+		if($query_only) {
+			return $query;
+		}
+
+		$items = $query->get();
+		$items = static::generatePeriods($items, $filters);
+
+		return $items;
+	}
+
+	public static function edits($filters = [], $query_only = false, $query_callback = null) {
 		$filters = static::parseFilters($filters);
 
 		$query = DB::query();
@@ -194,6 +233,10 @@ class AppStatisticsManager {
 		static::applyDateFilters($query, $filters, 'ac.created_at');
 		static::applyAccessScope($query);
 
+		if(is_callable($query_callback)) {
+			$query_callback($query);
+		}
+
 		$query->selectRaw('count(distinct ac.id) as `total`');
 
 		if($query_only) {
@@ -206,7 +249,7 @@ class AppStatisticsManager {
 		return $items;
 	}
 
-	public static function changesStatuses($filters = [], $query_only = false) {
+	public static function changesStatuses($filters = [], $query_only = false, $query_callback = null) {
 		$filters = static::parseFilters($filters);
 
 		$query = DB::query();
@@ -220,6 +263,10 @@ class AppStatisticsManager {
 
 		static::applyDateFilters($query, $filters, 'ac.updated_at');
 		static::applyAccessScope($query);
+
+		if(is_callable($query_callback)) {
+			$query_callback($query);
+		}
 
 		$query->selectRaw('count(distinct if(ac.status in(?, ?), ac.id, null)) as `total_approved`', ['approved', 'committed']);
 		$query->selectRaw('count(distinct if(ac.status = ?, ac.id, null)) as `total_rejected`', ['rejected']);
@@ -235,7 +282,7 @@ class AppStatisticsManager {
 		return $items;
 	}
 
-	public static function reports($filters = [], $query_only = false) {
+	public static function reports($filters = [], $query_only = false, $query_callback = null) {
 		$filters = static::parseFilters($filters);
 
 		$query = DB::query();
@@ -244,6 +291,10 @@ class AppStatisticsManager {
 
 		static::applyDateFilters($query, $filters, 'ar.created_at');
 		static::applyAccessScope($query);
+
+		if(is_callable($query_callback)) {
+			$query_callback($query);
+		}
 
 		$query->selectRaw('count(distinct ar.id) as `total`');
 		$query->selectRaw('count(distinct a.id) as `total_apps`');
@@ -258,7 +309,7 @@ class AppStatisticsManager {
 		return $items;
 	}
 
-	public static function reportCategories($filters = [], $query_only = false) {
+	public static function reportCategories($filters = [], $query_only = false, $query_callback = null) {
 		$filters = static::parseFilters($filters);
 
 		$query = DB::query();
@@ -271,6 +322,10 @@ class AppStatisticsManager {
 
 		static::applyDateFilters($query, $filters, 'ar.created_at');
 		static::applyAccessScope($query);
+
+		if(is_callable($query_callback)) {
+			$query_callback($query);
+		}
 
 		$query->selectRaw('count(distinct ar.id) as `total`');
 
@@ -302,7 +357,7 @@ class AppStatisticsManager {
 		return $categories;
 	}
 
-	public static function reportsStatuses($filters = [], $query_only = false) {
+	public static function reportsStatuses($filters = [], $query_only = false, $query_callback = null) {
 		$filters = static::parseFilters($filters);
 
 		$query = DB::query();
@@ -312,6 +367,10 @@ class AppStatisticsManager {
 
 		static::applyDateFilters($query, $filters, 'ar.created_at');
 		static::applyAccessScope($query);
+
+		if(is_callable($query_callback)) {
+			$query_callback($query);
+		}
 
 		$query->selectRaw('count(distinct if(ar.status = ?, ar.id, null)) as `total_unresolved`', ['submitted']);
 		$query->selectRaw('count(distinct if(ar.status = ?, ar.id, null)) as `total_valid`', ['validated']);

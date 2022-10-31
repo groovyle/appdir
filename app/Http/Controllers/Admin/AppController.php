@@ -1490,16 +1490,7 @@ class AppController extends Controller
 	}
 
 
-	public function activityLog(Request $request) {
-		$this->authorize('view-any', App::class);
-
-		//
-		$data = [];
-		$user = Auth::user();
-
-		$filters = get_filters(['keyword', 'owned']);
-		$opt_filters = optional($filters);
-		$filter_count = 0;
+	public static function activityLogQuery($filters = []) {
 
 		$query = (new AppVerification)->newQueryWithoutScopes()->withoutGlobalScopes();
 
@@ -1618,6 +1609,37 @@ class AppController extends Controller
 		$query->orderBy('av.updated_at', 'desc');
 		$query->orderBy('av.id', 'desc');
 
+		return compact('query', 'view_mode', 'total_all', 'total_scoped');
+	}
+
+	public static function activityLogPrepareItems($items) {
+		$items->transform(function($item) {
+			$item->view_url = null;
+			if($item->concern == 'edit'
+				&& Gate::allows('view-changelog', $item->app))
+				$item->view_url = route('admin.apps.changes', ['app' => $item->app_id, 'go_version' => optional($item->changelogs()->first())->version, 'go_flash' => 1]);
+			elseif(Gate::allows('view-verifications', $item->app))
+				$item->view_url = route('admin.apps.verifications', ['app' => $item->app_id, 'go_item' => $item->id, 'go_flash' => 1]);
+			elseif(Gate::allows('view', $item->app))
+				$item->view_url = route('admin.apps.show', ['app' => $item->app_id]);
+
+			return $item;
+		});
+	}
+
+	public function activityLog(Request $request) {
+		$this->authorize('view-any', App::class);
+
+		//
+		$data = [];
+		$user = Auth::user();
+
+		$filters = get_filters(['keyword', 'owned']);
+		$opt_filters = optional($filters);
+		$filter_count = 0;
+
+		extract(static::activityLogQuery($filters));
+
 		if($keyword = trim($opt_filters['keyword'])) {
 			$str = escape_mysql_like_str($keyword);
 			$like = '%'.$str.'%';
@@ -1655,18 +1677,7 @@ class AppController extends Controller
 		}
 
 		// Prepare items
-		$list->getCollection()->transform(function($item) {
-			$item->view_url = null;
-			if($item->concern == 'edit'
-				&& Gate::allows('view-changelog', $item->app))
-				$item->view_url = route('admin.apps.changes', ['app' => $item->app_id, 'go_version' => optional($item->changelogs()->first())->version, 'go_flash' => 1]);
-			elseif(Gate::allows('view-verifications', $item->app))
-				$item->view_url = route('admin.apps.verifications', ['app' => $item->app_id, 'go_item' => $item->id, 'go_flash' => 1]);
-			elseif(Gate::allows('view', $item->app))
-				$item->view_url = route('admin.apps.show', ['app' => $item->app_id]);
-
-			return $item;
-		});
+		static::activityLogPrepareItems($list->getCollection());
 
 		$data['view_mode'] = $view_mode;
 		$data['prodi'] = optional($user->prodi);

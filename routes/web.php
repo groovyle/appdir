@@ -16,6 +16,7 @@ Route::get('/', function () {
 });
 
 Auth::routes();
+Route::get('/register/done', 'Auth\\AfterRegisterController@afterRegister')->name('after_register');
 
 Route::get('/', 'HomeController@index')->name('index');
 Route::get('/home', 'HomeController@home')->name('home');
@@ -32,7 +33,7 @@ Route::get('/color_test', 'TestColorsController@index')->name('color_test');
 
 Route::redirect('/admin', URL::to('/admin/home'))->name('admin');
 Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
-	Route::get('home', 'HomeController@index')->name('home');
+	Route::get('home', 'DashboardController@index')->name('home');
 
 	Route::get('profile', 'UserProfileController@show')->name('profile.index');
 	Route::get('profile/edit', 'UserProfileController@editProfile')->name('profile.edit');

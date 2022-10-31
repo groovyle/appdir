@@ -77,6 +77,7 @@ return [
 'app_is_private'		=> 'App is private',
 'app_is_not_private'	=> 'App is not private',
 'activities'			=> 'Activities',
+'no_app_activities_yet'	=> 'No activities yet',
 
 'man_pan'		=> [
 	'title'					=> 'Management Panel',

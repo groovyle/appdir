@@ -5,9 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use App\User;
-use App\SystemUser;
-use App\Rules\FQDN;
-use App\SystemDataProviders\SystemDataBroker;
+use App\Models\Prodi;
+use App\Rules\ModelExists;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -43,11 +42,18 @@ class RegisterController extends Controller
 	 *
 	 * @return void
 	 */
-	public function __construct(SystemDataBroker $broker)
+	public function __construct()
 	{
 		$this->middleware('guest');
+	}
 
-		$this->broker = $broker;
+	public function showRegistrationForm()
+	{
+		$data = [
+			'prodis'	=> Prodi::all(),
+		];
+
+		return view('auth.register', $data);
 	}
 
 	/**
@@ -62,7 +68,7 @@ class RegisterController extends Controller
 			'name' => ['required', 'string', 'max:255'],
 			'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
 			'password' => ['required', 'string', 'min:5', 'max:50', 'confirmed'],
-			'domain' => ['required', new FQDN([], TRUE)],
+			'prodi' => ['required', new ModelExists(Prodi::class)],
 		]);
 	}
 
@@ -76,36 +82,20 @@ class RegisterController extends Controller
 	{
 		DB::beginTransaction();
 
-		$user = new User([
-			'name' => $data['name'],
-			'email' => $data['email'],
-			'password' => Hash::make($data['password']),
-		]);
-
-		$result = $user->save();
+		$result = true;
 		$message = '';
-
-		// Generate a random username
-		$prefix = random_string(4, 'abcdefghijklmnopqrstuvwxyz');
-		$username = $prefix . random_string(6, '1234567890');
-
-		if($result) {
-			$sysuser = new SystemUser([
-				'username'	=> $username,
-				'password'	=> encrypt($data['password']),
-				'domain'	=> $data['domain'],
-				'prefix'	=> $prefix,
+		try {
+			$user = new User([
+				'name' => $data['name'],
+				'email' => $data['email'],
+				'password' => Hash::make($data['password']),
+				'prodi_id' => $data['prodi'],
 			]);
-			$result = $user->system()->save($sysuser);
-		}
 
-		$result_remote = NULL;
-		if($result) {
-			$remote = $this->broker->createUser($data['domain'], $username, $data['password'], $data['name']);
-			$result = $result_remote = $remote['status'];
-			if(!$result) {
-				$message = $remote['message'];
-			}
+			$result = $user->save();
+		} catch(\Illuminate\Database\QueryException $e) {
+			$result = false;
+			$message = $e->getMessage();
 		}
 
 		if($result) {
@@ -113,26 +103,28 @@ class RegisterController extends Controller
 
 			// Pass a message...?
 			session()->flash('flash_message', [
-				'message'	=> __('admin.user.registration_successful'),
+				'message'	=> __('frontend.auth.messages.registration_successful'),
 				'type'		=> 'success'
 			]);
+
+			return $user;
 		} else {
 			DB::rollback();
 
 			// Pass a message...?
-			$message = $message ? $message : __('admin.user.registration_failed');
+			$message = $message ? $message : __('frontend.auth.messages.registration_failed');
 			session()->flash('flash_message', [
 				'message'	=> $message,
 				'type'		=> 'error'
 			]);
 
-			if($result_remote === TRUE) {
-				$this->broker->deleteUser($data['domain'], $username);
-			}
-
 			redirect()->back()->withInput()->withError($message);
+			return;
 		}
-
-		return $user;
 	}
+
+	protected function redirectTo() {
+		return route('after_register');
+	}
+
 }
