@@ -15,15 +15,15 @@ $limit = $limit ?? 10;
 		<h5 class="text-center">&ndash; {{ __('admin/apps.no_app_activities_yet') }} &ndash;</h5>
 	</div>
 	@else
-	<div class="card-body p-0">
+	<div class="card-body p-0 table-responsive">
 		<table class="table table-hover table-sm text-nowrap text-090">
 			<tbody>
 				@foreach($activities as $item)
 				<tr>
-					<td class="pl-2">
-						<span class="d-block text-truncate" title="{{ $item->app->name }}">{{ text_truncate($item->app->name, 30) }}</span>
+					<td class="pl-2" style="max-width: 100px;">
+						<span class="d-block text-truncate" title="{{ $item->app->name }}">{{ text_truncate($item->app->name, 50) }}</span>
 					</td>
-					<td style="width: 1%;">
+					<td class="text-truncate" style="width: 1%;">
 						@if($item->concern == 'new')
 							<span class="badge badge-soft cursor-default text-090 badge-info">{{ ucfirst(__('admin/common.new')) }}</span>
 						@else
@@ -34,8 +34,8 @@ $limit = $limit ?? 10;
 							@endif
 						@endif
 					</td>
-					<td style="width: 1%;">
-						<span class="text-090 text-secondary">@include('components.date-with-tooltip', ['date' => $item->action_at, 'reverse' => true])</span>
+					<td class="text-truncate" style="width: 1%;">
+						<span class="text-090 text-secondary">@include('components.date-with-tooltip', ['date' => $item->action_at, 'reverse' => true, 'short' => true])</span>
 					</td>
 					<td class="pr-2" style="width: 1%;">
 						@if($item->view_url)

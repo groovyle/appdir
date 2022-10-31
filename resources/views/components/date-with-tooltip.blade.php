@@ -3,13 +3,20 @@
 if(isset($date) && is_string($date))
 	$date = \Carbon\Carbon::parse($date);
 
-$format = $format ?? 'j F Y, H:i';
+$short = $short ?? false;
+if(!$short) {
+	$format = $format ?? 'j F Y, H:i';
+	$relative_fn = 'longRelativeToNowDiffForHumans';
+} else {
+	$format = $format ?? 'j M \'y G:i';
+	$relative_fn = 'shortRelativeToNowDiffForHumans';
+}
 $tip_classes = $tip_classes ?? '';
 if(isset($date) && !isset($text)) {
 	$date_text = $date->translatedFormat($format);
 	$text = isset($text) ? sprintf($text, $date_text) : $date_text;
 }
-$title = $title ?? $date->longRelativeToNowDiffForHumans();
+$title = $title ?? $date->$relative_fn();
 $reverse = $reverse ?? false;
 if($reverse) {
 	$tmp = $title;

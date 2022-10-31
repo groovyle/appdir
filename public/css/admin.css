@@ -778,3 +778,13 @@
 .visuals-comparison-wrapper.extended .splide-caption a:focus {
 	color: deepskyblue;
 }
+
+.info-box .info-box-content {
+	min-width: 0;
+}
+.info-box .info-box-text {
+	line-height: 1.2;
+}
+.info-box .info-box-number {
+	line-height: 1;
+}
