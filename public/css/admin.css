@@ -23,6 +23,16 @@
 	min-height: 175px;
 	max-height: 100%;
 }
+.navbar-nav > .user-menu > .dropdown-menu > .user-footer.flexible {
+	display: flex;
+	flex-flow: row wrap;
+	/*justify-content: space-between;*/
+	align-items: center;
+	gap: 0.25rem;
+}
+.navbar-nav > .user-menu > .dropdown-menu > .user-footer.flexible::after {
+	content: none;
+}
 
 .content-wrapper {
 	position: relative;
@@ -710,18 +720,6 @@
 }
 .callout a.btn-tool:hover {
 	color: #495057;
-}
-
-.input-group .input-group-prepend .input-group-text.plain,
-.input-group .input-group-append .input-group-text.plain {
-	background-color: var(--white);
-	z-index: 1;
-}
-.input-group .input-group-prepend .input-group-text.plain {
-	border-right-color: var(--white);
-}
-.input-group .input-group-append .input-group-text.plain {
-	border-left-color: var(--white);
 }
 
 .popover .close.other-icon {

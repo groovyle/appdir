@@ -54,13 +54,16 @@ $user = Auth::user();
 						</p>
 					</li>
 					<!-- Menu Footer-->
-					<li class="user-footer">
-						<a href="{{ route('admin.profile.index') }}" class="btn btn-primary btn-flat">{{ __('admin/common.user_profile_button') }}</a>
-						<a class="btn btn-outline-danger btn-flat float-right btn-logout" href="{{ route('logout') }}">{{ __('admin/common.logout_button') }}</a>
-						@include('components.logout-form')
+					<li class="user-footer flexible">
+						<a href="{{ route('admin.profile.index') }}" class="btn btn-primary btn-flat btn-sm">{{ __('admin/common.user_profile_button') }}</a>
+						<a href="{{ route('admin.profile.password') }}" class="btn btn-warning btn-flat btn-sm" title="{{ __('admin/profile.change_password') }}" data-toggle="tooltip"><span class="fas fa-key"></span></a>
+						<a class="btn btn-danger btn-flat float-right btn-logout btn-sm ml-auto" href="{{ route('logout') }}">{{ __('admin/common.logout_button') }}</a>
 					</li>
 				</ul>
 			</li>
 		</ul>
 	</nav>
+	@push('hidden-contents')
+		@include('components.logout-form')
+	@endpush
 	<!-- /.navbar -->

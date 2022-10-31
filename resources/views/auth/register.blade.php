@@ -19,7 +19,7 @@ $transparent_navs = true;
 					<h3>{{ __('frontend.auth.register_header') }}</h3>
 				</div>
 
-				<form method="POST" action="{{ route('register') }}">
+				<form method="POST" action="{{ route('register') }}" class="login-form">
 					@csrf
 
 					<div class="form-group row">
@@ -73,7 +73,12 @@ $transparent_navs = true;
 						<label for="password" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.password') }}</label>
 
 						<div class="col-md-7">
-							<input id="password" type="password" class="login-form-control form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
+							<div class="input-group password-wrapper">
+								<input id="password" type="password" class="login-form-control form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
+								<div class="input-group-append">
+									<button type="button" class="input-group-text plain text-decoration-none rounded-0 btn-see-password" data-targets="#password, #password-confirm"><span class="far fa-eye"></span></button>
+								</div>
+							</div>
 
 							@error('password')
 								<span class="invalid-feedback" role="alert">

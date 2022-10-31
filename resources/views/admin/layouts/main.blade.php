@@ -89,6 +89,7 @@
 
 @include('admin.layouts.one-for-all-modal')
 @include('admin.layouts.confirmator-modal')
+@stack('hidden-contents')
 
 <!-- Scripts -->
 <script>

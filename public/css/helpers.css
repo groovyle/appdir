@@ -82,6 +82,18 @@ span.icon-text-pair {
 	margin-right: 0; /* decided by gap property */
 }
 
+.input-group .input-group-prepend .input-group-text.plain,
+.input-group .input-group-append .input-group-text.plain {
+	background-color: var(--white);
+	z-index: 1;
+}
+.input-group .input-group-prepend .input-group-text.plain {
+	border-right-color: var(--white);
+}
+.input-group .input-group-append .input-group-text.plain {
+	border-left-color: var(--white);
+}
+
 .flash-element, [class*="flash-element-"],
 .flash-element > td, [class*="flash-element-"] > td {
 	animation: flash-element 2s linear 0.25s;

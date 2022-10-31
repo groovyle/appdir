@@ -182,31 +182,50 @@
   margin-bottom: 0.75rem;
 }
 
-.login-form-control, .login-form-select {
+.login-form-control,
+.login-form-select,
+.login-form .input-group-text {
+  border: 1px solid #adb5bd;
+  outline: none;
+  border-radius: 0;
+  transition: 0.15s all;
+}
+.login-form-control:focus, .login-form-control:active,
+.login-form-select:focus,
+.login-form-select:active,
+.login-form .input-group-text:focus,
+.login-form .input-group-text:active {
+  box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.2);
+  border-color: #adb5bd;
+}
+
+.login-form-control,
+.login-form .input-group-text {
+  background-color: #fff;
+}
+
+.login-form-control,
+.login-form-select {
   width: 100%;
   height: 2.5rem;
   min-width: 6rem;
-  min-height: none;
+  min-height: auto;
   padding: 0.1875rem 0.5rem;
   font-size: 0.9rem;
   font-weight: 400;
   line-height: 1.5;
   vertical-align: middle;
   color: black;
-  border: 1px solid #adb5bd;
-  outline: none;
-  border-radius: 0;
-  transition: 0.15s all;
-}
-.login-form-control:focus, .login-form-control:active, .login-form-select:focus, .login-form-select:active {
-  box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.2);
-  border-color: #adb5bd;
 }
 
-.login-form-control.grayed {
+.login-form-control.grayed,
+.login-form .input-group-text.grayed {
   background-color: rgba(192, 192, 192, 0.15);
 }
-.login-form-control:hover, .login-form-control:focus, .login-form-control:active {
+.login-form-control:hover, .login-form-control:focus, .login-form-control:active,
+.login-form .input-group-text:hover,
+.login-form .input-group-text:focus,
+.login-form .input-group-text:active {
   color: #000;
   background-color: rgba(192, 192, 192, 0.3);
 }

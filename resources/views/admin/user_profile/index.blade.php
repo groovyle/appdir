@@ -78,7 +78,7 @@
 
 				<hr>
 
-				<a href="{{ route('logout') }}" class="btn btn-outline-danger btn-block btn-sm btn-logout">{{ __('admin/common.logout_button') }}</a>
+				<a href="{{ route('logout') }}" class="btn btn-danger btn-block btn-sm btn-logout">{{ __('admin/common.logout_button') }}</a>
 			</div>
 			<!-- /.card-body -->
 		</div>
