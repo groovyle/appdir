@@ -258,7 +258,13 @@ class AppReportController extends Controller
 				$app->setToReported();
 				$result = $result && $app->save();
 
-				// TODO: generate verification entry
+				// Reject the app's current version
+				if($app->version) {
+					$app->version->status = AppChangelog::STATUS_REJECTED;
+					$result = $result && $app->version->save();
+				}
+
+				// Generate verification entry
 				$verif = new AppVerification;
 				$verif->app_id = $app->id;
 				$verif->base_changes_id = $app->version_id;

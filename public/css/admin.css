@@ -512,6 +512,7 @@
 }
 .verif-content .verif-header {
 	font-size: 1.1em;
+	line-height: 1.25;
 	display: flex;
 	flex-flow: row wrap;
 	column-gap: 0.75rem;
@@ -527,6 +528,7 @@
 }
 .verif-content .verif-body {
 	font-size: 1em;
+	line-height: 1.25;
 }
 .verif-content .verif-body .verif-value-group {
 	display: block;

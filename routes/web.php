@@ -49,6 +49,8 @@ Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
 	Route::resource('apps', 'AppController');
 	Route::get('apps/{app}/verifications', 'AppController@verifications')->name('apps.verifications');
 	Route::get('apps/{app}/changes', 'AppController@changes')->name('apps.changes');
+	Route::get('apps/{app}/switch/{version}', 'AppController@switchVersionForm')->name('apps.switch_version');
+	Route::post('apps/{app}/switch/{version}', 'AppController@switchToVersion')->name('apps.switch_version.save');
 	Route::get('apps/{app}/visuals', 'AppController@visuals')->name('apps.visuals');
 	Route::post('apps/{app}/visuals', 'AppController@updateVisuals')->name('apps.visuals.save');
 	Route::get('apps/{app}/publish', 'AppController@reviewChanges')->name('apps.publish');

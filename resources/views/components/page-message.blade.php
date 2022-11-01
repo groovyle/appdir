@@ -18,7 +18,7 @@ if(!isset($status)) {
 		} else {
 			$status_class = $status == 1 ? 'success' : 'danger';
 		}
-	} elseif($show_errors) {
+	} elseif(isset($show_errors) && $show_errors) {
 		$status_class = 'danger';
 	} else {
 		$status_class = 'info';

@@ -38,6 +38,8 @@ return [
 
 'related_version'		=> 'Related version',
 'related_versions'		=> 'Related versions',
+'discarded_versions'	=> 'Discarded versions',
+'previous_version'		=> 'Previous version',
 'this_form_shows_the_app\'s_pending_changes'	=> 'This form shows data from the app\'s pending changes.',
 'this_app_does_not_have_any_pending_changes_to_be_reviewed'	=> 'This app does not have any pending changes to be reviewed.',
 'this_form_shows_version_x_the_app\'s_current_version'	=> 'This form shows data from Version :x, which is the app\'s version with no changes applied yet.',
@@ -51,6 +53,9 @@ return [
 'pending_changes_applied'	=> 'Pending data applied',
 'item_published'		=> 'Item published',
 'changes_verified'		=> 'Changes verified',
+'auto_discard_unapplied_changes'	=> 'Automatic discard of any pending/unapplied changes during version switch',
+'switch_version_from_x_to_y'	=> 'Version switch: from Version :x to Version :y',
+'new_version_x'			=> 'New version: Version :x',
 'this_app_was_unlisted_because_of_reports'	=> 'This app was unlisted because of reports of inappropriate content',
 'this_app_was_recently_found_guilty_for_inappropriate_content'	=> 'This app was recently found guilty for having inappropriate contents.',
 'please_make_sure_the_offending_contents_have_been_removed'	=> 'Please make sure the offending contents have been removed.',

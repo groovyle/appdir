@@ -637,10 +637,133 @@ class AppManager {
 
 	public static function goToVersion(App $app, $version)
 	{
-		$changes = static::getVersionsChanges($app, $version)['changes'];
+		$return = [
+			'status'	=> true,
+			'messages'	=> [],
+			'app'		=> $app,
+			'target_version'	=> null,
+			'from_version'		=> null,
+			'new_version'		=> null,
+		];
 
-		// We don't really need to return the app since it gets modified
-		return static::applyDiff($app, $changes, false);
+		$return['target_version'] = $target_version = $app->changelogs()->where('version', $version)->firstOrFail();
+		$compiled = static::getVersionsChanges($app, $target_version->version);
+
+		$from_version_id = $app->version_id;
+		$return['from_version'] = $from_version = $app->version;
+
+		// Get the target version, apply, then diff, then store cl diff, then save
+
+		$result = true;
+
+		if(empty($compiled['changes'])) {
+			$result = false;
+			$return['messages'][] = __('admin/apps.changes.cannot_switch_version_because_no_changes');
+		}
+
+		if($result) {
+			// Get new instance
+			$mock = $app->find($app->id);
+
+			// Prep for diff
+			static::prepareForVersionDiff($mock);
+
+			// Apply changes without saving
+			static::applyDiff($mock, $compiled['changes'], true);
+
+			// Save diffs
+			$diff_result = static::makeVersionDiff($mock, true);
+			$result = $diff_result['status'];
+
+			if(empty($diff_result['changes'])) {
+				$result = false;
+				$return['messages'][] = __('admin/apps.changes.cannot_switch_version_because_no_changes');
+			}
+		}
+
+		if($result) {
+			// Get new instance
+			$mock = $app->find($app->id);
+			// Apply changes, but now save
+			static::applyDiff($mock, $compiled['changes'], false);
+
+			// Commit immediately
+			// Save app after making diff
+			$return['new_version'] = $new_version = $diff_result['model'];
+			$mock->version()->associate($new_version->id);
+			$result = $mock->save();
+
+			// NOTE: do not change any published/private status so as to
+			// maintain the previous state. Changing version should not
+			// equal to a cheat way to publish item, right?
+		}
+
+		if($result) {
+			// Immediately change version status
+			$new_version->based_on_id = $target_version->id;
+			$new_version->status = AppChangelog::STATUS_COMMITTED;
+			$new_version->is_switch = true;
+			$result = $new_version->save();
+		}
+
+		// Invalidate all unapplied changes (i.e non-rejected/committed changes)
+		if($result) {
+			$query = $app->changelogs()->rejected(false)->committed(false);
+			if($from_version) {
+				$query->where('updated_at', '>', $from_version->updated_at);
+			}
+			$lose_changes = $query->get();
+			if(count($lose_changes) > 0) {
+				// Generate verification item
+				$verif = new AppVerification;
+				$verif->app_id = $app->id;
+				$verif->verifier_id = \App\Models\SystemUsers\Automator::instance()->id;
+				$verif->status_id = 'rejected';
+				$verif->base_changes_id = $from_version_id;
+				$verif->concern = AppVerification::CONCERN_VERSION_SWITCH;
+				$result = $result && $verif->save();
+
+				foreach($lose_changes as $cl) {
+					$cl->status = AppChangelog::STATUS_REJECTED;
+					$result = $result && $cl->save();
+				}
+				$result && $verif->changelogs()->attach($lose_changes);
+			}
+		}
+
+		// NOTE: change status to published anyway, since the target version
+		// had been committed in the past
+		if($result) {
+			// Generate verification item
+			$verif = new AppVerification;
+			$verif->app_id = $app->id;
+			$verif->verifier_id = request()->user()->id;
+			$verif->status_id = 'applied';
+			$verif->base_changes_id = $from_version_id;
+			$verif->concern = AppVerification::CONCERN_VERSION_SWITCH;
+			$verif->details = [
+				'from'	=> $from_version->version ?? null,
+				'to'	=> $target_version->version,
+				'new'	=> $new_version->version,
+			];
+
+			$result = $verif->save();
+
+			if($result) {
+				if($from_version)
+					$verif->changelogs()->attach($from_version);
+				$verif->changelogs()->attach($target_version);
+				$verif->changelogs()->attach($new_version);
+			}
+		}
+
+		// Done!
+		$return['status'] = $result;
+		if($result) {
+			$return['app'] = $mock;
+		}
+
+		return $return;
 	}
 
 	public static function getMockItem($app_id, $version)
@@ -854,18 +977,57 @@ class AppManager {
 				if(isset($diffs['relations'])) {
 					$rels = $diffs->pull('relations');
 					foreach($rels as $key => $rel) {
-						if(!isset($rel['old']) || !isset($rel['new'])) {
+						if(!array_key_exists('old', $rel) || !array_key_exists('new', $rel)) {
 							return false;
 						}
 						// $changes['relations'][$key]['new'] = array_merge($changes['relations'][$key]['new'] ?? [], $rel['old']);
 						// // Set old values from new diffs
 						// $changes['relations'][$key]['old'] = array_merge($rel['new'], $changes['relations'][$key]['old'] ?? []);
-						if(isset($rel['new']))
+
+						$changes['relations'][$key]['new'] = $rel['old'];
+						// Only set old values if not yet set
+						if(!array_key_exists('old', $changes['relations'][$key]))
 							$changes['relations'][$key]['old'] = $rel['new'];
-						if(isset($rel['old']))
-							$changes['relations'][$key]['new'] = $rel['old'];
 					}
 				}
+			}
+		}
+
+		// Final check, if final old and new values are the same, remove them
+		if(isset($changes['attributes'])) {
+			$attr_new = $changes['attributes']['new'] ?? [];
+			$attr_old = $changes['attributes']['old'] ?? [];
+			$keys = array_unique(array_merge(
+				array_keys($attr_new),
+				array_keys($attr_old)
+			));
+			foreach($keys as $k) {
+				if(!array_key_exists($k, $attr_new)
+					|| !array_key_exists($k, $attr_old)) {
+					continue;
+				}
+				if($attr_new[$k] == $attr_old[$k]) {
+					unset($changes['attributes']['new'][$k]);
+					unset($changes['attributes']['old'][$k]);
+				}
+			}
+			if(empty($changes['attributes']['new']) && empty($changes['attributes']['old'])) {
+				unset($changes['attributes']);
+			}
+		}
+		if(isset($changes['relations'])) {
+			$keys = array_keys($changes['relations']);
+			foreach($keys as $k) {
+				if(!array_key_exists('old', $changes['relations'][$k])
+					|| !array_key_exists('new', $changes['relations'][$k])) {
+					continue;
+				}
+				if($changes['relations'][$k]['old'] == $changes['relations'][$k]['new']) {
+					unset($changes['relations'][$k]);
+				}
+			}
+			if(empty($changes['relations'])) {
+				unset($changes['relations']);
 			}
 		}
 

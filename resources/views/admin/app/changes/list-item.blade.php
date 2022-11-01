@@ -4,6 +4,8 @@ $collapsed = $collapsed ?? false;
 $color = $is_current ? 'text-success' : '';
 $show_current = !!($show_current ?? true);
 $show_status = !!($show_status ?? true);
+$show_switch = !!($show_switch ?? false);
+$show_preview = !!($show_preview ?? true);
 ?>
 <div class="card card-default @if($collapsed) collapsed-card @endif changes-item changes-item-{{ $cl->id }} changes-item-v{{ $cl->version }}" id="changes-item-{{ $cl->id }}" data-version="{{ $cl->version }}">
 	<div class="card-header border-bottom-0">
@@ -18,20 +20,25 @@ $show_status = !!($show_status ?? true);
 					@endif
 				@endif
 			</span>
-			@if($show_current && $show_status)
+			@if($show_status)
+			<span class="fas fa-recycle text-info text-080 ml-2" title="@lang('admin/apps.changes.this_version_was_a_result_of_version_switch')" data-toggle="tooltip"></span>
+			@if($show_current)
 			<span class="text-090 ml-2">@include('components.app-version-status', ['status' => $cl->status, 'class' => 'align-middle'])</span>
+			@endif
 			@endif
 			<br>
 			<div class="changes-timestamp">@include('components.date-with-tooltip', ['date' => $cl->created_at])</div>
 		</h5>
 		<div class="card-tools">
-			<button type="button" class="btn btn-tool btn-view-version" data-toggle="tooltip" title="@lang('admin/apps.changes.view_this_version')" data-app-id="{{ $app->id }}" data-version="{{ $cl->version }}"><span class="fas fa-expand"></span></button>
-			<button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="@lang('common.show/hide')"><i class="fas {{ !$collapsed ? 'fa-minus' : 'fa-plus' }}"></i></button>
-			{{--
-			@if(!$is_current)
-			<button type="button" class="btn btn-tool btn-go-version" data-toggle="tooltip" title="@lang('admin/apps.changes.go_to_version_x', ['x' => $cl->version])"><span class="fas fa-check"></span></button>
+			@if($show_switch)
+			@can('switch-to-version', [$app, $cl->version])
+			<a href="{{ route('admin.apps.switch_version', ['app' => $app->id, 'version' => $cl->version]) }}" class="btn btn-tool" data-toggle="tooltip" title="@lang('admin/apps.changes.switch_to_this_version')"><span class="fas fa-clone"></span></a>
+			@endcan
 			@endif
-			--}}
+			@if($show_preview)
+			<button type="button" class="btn btn-tool btn-view-version" data-toggle="tooltip" title="@lang('admin/apps.changes.view_this_version')" data-app-id="{{ $app->id }}" data-version="{{ $cl->version }}"><span class="fas fa-expand"></span></button>
+			@endif
+			<button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="@lang('common.show/hide')"><i class="fas {{ !$collapsed ? 'fa-minus' : 'fa-plus' }}"></i></button>
 		</div>
 	</div>
 	<div class="card-body pt-1">

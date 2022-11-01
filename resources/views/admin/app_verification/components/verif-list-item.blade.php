@@ -13,6 +13,7 @@ if($item_class == 'auto') {
 $other_comments = !!($other_comments ?? false);
 $hide_navs = !!($hide_navs ?? false);
 $hide_edit = !!($hide_edit ?? true);
+$opt_details = optional($verif->details);
 ?>
 <div class="verif-content verif-item verif-item-{{ $verif->id }} {{ $item_side }} {{ $item_class }}">
   <div class="verif-header">
@@ -49,6 +50,13 @@ $hide_edit = !!($hide_edit ?? true);
       @if($is_reported_guilty)
       <span class="fas fa-spell-check icon"></span>
       <span>@lang('admin/app_verifications.related_version'): @vo_((string) optional($verif->verdict->version)->version)</span>
+      @elseif($verif->concern == 'switchver')
+      <span class="fas fa-recycle icon"></span>
+        @if($verif->status->by == 'verifier')
+        <span>@lang('admin/app_verifications.discarded_versions'): @vo_((string) $verif->changelog_range)</span>
+        @else
+        <span>@lang('admin/app_verifications.previous_version'): @vo_((string) $verif->base_changelog->version)</span>
+        @endif
       @elseif($verif->status->by == 'verifier')
       <span class="fas fa-spell-check icon"></span>
       <span>@lang('admin/app_verifications.versions_verified'): @vo_((string) $verif->changelog_range)</span>
@@ -64,7 +72,15 @@ $hide_edit = !!($hide_edit ?? true);
       @lang('admin/app_verifications.this_app_was_unlisted_because_of_reports')
     </div>
   @endif
-  @if($verif->status->by == 'verifier')
+  @if($verif->concern == 'switchver')
+    @if($verif->status->by == 'verifier')
+      @lang('admin/app_verifications.auto_discard_unapplied_changes')
+    @else
+      @lang('admin/app_verifications.switch_version_from_x_to_y', ['x' => $opt_details['from'], 'y' => $opt_details['to']])
+      <br>
+      @lang('admin/app_verifications.new_version_x', ['x' => $opt_details['new']])
+    @endif
+  @elseif($verif->status->by == 'verifier')
     @if($is_reported_guilty)
     <div class="verif-value-group">
       <span class="verif-label">@lang('admin/app_reports.fields.violation_types'):</span>

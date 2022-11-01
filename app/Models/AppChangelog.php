@@ -33,6 +33,7 @@ class AppChangelog extends Model
 	protected $casts = [
 		'diffs'	=> 'array',
 		'is_verified' => 'boolean',
+		'is_switch' => 'boolean',
 	];
 
 	protected $guarded = [

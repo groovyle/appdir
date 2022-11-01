@@ -1008,7 +1008,7 @@ class AppController extends Controller
 			'new_images.*'	=> ['nullable', 'file', 'max:2048'], // TODO: settings on max image size
 		]);
 
-		// TODO: prepare for app diff
+		// Prepare for app diff
 		AppManager::prepareForVersionDiff($app);
 		$visuals_by_id = $app->visuals->keyBy('id');
 
@@ -1489,6 +1489,82 @@ class AppController extends Controller
 		}
 	}
 
+	public function switchVersionForm(Request $request, App $app, $version) {
+		$this->authorize('switch-to-version', [$app, $version]);
+
+		$version = $app->changelogs()->where('version', $version)->firstOrFail();
+
+		// Get mock item
+		$target = AppManager::getMockItem($app->id, $version->version);
+		$changes = AppManager::getVersionsChanges($app, $version->version);
+
+		$back_url = null;
+		if(Auth::user()->can('view-changelog', $app)) {
+			$back_url = route('admin.apps.changes', ['app' => $app->id, 'go_version' => $version->version, 'go_flash' => 1]);
+		} elseif(Auth::user()->can('view', $app)) {
+			$back_url = route('admin.apps.show', ['app' => $app->id]);
+		}
+
+		$summary = new AppChangelog;
+		$summary->app_id = $app->id;
+		$summary->diffs = $changes['changes'];
+
+		$data = [];
+		$data['app'] = $app;
+		$data['target'] = $target;
+		$data['version'] = $version;
+		$data['compiled_changes'] = $changes;
+		$data['summary'] = $summary;
+		$data['back'] = $back_url;
+
+		return view('admin/app/changes/switch_version', $data);
+	}
+
+	// POST
+	public function switchToVersion(Request $request, App $app, $version) {
+		$this->authorize('switch-to-version', [$app, $version]);
+
+		DB::beginTransaction();
+		$result = true;
+		$messages = [];
+		try {
+			$goto_result = AppManager::goToVersion($app, $version);
+			extract($goto_result);
+			$result = $status;
+		} catch(\Illuminate\Database\QueryException $e) {
+			$result = false;
+			$messages[] = $e->getMessage();
+		}
+
+		if(!$result) {
+			DB::rollback();
+
+			// Pass a message
+			$request->session()->flash('flash_message', [
+				'message'	=> __('admin/apps.messages.update_failed'),
+				'type'		=> 'error'
+			]);
+
+			return redirect()->back()->withInput()->withErrors($messages);
+		} else {
+			DB::commit();
+
+			// Pass a message
+			$request->session()->flash('flash_message', [
+				'message'	=> __('admin/apps.messages.version_switch_successful', ['x' => $from_version->version, 'y' => $target_version->version]),
+				'type'		=> 'success'
+			]);
+
+			if(Auth::user()->can('view-changelog', $app)) {
+				return redirect()->route('admin.apps.changes', ['app' => $app->id, 'show_current' => 1]);
+			} elseif(Auth::user()->can('view', $app)) {
+				return redirect()->route('admin.apps.show', ['app' => $app->id]);
+			}
+
+			return redirect()->back();
+		}
+	}
+
 
 	public static function activityLogQuery($filters = []) {
 
@@ -1576,7 +1652,7 @@ class AppController extends Controller
 
 		$query->with(['app' => function($query) {
 			$query->withTrashed();
-		}]);
+		}, 'app.last_verification']);
 
 		// Get the first item only in each series of same status consecutive actions
 		// $query->whereNull('avp2.id');
@@ -1618,6 +1694,9 @@ class AppController extends Controller
 			if($item->concern == 'edit'
 				&& Gate::allows('view-changelog', $item->app))
 				$item->view_url = route('admin.apps.changes', ['app' => $item->app_id, 'go_version' => optional($item->changelogs()->first())->version, 'go_flash' => 1]);
+			elseif(Gate::allows('view', $item->app) && $item->status->by == 'verifier'
+				&& $item->id == $item->app->last_verification->id)
+				$item->view_url = route('admin.apps.show', ['app' => $item->app_id, 'show_verification' => 1]);
 			elseif(Gate::allows('view-verifications', $item->app))
 				$item->view_url = route('admin.apps.verifications', ['app' => $item->app_id, 'go_item' => $item->id, 'go_flash' => 1]);
 			elseif(Gate::allows('view', $item->app))

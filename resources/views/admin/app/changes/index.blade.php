@@ -44,7 +44,7 @@ if(($count = $app->changelogs()->count()) > 0) {
 <div class="row">
   <div class="col-12">
     @forelse($changelogs as $cl)
-    @include('admin.app.changes.list-item', compact('cl', 'app'))
+    @include('admin.app.changes.list-item', compact('cl', 'app') + ['show_switch' => true])
     @empty
     <h4>@lang('admin/apps.changes.there_are_no_changes_yet')</h4>
     @endforelse

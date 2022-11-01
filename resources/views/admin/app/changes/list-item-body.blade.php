@@ -8,6 +8,11 @@ $regular_relations = ['categories', 'tags'];
 ?>
 @if($cl->based_on)
 <div class="mb-1">
+	@if($cl->is_switch)
+	<div class="text-info text-bold text-italic mt-n2 mb-2">
+		@lang('admin/apps.changes.this_version_was_a_result_of_version_switch')
+	</div>
+	@endif
 	@lang('admin/apps.changes.this_version_is_based_on'):
 	@if($linked_based_on)
 	<a href="{{ route('admin.apps.changes', ['app' => $app->id, 'go_version' => $cl->based_on->version]) }}" class="btn-goto-version" data-goto-version="{{ $cl->based_on->version }}">@lang('admin/apps.changes.version_x', ['x' => $cl->based_on->version])</a>

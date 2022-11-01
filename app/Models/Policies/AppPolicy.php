@@ -3,6 +3,7 @@
 namespace App\Models\Policies;
 
 use App\Models\App;
+use App\Models\AppChangelog;
 use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Gate;
@@ -208,5 +209,28 @@ class AppPolicy
 	{
 		// No permanent deletion pls
 		return false;
+	}
+
+	public function switchToVersion(User $user, App $app, $version) {
+		$update = $user->can('update', $app);
+		if(!$update)
+			return false;
+
+		if(!$app->version)
+			return false;
+
+		if(!($version instanceof AppChangelog))
+			$version = $app->changelogs()->where('version', $version)->first();
+
+		if(!$version) // nothing found
+			return false;
+		elseif($app->id != $version->app_id) // who???
+			return false;
+		elseif($app->version_number == $version->version) // cant switch to self
+			return false;
+		elseif($version->updated_at > $app->version->updated_at) // TODO:? target is from the future
+			return false;
+		elseif(!$version->is_committed) // not an applied version
+			return false;
 	}
 }

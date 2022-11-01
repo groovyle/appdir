@@ -15,6 +15,7 @@ return [
 	'review_changes'	=> 'Review Changes',
 	'publish_changes'	=> 'Publish Changes',
 	'publish_app'		=> 'Publish App',
+	'switch_version'	=> 'Switch Version',
 	'activities'		=> 'Activities on Apps',
 
 	'view_mode'			=> [
@@ -33,6 +34,7 @@ return [
 	'review_changes'	=> 'Review Changes - :x',
 	'publish_changes'	=> 'Publish Changes - :x',
 	'publish_app'		=> 'Publish App - :x',
+	'switch_version'	=> 'Switch Version - :x',
 ],
 
 'titles'		=> [
@@ -61,7 +63,7 @@ return [
 'app_had_been_verified'	=> 'This app had been verified and is publicly listed',
 'app_has_pending_changes'	=> 'This app has pending changes waiting to be reviewed',
 'app_has_approved_changes'	=> 'This app\'s has changes which has been reviewed and approved',
-'app_has_rejected_changes'	=> 'This app\'s last changes was rejected',
+'app_has_rejected_changes'	=> 'This app\'s last changes were rejected',
 'app_changes_needs_revision_to_be_approved'	=> 'This app needs revision to be approved',
 'app_is_public'				=> 'App is public',
 'app_is_not_public'			=> 'App is not public',
@@ -177,6 +179,17 @@ return [
 	'publish_item'					=> 'Publish item',
 	'apply_changes_without_publishing'	=> 'Apply changes without publishing',
 	'cannot_load_version_preview'	=> 'Error occurred while trying to load version preview',
+	'switch_to_this_version'		=> 'Switch to this version',
+	'switch_version'				=> 'Switch app version',
+	'current'						=> 'current',
+	'current_version'				=> 'Current Version',
+	'target_version'				=> 'Target Version',
+	'switching_from_version_x_to_y'	=> 'Switching from Version :x to <strong>Version :y</strong>',
+	'switch_to_version_x'			=> 'Switch to Version :x',
+	'data_from_target_version_will_be_copied'	=> 'Data from the target version will be copied into the current version as an edit',
+	'any_pending_changes_will_be_discarded'		=> 'Warning: any pending or unapplied changes you made before this will be discarded!',
+	'cannot_switch_version_because_no_changes'	=> 'Cannot switch version because there are no changes between both versions',
+	'this_version_was_a_result_of_version_switch'	=> 'This version was a result of version switching',
 
 	'statuses'	=> [
 		'pending'	=> 'Pending',
@@ -215,6 +228,8 @@ return [
 	'update_failed'				=> 'An error occurred while submitting app data.',
 	'delete_successful'			=> 'Successfully deleted the app!',
 	'delete_failed'				=> 'An error occurred while trying to delete the app.',
+
+	'version_switch_successful'	=> 'App has been switched from Version :x to Version :y',
 
 	'form_showing_pending_changes'			=> 'This form shows your pending changes',
 	'new_items_will_be_staged'				=> 'Apps will not become public immediately, and has to go through verification first',

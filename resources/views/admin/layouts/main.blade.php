@@ -17,7 +17,7 @@
 	<script data-ajax="true" src="{{ asset('plugins/pace-progress/pace.min.js') }}"></script>
 
 	<!-- Favicon -->
-	<link rel="icon" type="image/png" href="{{ asset('img/favicon.png') }}" />
+	<link rel="icon" type="image/png" href="{{ asset('img/favicon-dark.png') }}" />
 
 	<!-- Fonts -->
 	<!-- Font Awesome -->
