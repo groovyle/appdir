@@ -114,12 +114,6 @@ $is_self = $is_self ?? false;
 				@endif
 				@endif
 			</section>
-
-			<div class="card">
-				<div class="card-body">
-					TODO: more content...? or not if there's nothing else
-				</div>
-			</div>
 		</div>
 	</div>
 </div>

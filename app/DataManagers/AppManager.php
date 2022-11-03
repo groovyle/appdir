@@ -73,19 +73,13 @@ class AppManager {
 
 	protected static function compileRelationsDataForDiff(App $model)
 	{
-		// Load fresh relations
-		/*$model->load([
-			'visuals',
-			'tags',
-			'categories',
-		]);*/
-		// $relations = $model->getRelations();
 		$compiled = [];
 
 		if($model->exists) {
 			// Visuals
 			$visuals = [];
 			foreach($model->visuals as $item) {
+				$item = clone $item;
 				$item->caption = $item->caption ?: null; // to avoid difference between '' and null (or other falsy values)
 				$visuals[$item['id']] = $item->getAttributesOnly(['id', 'order', 'caption']);
 			}
@@ -231,7 +225,7 @@ class AppManager {
 	// Call this function only in a db transaction
 	// For edits, call this function BEFORE $model->save() or push()
 	// For new items, call this function AFTER $model->save() or push()
-	// TODO: maybe do this before save() and provide the edited attributes (AND relations), because
+	// NOTE: do this before save() and provide the edited attributes (AND relations), because
 	// doing it after save() means applying the diff BEFORE generating the diff, right?
 	// If we want to stage the modifications for verification, we have to NOT apply
 	// any edits/diffs, and instead just insert new changelogs and then later apply
@@ -245,8 +239,7 @@ class AppManager {
 			throw new \OutOfBoundsException('App has to exist to make a diff.');
 		}*/
 
-		// TODO: for edits, dont allow saving before diffing
-		// TODO: check config for disabled staging
+		// NOTE: for edits, dont allow saving before diffing
 		// NOTE: how to detect changes in any of the relationships?
 		$is_edit = $model->exists && !$model->wasRecentlyCreated;
 		if($is_edit && $model->wasChanged()) {
@@ -306,11 +299,6 @@ class AppManager {
 		$verf_edit = settings('app.modification_needs_verification', false);
 
 		$needs_verf = (!$is_edit && $verf_add) || ($is_edit && $verf_edit);
-		/*if(!$needs_verf) {
-			// TODO: not here, but on verifications
-			// Set to published
-			$model->is_verified = 1;
-		}*/
 
 		$version_id = optional($result['model'])->id;
 
@@ -337,8 +325,7 @@ class AppManager {
 			if(!$verf_add) {
 				// $result['model']->is_verified = 1;
 
-				// TODO: generate a verification to publish the changes immediately,
-				// and/or approve it before committing it
+				// NOTE: generate a verification to publish the changes immediately
 				// Also set it to published
 				$result['saved'] = $result['saved'] && static::verifyAndApplyChanges($model, collect([$result['model']]), true);
 			}
@@ -385,8 +372,6 @@ class AppManager {
 		}
 
 		$result['status'] = $result['diff_status'] && $result['saved'];
-
-		// TODO: verification stuff
 
 		return $result;
 	}

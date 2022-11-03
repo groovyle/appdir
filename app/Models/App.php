@@ -144,8 +144,6 @@ class App extends Model
 	}
 	// Alias
 	public function visual() {
-		// TODO
-		// return $this->hasOne('App\Models\AppVisualMedia')->oldest();
 		return $this->hasOne('App\Models\AppVisualMedia')->orderBy('order', 'asc');
 	}
 
@@ -312,7 +310,6 @@ class App extends Model
 	}
 
 	public function getIsUnverifiedNewAttribute() {
-		// TODO: maybe check if it has any verifications as well?
 		return !$this->is_verified
 			// && !$this->is_published
 			// && $this->changelogs()->count() == $this->floating_changes()->count()
@@ -342,7 +339,7 @@ class App extends Model
 	}
 
 	public function get_public_url($params = []) {
-		// TODO: decide whether to use slug or ID for the public URL
+		// NOTE: use slug or ID for the public URL?
 		// ID	= weird number
 		// Slug	= nicer, but changes with the name, so can't really be bookmarked
 		if(!isset($params['slug']))

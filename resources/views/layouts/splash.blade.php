@@ -21,7 +21,6 @@ extract(theme_vars($theme));
 	<link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
 
 	<!-- Fonts -->
-	<!-- TODO: use CDN instead -->
 	<link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
 	<link rel="dns-prefetch" href="//fonts.gstatic.com">
 	<link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">

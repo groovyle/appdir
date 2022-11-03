@@ -36,6 +36,8 @@ return [
 'edit'					=> 'edit',
 'you'					=> 'you',
 'no_data_available'		=> 'No data available',
+'logo'					=> 'logo',
+'image'					=> 'image',
 
 'fields'	=> [
 	'id'				=> 'ID',
@@ -57,6 +59,11 @@ return [
 	'update_failed'		=> 'An error occurred while attempting to update data.',
 	'delete_successful'	=> 'Item has been deleted.',
 	'delete_failed'		=> 'An error occurred while attempting to delete item.',
+	'save_successful'	=> 'Data has been saved.',
+	'save_failed'		=> 'An error occurred while trying to process and save data.',
+
+	'upload_error_file'		=> 'Error while processing uploaded file: :file',
+	'upload_x_error_file'	=> 'Error while processing uploaded :x: :file',
 ],
 
 'ofamodal'	=> [

@@ -66,7 +66,7 @@ $append_breadcrumb = [
         <span class="fas fa-info-circle ml-1 mr-2"></span> @lang('admin/apps.max_visuals'): {{ $max_visuals }}
       </p>
 
-      @include('components.page-message', ['show_errors' => true, 'errors' => $cerrors])
+      @include('components.page-message', ['messages' => $cerrors->get('visuals_count'), 'status' => 'danger'])
 
       <div class="row">
       <div class="col-lg-6 col-md-6 col-12">
@@ -103,9 +103,9 @@ $append_breadcrumb = [
                 <div class="textarea-length-container textarea-length-top-right">
                   <textarea class="form-control form-control-sm input-caption" name="visuals[{{ $vis->id }}][caption]" placeholder="@lang('admin/apps.fields.caption_placeholder')" rows="1" maxlength="{{ $caption_limit }}">{{ old('visuals.'.$vis->id.'.caption', $vis->caption) }}</textarea>
                 </div>
-                @include('components.input-feedback', ['name' => 'visuals.'.$vis->id.'.caption'])
               </div>
               <div class="visuals-meta">{!! implode(' | ', $vis->meta_text) !!}</div>
+              @include('components.input-feedback', ['name' => 'visuals.'.$vis->id.'.*', 'all' => true, 'force' => 'd-block m-0', 'wrap' => true])
             </div>
           </li>
           @endforeach
@@ -125,6 +125,7 @@ $append_breadcrumb = [
             @lang('admin/apps.fields.upload_image_hint')
             @endcomponent
           </label>
+          @include('components.input-feedback', ['name' => 'new_images.*', 'all' => true, 'force' => 'd-block m-0', 'wrap' => 'mt-n2 mb-2'])
           <input type="file" name="new_images[]" class="visuals-filepond" id="input-file-visuals" multiple>
         </div>
         <div class="form-group">
@@ -323,7 +324,7 @@ jQuery(document).ready(function($) {
     fileValidateTypeLabelExpectedTypes: 'Expects {allTypes}',
     fileValidateTypeLabelExpectedTypesMap: {'image/*': 'images'},
     allowFileSizeValidation: true,
-    maxFileSize: '2MB',
+    maxFileSize: @json($vis_max_size ? $vis_max_size.'KB' : null),
     files: [
       {{--
       Only use validation returns as old files instead of all files the user ever uploaded

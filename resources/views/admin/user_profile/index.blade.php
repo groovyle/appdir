@@ -91,7 +91,7 @@
 				@if($user->apps_count > 0)
 				{{ __('admin/profile.you_have_x_apps', ['x' => $user->apps_count]) }}.
 				@can('view-any', App\Models\App::class)
-				<a href="{{ route('admin.apps.index', ['owned' => 'mine']) }}" class="text-primary">{{ __('admin/profile.check_your_apps') }} &raquo;</a>
+				<a href="{{ route('admin.apps.index', ['whose' => 'own']) }}" class="text-primary">{{ __('admin/profile.check_your_apps') }} &raquo;</a>
 				@endcan
 				@else
 				{{ __('admin/profile.you_dont_have_any_apps_yet') }}!

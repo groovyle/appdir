@@ -43,7 +43,7 @@ $rand = random_alpha(5);
       <dl class="row">
         <dt class="col-12 col-sm-3 col-xl-2">{{ __('admin/apps.fields.owner') }}</dt>
         <dd class="col-12 col-sm-9 col-xl-10">
-          @vo_($app->owner->name)
+          @vo_($app->owner->name_email)
           @include('admin.app.components.owned-icon')
         </dd>
 

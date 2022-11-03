@@ -44,7 +44,7 @@ list($theme, $counter_theme) = theme_timely();
 			|
 			<a href="{{ route('admin') }}" class="btn btn-link btn-lg">{{ __('frontend.navs.admin_panel') }}</a>
 			|
-			<a href="{{ route('admin.apps.index', ['owned' => 'mine']) }}" class="btn btn-link btn-lg">{{ __('frontend.splash.your_apps_x', ['x' => $user->apps->count()]) }}</a>
+			<a href="{{ route('admin.apps.index', ['whose' => 'own']) }}" class="btn btn-link btn-lg">{{ __('frontend.splash.your_apps_x', ['x' => $user->apps->count()]) }}</a>
 			<br>
 			<a href="{{ route('logout') }}" class="btn btn-link mt-2 btn-logout">{{ __('frontend.navs.logout') }}</a>
 			@endguest

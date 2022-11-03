@@ -88,7 +88,7 @@ class AppController extends Controller
 	}
 
 	public function page(string $slug) {
-		// TODO: if user is admin/verifier/owner, allow viewing an unpublished app
+		// If user is admin/verifier/owner, allow viewing an unpublished app
 		// as a preview
 
 		$app = App::getFrontendItem($slug, false, false);

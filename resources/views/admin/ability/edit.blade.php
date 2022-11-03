@@ -33,13 +33,6 @@ if(!$is_edit) {
 
 @section('content')
 
-<div class="alert alert-warning">
-  <div class="icon-text-pair icon-color-reset">
-    <span class="fas fa-exclamation-triangle icon icon-2x mt-2 mr-2"></span>
-    <span>@lang('admin/abilities.management_warning')</span>
-  </div>
-</div>
-
 <div class="mb-2">
   @if($back)
   @if($is_edit)
@@ -50,11 +43,27 @@ if(!$is_edit) {
   @endif
 </div>
 
+<div class="alert alert-warning">
+  <div class="icon-text-pair icon-color-reset">
+    <span class="fas fa-exclamation-triangle icon icon-2x mt-2 mr-2"></span>
+    <span>@lang('admin/abilities.management_warning')</span>
+  </div>
+</div>
+
 <form method="POST" action="{{ $action }}" class="no-enter-submit" id="formInputRole">
   @csrf
   @method($method)
 
   <input type="hidden" name="backto" value="{{ $backto }}">
+
+  @if($is_edit)
+  <div class="alert alert-info">
+    <div class="icon-text-pair icon-color-reset">
+      <span class="fas fa-info-circle icon icon-2x text-150 mr-2"></span>
+      <span class="align-self-center">{{ __('admin/abilities.fields.some_attributes_cannot_be_edited') }}</span>
+    </div>
+  </div>
+  @endif
 
   @include('components.page-message', ['show_errors' => true])
 
@@ -71,38 +80,11 @@ if(!$is_edit) {
           @endif
 
           <div class="form-group">
-            <label for="inputAbilityEntityType">{{ __('admin/abilities.fields.entity_type') }}</label>
-            <input type="text" name="entity_type" class="form-control" id="inputAbilityEntityType" placeholder="{{ __('admin/abilities.fields.entity_type') }}" value="{{ old('entity_type', $abl->entity_type) }}" maxlength="100">
-          </div>
-
-          <div class="form-group">
-            <label for="inputAbilityEntityId">{{ __('admin/abilities.fields.entity_id') }}</label>
-            <input type="text" name="entity_id" class="form-control" id="inputAbilityEntityId" placeholder="{{ __('admin/abilities.fields.entity_id') }}" value="{{ old('entity_id', $abl->entity_id) }}" maxlength="100">
-          </div>
-
-          <div class="form-group">
             <label for="inputAbilityName">
               {{ __('admin/abilities.fields.name') }}
               @component('admin.slots.label-hint')
               @lang('admin/abilities.fields.name_hint')
               @endcomponent
-            </label>
-            <input type="text" name="name" class="form-control" id="inputAbilityName" placeholder="{{ __('admin/abilities.fields.name_placeholder') }}" value="{{ old('name', $abl->name) }}" maxlength="100" required>
-          </div>
-
-          {{--
-          <div class="form-group">
-            <label for="inputAbilityName">
-              {{ __('admin/abilities.fields.name') }}
-              @if($is_edit)
-                @component('admin.slots.label-hint', ['icon' => 'fas fa-info-circle'])
-                @lang('admin/abilities.fields.name_hint_edit')
-                @endcomponent
-              @else
-                @component('admin.slots.label-hint')
-                @lang('admin/abilities.fields.name_hint')
-                @endcomponent
-              @endif
             </label>
             @if(!$is_edit)
             <input type="text" name="name" class="form-control" id="inputAbilityName" placeholder="{{ __('admin/abilities.fields.name_placeholder') }}" value="{{ old('name', $abl->name) }}" maxlength="100" required>
@@ -110,7 +92,6 @@ if(!$is_edit) {
             <p class="form-control-plaintext" id="inputAbilityName">{{ $abl->name }}</p>
             @endif
           </div>
-          --}}
 
           <div class="form-group">
             <label for="inputAbilityTitle">
@@ -123,8 +104,44 @@ if(!$is_edit) {
           </div>
 
           <div class="form-group">
+            <label for="inputAbilityEntityType">
+              {{ __('admin/abilities.fields.entity_type') }}
+              @component('admin.slots.label-hint')
+              @lang('admin/abilities.fields.entity_type_hint')
+              @endcomponent
+            </label>
+            @if(!$is_edit)
+            <input type="text" name="entity_type" class="form-control" id="inputAbilityEntityType" placeholder="{{ __('admin/abilities.fields.entity_type') }}" value="{{ old('entity_type', $abl->entity_type) }}" maxlength="100">
+            @else
+            <p class="form-control-plaintext" id="inputAbilityEntityType">
+              @vo_($abl->entity_type)
+              @if($abl->aliased_entity_type)
+              <br>
+              <span class="text-080 text-italic text-secondary">
+                @lang('admin/abilities.details.morphed_from')
+                <strong>{{ $abl->display_entity_type }}</strong>
+              </span>
+              @endif
+            </p>
+            @endif
+          </div>
+
+          <div class="form-group">
+            <label for="inputAbilityEntityId">{{ __('admin/abilities.fields.entity_id') }}</label>
+            @if(!$is_edit)
+            <input type="text" name="entity_id" class="form-control" id="inputAbilityEntityId" placeholder="{{ __('admin/abilities.fields.entity_id') }}" value="{{ old('entity_id', $abl->entity_id) }}" maxlength="100">
+            @else
+            <p class="form-control-plaintext" id="inputAbilityEntityId">@vo_($abl->entity_id)</p>
+            @endif
+          </div>
+
+          <div class="form-group">
             <label for="inputAbilityOnlyOwned">{{ __('admin/abilities.fields.only_owned') }}</label>
+            @if(!$is_edit)
             <input type="checkbox" name="only_owned" value="1" class="ml-2" id="inputAbilityOnlyOwned" {!! old_checked('only_owned', $abl->only_owned) !!}>
+            @else
+            <p class="form-control-plaintext" id="inputAbilityOnlyOwned">@vo_($abl->only_owned)</p>
+            @endif
           </div>
 
         </div>

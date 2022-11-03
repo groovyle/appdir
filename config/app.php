@@ -181,7 +181,7 @@ return [
 
         App\Providers\HelperServiceProvider::class,
         App\Providers\BouncerServiceProvider::class,
-        App\Providers\SystemDataServiceProvider::class,
+        App\Providers\RelationMapServiceProvider::class,
 
     ],
 

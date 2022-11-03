@@ -112,9 +112,6 @@ class AppVerification extends Model
 
 	public function getChangelogRangeAttribute() {
 		$changes = $this->changelogs->reverse()->values();
-		// unset($changes[1]);
-		// unset($changes[3]);
-		// unset($changes[7]);
 		return new AppChangelogCollection($changes);
 	}
 
@@ -129,32 +126,6 @@ class AppVerification extends Model
 
 	public function getIsReportedGuiltyAttribute() {
 		return !!optional($this->verdict)->is_guilty;
-	}
-
-	public function getCanEditAttribute() {
-		// TODO: can only be edited by the verifier themself?
-		if(Auth::user()->id != $this->verifier_id) {
-			return false;
-		}
-
-		// TODO: add a time restriction (e.g only 24 hours after last update?)
-		if($this->id == $this->app->last_verification->id
-			&& $this->status->by == 'verifier'
-			&& $this->concern == static::CONCERN_VERIFICATION
-		) {
-			// Is the last verification
-			if($this->status_id == 'approved') {
-				// Can only edit approved ones if the changes were not committed yet
-				$can = $this->changelogs->every(function($item, $key) {
-					return $item->status == AppChangelog::STATUS_APPROVED;
-				});
-				return $can;
-			} else {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 }

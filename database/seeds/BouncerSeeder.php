@@ -14,8 +14,6 @@ class BouncerSeeder extends Seeder
 		Bouncer::role()->newQuery()->delete();
 		Bouncer::ability()->newQuery()->delete();
 
-		// TODO: to have the ability and roles CRUDs work properly, we need to list
-		// all actions available in the system
 
 		// View list of all apps, even the non-owned ones
 		Bouncer::ability()::createForModel('App\Models\App', ['name' => 'view-any-in-prodi']);
@@ -41,6 +39,7 @@ class BouncerSeeder extends Seeder
 		Bouncer::allow('superadmin')->everything();
 		// Bouncer::forbid('superadmin')->toManage(\App\Models\AppCategory::class);
 		// Bouncer::forbid('superadmin')->toManage(\App\Models\AppTag::class);
+		// Bouncer::forbid('superadmin')->toManage(\App\Models\Role::class);
 		Bouncer::assign('superadmin')->to(1);
 
 

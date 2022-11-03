@@ -202,36 +202,38 @@ class AppReportController extends Controller
 		$verdict_status = $request->input('verdict');
 		if($verdict_status == AppVerdict::STATUS_INNOCENT) {
 			// Does being innocent mean ALL the reports have to be invalid?
-			// TODO: error message for this
 			$rules['verdict'][] = function($attr, $value, $fail) use($request) {
 				$result = collect($request->input('report.*.status'))->every(function($item) {
 					return $item == 'invalid';
 				});
 				if(!$result) {
-					// TODO: move message somewhere else
-					$fail('TODO: If the verdict is innocent, all the reports must be invalid.');
+					$fail(__('admin/app_reports.if_verdict_innocent_all_reports_must_be_invalid'));
 				}
 			};
 		} elseif($verdict_status == AppVerdict::STATUS_GUILTY) {
 			// Does being guilty mean AT LEAST ONE the reports have to be valid?
-			// TODO: error message for this
 			/*$rules['verdict'][] = function($attr, $value, $fail) use($request) {
 				$result = collect($request->input('report.*.status'))->contains('valid');
 				if(!$result) {
-					// TODO: move message somewhere else
-					$fail('TODO: If the verdict is guilty, at least one of the reports must be valid.');
+					$fail(__('admin/app_reports.if_verdict_guilty_one_report_must_be_valid'));
 				}
 			};*/
 		}
 
-		// TODO: field names
+		// Field names
+		$field_names = [
+			'report.*.id'		=> __('admin/app_reports.fields.report'),
+			'report.*.status'	=> __('admin/app_reports.fields.report_status'),
+			'final_comments'	=> __('admin/app_reports.fields.final_comments'),
+			'verdict'			=> __('admin/app_reports.fields.verdict'),
+		];
 		$messages = [
-			'report.*.id'		=> 'Terjadi kesalahan: item tidak ditemukan.',
+			'report.*.id'		=> __('validation.error_value_not_found'),
 		];
 
 
 		// Validate
-		$validData = $request->validate($rules);
+		$validData = $request->validate($rules, $messages, $field_names);
 
 		$result = true;
 		$error = [];
@@ -323,17 +325,15 @@ class AppReportController extends Controller
 			// Done
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = FALSE;
-			// TODO: do something with the message
 			$error[] = $e->getMessage();
-			// dd($e->getMessage());
 		}
 
 		if(!$result) {
 			DB::rollback();
 
-			// TODO: Pass a message...?
+			// Pass a message
 			$request->session()->flash('flash_message', [
-				'message'	=> __('admin.message.save_failed'),
+				'message'	=> __('admin/common.messages.save_failed'),
 				'type'		=> 'error'
 			]);
 
@@ -343,7 +343,7 @@ class AppReportController extends Controller
 
 			// Pass a message
 			$request->session()->flash('flash_message', [
-				'message'	=> __('admin.message.save_successful'),
+				'message'	=> __('admin/common.messages.save_successful'),
 				'type'		=> 'success'
 			]);
 

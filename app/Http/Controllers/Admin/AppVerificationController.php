@@ -291,8 +291,6 @@ class AppVerificationController extends Controller
 					foreach($related_versions as $rv) {
 						$rv->status = AppChangelog::STATUS_APPROVED;
 					}
-
-					// TODO: 'auto-commit-upon-approval' setting, maybe per user?
 				} elseif($verif_status == 'rejected') {
 					// Set all related changes to rejected...
 					// Rejected changes shouldn't be counted as pending changes anymore,
@@ -330,9 +328,7 @@ class AppVerificationController extends Controller
 			}
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = FALSE;
-			// TODO: do something with the message
 			$error[] = $e->getMessage();
-			// dd($e->getMessage());
 		}
 
 		if(!$result) {

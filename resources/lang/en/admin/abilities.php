@@ -34,6 +34,8 @@ return [
 	'mode_forbid'		=> 'Forbid',
 	'mode_forbidden'	=> 'Forbidden',
 	'only_owned'		=> 'Only on owned items',
+	'alias_from'		=> 'alias from',
+	'morphed_from'		=> 'morphed from',
 ],
 
 'fields'	=> [
@@ -52,9 +54,11 @@ return [
 	'users_hint'				=> 'Generally, abilities shouldn\'t be granted through direct assignments, but through role abilities instead.',
 	'entity_id'					=> 'Entity ID',
 	'entity_type'				=> 'Entity Type',
+	'entity_type_hint'			=> 'Entity type is the model class name for the rule. This may be morphed automatically if the system has a morph map defined for that entity/model class',
 	'only_owned'				=> 'Only Owned?',
 	'scope'						=> 'Scope',
 	'options'					=> 'Options',
+	'some_attributes_cannot_be_edited'	=> 'Some attributes of the ability cannot be edited because those abilities are used internally within the system.',
 ],
 
 

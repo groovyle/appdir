@@ -368,6 +368,8 @@ class RoleController extends Controller
 			// Users
 			$input_user_ids = $request->input('users', []);
 			$role->syncUsers($input_user_ids);
+
+			Bouncer::refresh();
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = false;
 			$messages[] = $e->getMessage();

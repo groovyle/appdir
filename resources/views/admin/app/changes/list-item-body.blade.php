@@ -9,7 +9,7 @@ $regular_relations = ['categories', 'tags'];
 @if($cl->based_on)
 <div class="mb-1">
 	@if($cl->is_switch)
-	<div class="text-info text-bold text-italic mt-n2 mb-2">
+	<div class="text-secondary text-bold text-italic mt-n2 mb-2">
 		@lang('admin/apps.changes.this_version_was_a_result_of_version_switch')
 	</div>
 	@endif

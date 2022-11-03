@@ -86,7 +86,7 @@ class AppController extends Controller
 		$user = Auth::user();
 		// $apps = Auth::user()->apps()->get();
 
-		$filters = get_filters(['keyword', 'status', 'published', 'categories', 'tags', 'owned', 'prodi_id']);
+		$filters = get_filters(['keyword', 'status', 'published', 'categories', 'tags', 'whose', 'user_id', 'prodi_id']);
 		$opt_filters = optional($filters);
 		$filter_count = 0;
 
@@ -201,13 +201,18 @@ class AppController extends Controller
 				break;
 		}
 
-		switch($opt_filters['owned']) {
-			case 'mine':
+		$opt_filters['user_id'] = $opt_filters['whose'] != 'specific' ? null : ($opt_filters['user_id'] ?: '');
+		switch($opt_filters['whose']) {
+			case 'own':
 				$query->where('a.owner_id', '=', $user->id);
 				$filter_count++;
 				break;
 			case 'others':
 				$query->where('a.owner_id', '!=', $user->id);
+				$filter_count++;
+				break;
+			case 'specific':
+				$query->where('a.owner_id', '=', $opt_filters['user_id']);
 				$filter_count++;
 				break;
 		}
@@ -308,8 +313,6 @@ class AppController extends Controller
 			'categories.*'		=> [/*'required', */'integer', new ModelExists(AppCategory::class)],
 			'tags'				=> [/*'required', */'array'],
 			'tags.*'			=> [/*'required', */'string', 'alpha_dash'],
-			'visuals'			=> ['array', 'max:'.ini_max_file_uploads()],
-			'visuals.*'			=> ['file', 'image', 'max:2048'],
 		];
 
 		// Settings-based rules
@@ -324,17 +327,26 @@ class AppController extends Controller
 		if($tags_min) $rules['tags'][] = 'min:'.$tags_min;
 		if($tags_max) $rules['tags'][] = 'max:'.$tags_max;
 
-		if($vis_max_size = settings('app.visuals.max_size'))
-			$rules['visuals.*'][] = 'max:'.$vis_max_size;
-
 		// END Settings-based rules
 
-		$validData = $request->validate($rules);
+		$field_names = [
+			'app_name'			=> __('admin/apps.fields.name'),
+			'app_short_name'	=> __('admin/apps.fields.short_name'),
+			'app_description'	=> __('admin/apps.fields.description'),
+			'app_url'			=> __('admin/apps.fields.url'),
+			'app_logo'			=> __('admin/apps.fields.logo'),
+			'categories'		=> __('admin/apps.fields.categories'),
+			'categories.*'		=> __('admin/apps.fields.category'),
+			'tags'				=> __('admin/apps.fields.tags'),
+			'tags.*'			=> __('admin/apps.fields.tag'),
+		];
+
+		$validData = $request->validate($rules, [], $field_names);
 
 		// Validate files
 		$validFiles = Filepond::field($logo_input_hash)->validate([
 			'app_logo'	=> ['nullable', 'file', 'image', 'max:2048'],
-		]);
+		], [], $field_names);
 
 		AppManager::prepareForVersionDiff($app);
 
@@ -399,20 +411,7 @@ class AppController extends Controller
 				$app->categories()->attach($categories);
 				$app->tags()->attach($tags);
 			} else {
-				// NOTE: if verification is used, attach/detach relationships later
-
-				// Categories
-				// Detach all then attach
-				// TODO: why not use sync(), is there a specific reason?
-				/*$app->categories()->detach();
-				$app->categories()->attach($categories);*/
-				// $app->categories()->sync($categories);
-
-				// Tags
-				// Detach all then attach
-				/*$app->tags()->detach();
-				$app->tags()->attach($tags);*/
-				// $app->tags()->sync($tags);
+				// NOTE: for edits, attach/detach relationships later
 			}
 
 			$rel_categories = AppCategory::findMany($categories);
@@ -483,7 +482,7 @@ class AppController extends Controller
 					$logo_upl = new File($fpath);
 				} catch(\Exception $e) {
 					$logo_result = false;
-					$messages[] = 'Gagal memproses logo unggahan: '. $logo_file->getClientOriginalName(); // TODO: fix message
+					$messages[] = __('admin/common.messages.upload_x_error_file', ['x' => __('admin/common.logo'), 'file' => $logo_file->getClientOriginalName()]);
 				}
 
 				if($result) {
@@ -518,18 +517,11 @@ class AppController extends Controller
 				$result = $changes['status'];
 			}
 
-			if($is_edit && $result) {
-				// Save edit only after diffing
-				// TODO: what about staging?
-				// $result = $result && $app->save();
-			}
-
 			// Delete temp files
 			if($result && $logo_result) {
 				Filepond::field($logo_input_hash)->delete();
 			}
 
-			// TODO: check config whether verification is used at all
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = FALSE;
 			$messages[] = $e->getMessage();
@@ -918,6 +910,8 @@ class AppController extends Controller
 		$data['pending_edits'] = settings('app.modification_needs_verification', false);
 		$data['caption_limit'] = settings('app.visuals.caption_limit', 300);
 
+		$data['vis_max_size'] = settings('app.visuals.max_size');
+
 		return view('admin/app/visuals', $data);
 	}
 
@@ -939,20 +933,25 @@ class AppController extends Controller
 			'visuals.*.caption'	=> ['nullable', 'string'],
 			'visuals.*.delete'	=> ['nullable'],
 			// 'new_images.*'		=> ['nullable', 'string'],
-			'viso'				=> ['nullable', 'array'], // TODO: add checking whether visuals has reached max or not
-			'viso.*.type'		=> ['required', 'string'], // TODO: check against type whitelist
+			'viso'				=> ['nullable', 'array'],
+			'viso.*.type'		=> ['required', 'string'],
 			'viso.*.value'		=> ['required', 'string'],
 		];
 
 		if($caption_limit = settings('app.visuals.caption_limit', 300))
 			$rules['visuals.*.caption'][] = 'max:'.$caption_limit;
 
-		// TODO: field names
+		// Field names
+		$field_names = [
+			'visuals.*.id'		=> __('admin/common.image'),
+			'visuals.*.order'	=> __('admin/apps.fields.order'),
+			'visuals.*.caption'	=> __('admin/apps.fields.caption'),
+			'new_images.*'		=> __('admin/apps.fields.new_images'),
+			'viso.*.type'		=> __('admin/apps.fields.other_visuals_type'),
+			'viso.*.value'		=> __('admin/apps.fields.other_visuals_value'),
+		];
 		$messages = [
-			'visuals.*.id'		=> 'Terjadi kesalahan: item tidak ditemukan.',
-			'viso'				=> 'Maksimal jumlah lang:visuals adalah x',
-			// 'viso.*.type'		=> '', // just change the attribute name
-			// 'viso.*.value'		=> '', // just change the attribute name
+			'visuals.*.id'		=> __('validation.error_value_not_found'),
 		];
 
 		// Dynamically add rules concerning the viso value based on its type
@@ -994,19 +993,22 @@ class AppController extends Controller
 			$rules['visuals_count'][] = function($attr, $value, $fail) use($max_visuals, $not_deleted, $new_images_hash, $viso_not_empty) {
 				$new_count = count($not_deleted) + count($new_images_hash) + count($viso_not_empty);
 				if($new_count > $max_visuals) {
-					// TODO: move message somewhere else
-					$fail('Max amount of visuals ($max_visuals) reached).');
+					$fail(__('admin/apps.messages.max_amount_of_visuals_reached', ['x' => $max_visuals]));
 				}
 			};
 		}
 
 		// Validate
-		$validData = $request->validate($rules);
+		$validData = $request->validate($rules, $messages, $field_names);
 
 		// Validate files
-		$validFiles = Filepond::field($new_images_hash)->validate([
-			'new_images.*'	=> ['nullable', 'file', 'max:2048'], // TODO: settings on max image size
-		]);
+		$filepond_rules = [
+			'new_images.*'	=> ['nullable', 'file'],
+		];
+		if($vis_max_size = settings('app.visuals.max_size'))
+			$filepond_rules['new_images.*'][] = 'max:'.$vis_max_size;
+
+		$validFiles = Filepond::field($new_images_hash)->validate($filepond_rules, $messages, $field_names);
 
 		// Prepare for app diff
 		AppManager::prepareForVersionDiff($app);
@@ -1023,11 +1025,7 @@ class AppController extends Controller
 			// Delete items first
 			foreach($deleted as $vdel) {
 				$vis = $visuals_by_id[$vdel['id']];
-				$vis->order = 99;
-
-				// TODO: Respect verf settings
-				// $result = $result && $vis->delete(); // make sure is soft-delete
-				$vis->deleted_at = $vis->freshTimestampString();
+				$vis->setToDeleted();
 				unset($rel_visuals[$vis->id]);
 			}
 
@@ -1038,9 +1036,6 @@ class AppController extends Controller
 				$vis = $visuals_by_id[$ivis['id']];
 				$vis->order = ++$visorder; // instead of the order input, because deleted files are not counted
 				$vis->caption = $ivis['caption'];
-
-				// TODO: Respect verf settings
-				// $result = $result && $vis->save();
 			}
 
 
@@ -1103,8 +1098,8 @@ class AppController extends Controller
 						}
 					} catch(\Exception $e) {
 						$new_images_result = false;
-						$error[] = 'Gagal memproses gambar unggahan: '. $imgfile->getClientOriginalName(); // TODO: fix message
-						continue; // TODO: continue or break?
+						$error[] = __('admin/common.messages.upload_x_error_file', ['x' => __('admin/common.image'), 'file' => $imgfile->getClientOriginalName()]);
+						continue;
 					}
 
 					// Gather image meta, store as json string
@@ -1132,36 +1127,37 @@ class AppController extends Controller
 			}
 
 			$result = $result && $new_images_result;
-			// TODO: do something with the message
 
 			// Insert non images
-			foreach($viso_not_empty as $viso) {
-				$vis = new AppVisualMedia;
-				$vis->app_id = $app->id;
-				$vis->order = ++$visorder;
-				$type = explode('.', $viso['type']);
-				$vis->type = $type[0];
-				$vis->subtype = $type[1];
+			if($result) {
+				foreach($viso_not_empty as $viso) {
+					$vis = new AppVisualMedia;
+					$vis->app_id = $app->id;
+					$vis->order = ++$visorder;
+					$type = explode('.', $viso['type']);
+					$vis->type = $type[0];
+					$vis->subtype = $type[1];
 
-				$value = null;
-				if($viso['type'] == 'video.youtube') {
-					// TODO: get video meta from URL maybe...?
-					$value = get_youtube_id_from_url($viso['value']);
-					$meta = [
-						'youtube_id'	=> $value,
-						'url'			=> get_youtube_url($value),
-					];
-					$vis->meta = $meta;
+					$value = null;
+					if($viso['type'] == 'video.youtube') {
+						// TODO: get video meta from URL maybe...?
+						$value = get_youtube_id_from_url($viso['value']);
+						$meta = [
+							'youtube_id'	=> $value,
+							'url'			=> get_youtube_url($value),
+						];
+						$vis->meta = $meta;
+					}
+
+					$vis->media_name = $value;
+					$vis->media_path = $viso['value'];
+
+					// NOTE: Respect verf settings, undelete later
+					$vis->deleted_at = $vis->freshTimestampString();
+
+					$result = $result && $vis->save();
+					$rel_visuals[$vis->id] = $vis;
 				}
-
-				$vis->media_name = $value;
-				$vis->media_path = $viso['value'];
-
-				// NOTE: Respect verf settings, undelete later
-				$vis->deleted_at = $vis->freshTimestampString();
-
-				$result = $result && $vis->save();
-				$rel_visuals[$vis->id] = $vis;
 			}
 
 			$app->setRelation('visuals', elocollect($rel_visuals->values()->all()));
@@ -1177,9 +1173,7 @@ class AppController extends Controller
 			}
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = FALSE;
-			// TODO: do something with the message
 			$error[] = $e->getMessage();
-			// dd($e->getMessage());
 		}
 
 		if(!$result) {
@@ -1192,9 +1186,9 @@ class AppController extends Controller
 				}
 			}
 
-			// TODO: Pass a message...?
+			// Pass a message
 			$request->session()->flash('flash_message', [
-				'message'	=> __('admin.message.save_failed'),
+				'message'	=> __('admin/apps.messages.update_failed'),
 				'type'		=> 'error'
 			]);
 
@@ -1266,14 +1260,17 @@ class AppController extends Controller
 
 		$rules = [
 			// 'versionb'			=> ['required'],
-			'verif_ids'	=> [ // TODO: message for if this fails (e.g going back to page or manually entering the address to bypass reports)
+			'verif_ids'	=> [
 				'required',
 				new ModelExists(AppVerification::class, 'id', ',', function($query) use($app) {
 					$query->where('app_id', $app->id);
 				}),
 			],
 		];
-		$validData = $request->validate($rules);
+		$messages = [
+			'verif_ids'	=> __('admin/apps.messages.publish_invalid_verif_ids'),
+		];
+		$validData = $request->validate($rules, $messages);
 
 		$input_verif_ids = explode(',', $request->input('verif_ids'));
 		$input_verif_ids = array_filter(array_unique($input_verif_ids));
@@ -1311,9 +1308,7 @@ class AppController extends Controller
 			$result = AppManager::verifyAndApplyChanges($app, $changelogs, $publish, $user);
 		} catch(\Exception $e) {
 			$result = FALSE;
-			// TODO: do something with the message
 			$error[] = $e->getMessage();
-			// dd($e->getMessage());
 		}
 
 		if(!$result) {
@@ -1330,7 +1325,6 @@ class AppController extends Controller
 			DB::commit();
 
 			// Pass a message
-			// TODO: maybe different messages for when it's an edit/new thing?
 			$request->session()->flash('flash_message', [
 				'message'	=> __('admin/apps.messages.update_successful'),
 				'type'		=> 'success'
@@ -1713,7 +1707,7 @@ class AppController extends Controller
 		$data = [];
 		$user = Auth::user();
 
-		$filters = get_filters(['keyword', 'owned']);
+		$filters = get_filters(['keyword', 'whose', 'user_id']);
 		$opt_filters = optional($filters);
 		$filter_count = 0;
 
@@ -1732,13 +1726,18 @@ class AppController extends Controller
 			$filter_count++;
 		}
 
-		switch($opt_filters['owned']) {
-			case 'mine':
+		$opt_filters['user_id'] = $opt_filters['whose'] != 'specific' ? null : ($opt_filters['user_id'] ?: '');
+		switch($opt_filters['whose']) {
+			case 'own':
 				$query->where('a.owner_id', '=', $user->id);
 				$filter_count++;
 				break;
 			case 'others':
 				$query->where('a.owner_id', '!=', $user->id);
+				$filter_count++;
+				break;
+			case 'specific':
+				$query->where('a.owner_id', '=', $opt_filters['user_id']);
 				$filter_count++;
 				break;
 		}
@@ -1794,7 +1793,6 @@ class AppController extends Controller
 				];
 			}
 		} elseif($request->has('new') && $request->has('old')) {
-			// TODO: what about the items order?
 			$new = explode(',', $request->input('new'));
 			$old = explode(',', $request->input('old'));
 
@@ -1819,8 +1817,7 @@ class AppController extends Controller
 		}
 
 		if(empty($items)) {
-			echo 'Please specify version or items to be compared'; // TODO message
-			return;
+			return response(__('admin/apps.messages.please_specify_version_to_be_compared'), 404);
 		}
 
 		// dd($items);

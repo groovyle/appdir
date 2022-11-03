@@ -303,9 +303,6 @@ class AbilityController extends Controller
 	protected function _store($request, $abl = NULL) {
 
 		$is_edit = $abl instanceof Ability;
-		if(!$is_edit) {
-			$abl = new Ability;
-		}
 
 		$user = $request->user();
 		$user_id = $user->id;
@@ -315,13 +312,12 @@ class AbilityController extends Controller
 		$rules = [
 			// 'dummy'			=> ['required'],
 			'name'			=> [
-				'required',
-				// Rule::requiredIf(!$is_edit),
+				Rule::requiredIf(!$is_edit),
 				'max:100',
 				// Rule::unique(Ability::class, 'name')->ignore($abl),
 			],
 			'title'			=> ['nullable', 'string', 'max:200'],
-			'entity_type'	=> ['nullable', 'string', 'max:100'],
+			'entity_type'	=> [Rule::requiredIf(!$is_edit), 'string', 'max:100'],
 			'entity_id'		=> ['nullable', 'string', 'max:100'],
 			'only_owned'	=> ['nullable'],
 			'roles'			=> ['nullable', 'array'],
@@ -341,57 +337,68 @@ class AbilityController extends Controller
 
 		// Begin storing entries
 		try {
-			/*if(!$is_edit) {
-				$abl->name = $request->input('name');
-			}*/
-			$abl->name = $request->input('name');
-			$abl->entity_type = $request->input('entity_type');
-			$abl->entity_id = $request->input('entity_id');
-			$abl->only_owned = $request->input('only_owned') == '1';
+			// NOTE: use Bouncer methods to discover abilities instead of making
+			// a model of our own, because some model class names are translated
+			// by morphMap.
+			if(!$is_edit) {
+				$attributes = [
+					'name'			=> $request->input('name'),
+					'entity_id'		=> $request->input('entity_id'),
+					'only_owned'	=> $request->input('only_owned') == '1',
+				];
+				$abl = Bouncer::ability()::createForModel($request->input('entity_type'), $attributes);
+			}
 
 			$abl->title	= $request->input('title');
 			if(is_null($abl->title)) {
 				$abl->title = AbilityTitle::from($abl)->toString();
 			}
-
 			$result = $abl->save();
 
-			// Roles
-			$input_role_ids = $request->input('roles', []);
-			$role_ids_used = [];
-			$role_ids_unused = [];
-			foreach($input_role_ids as $irole) {
-				if(!isset($irole['check'])) {
-					$role_ids_unused[] = $irole['id'];
-				} else {
-					$role_ids_used[$irole['id']] = ['forbidden' => ($irole['mode'] ?? null) == 'forbid' ? 1 : 0];
+			if($result) {
+				// Roles
+				$input_role_ids = $request->input('roles', []);
+				$role_ids_used = [];
+				$role_ids_unused = [];
+				foreach($input_role_ids as $irole) {
+					if(!isset($irole['check'])) {
+						$role_ids_unused[] = $irole['id'];
+					} else {
+						$role_ids_used[$irole['id']] = ['forbidden' => ($irole['mode'] ?? null) == 'forbid' ? 1 : 0];
+					}
+				}
+				// Can't do the following because it discards the forbidden attribute
+				// $abl->roles()->sync($role_ids);
+
+				// Manually do each role
+				$current_roles = $abl->roles;
+				$roles_unused = Role::findMany($role_ids_unused);
+				foreach($current_roles->intersect($roles_unused) as $r) {
+					Bouncer::disallow($r)->to($abl);
+					Bouncer::unforbid($r)->to($abl);
+				}
+				$roles_used = Role::findMany(array_keys($role_ids_used));
+				foreach($roles_used as $r) {
+					Bouncer::disallow($r)->to($abl);
+					Bouncer::unforbid($r)->to($abl);
+					if($role_ids_used[$r->id]['forbidden']) {
+						Bouncer::forbid($r)->to($abl);
+					} else {
+						Bouncer::allow($r)->to($abl);
+					}
 				}
 			}
-			// Can't do the following because it discards the forbidden attribute
-			// $abl->roles()->sync($role_ids);
 
-			// Manually do each role
-			$current_roles = $abl->roles;
-			$roles_unused = Role::findMany($role_ids_unused);
-			foreach($current_roles->intersect($roles_unused) as $r) {
-				Bouncer::disallow($r)->to($abl);
-				Bouncer::unforbid($r)->to($abl);
-			}
-			$roles_used = Role::findMany(array_keys($role_ids_used));
-			foreach($roles_used as $r) {
-				Bouncer::disallow($r)->to($abl);
-				Bouncer::unforbid($r)->to($abl);
-				if($role_ids_used[$r->id]['forbidden']) {
-					Bouncer::forbid($r)->to($abl);
-				} else {
-					Bouncer::allow($r)->to($abl);
-				}
+
+			if($result) {
+				// Users
+				$user_ids = $request->input('users', []);
+				$abl->syncUsers($user_ids);
 			}
 
-
-			// Users
-			$user_ids = $request->input('users', []);
-			$abl->syncUsers($user_ids);
+			if($result) {
+				Bouncer::refresh();
+			}
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = false;
 			$messages[] = $e->getMessage();

@@ -105,18 +105,6 @@ if(!$is_edit) {
               @endcomponent
               <input type="text" name="app_url" class="form-control" id="inputAppUrl" placeholder="{{ __('admin/apps.fields.url_placeholder') }}" value="{{ old('app_url', $app->url) }}" maxlength="200">
             </div>
-
-            {{--
-            <div class="form-group">
-              <label for="inputAppType">{{ __('admin/apps.fields.type') }}</label>
-              <select name="type" class="custom-select d-block w-auto" id="inputAppType" style="min-width: 100px;">
-                <option value="">&ndash; {{ __('admin/apps.fields.type_placeholder') }} &ndash;</option>
-                @if (!empty($types))
-                {!! generate_options($types, old('type', $app->type_id)) !!}
-                @endif
-              </select>
-            </div>
-            --}}
           </div>
 
           <div class="col-12 col-md-4 col-xl-6">

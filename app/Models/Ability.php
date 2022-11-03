@@ -61,4 +61,21 @@ class Ability extends BaseAbility
 		}
 	}
 
+
+	public function getAliasedEntityTypeAttribute() {
+		$entity_type = $this->attributes['entity_type'] ?? null;
+		if(!$entity_type && $entity_type == '*')
+			return $entity_type;
+
+		return get_morph_model($entity_type, false) != null;
+	}
+
+	public function getDisplayEntityTypeAttribute() {
+		$entity_type = $this->attributes['entity_type'] ?? null;
+		if(!$entity_type && $entity_type == '*')
+			return $entity_type;
+
+		return get_morph_model($entity_type, true);
+	}
+
 }

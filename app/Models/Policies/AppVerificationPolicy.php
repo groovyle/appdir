@@ -4,6 +4,7 @@ namespace App\Models\Policies;
 
 use App\Models\App;
 use App\Models\AppVerification;
+use App\Models\AppChangelog;
 use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -54,10 +55,36 @@ class AppVerificationPolicy
 	 */
 	public function update(User $user, AppVerification $verif)
 	{
-		//
-		if($verif->exists) {
-			if(!$verif->can_edit) return false;
+		// Must exist
+		if(!$verif->exists)
+			return false;
+
+		// NOTE: can only be edited by the verifier themself, or...?
+		if($user->id != $verif->verifier_id) {
+			return false;
 		}
+
+		// TODO: maybe add a time restriction (e.g only 24 hours after last update?)
+		if($verif->id == $verif->app->last_verification->id
+			&& $verif->status->by == 'verifier'
+			&& $verif->concern == AppVerification::CONCERN_VERIFICATION
+		) {
+			// Is the last verification
+			if($verif->status_id == 'approved') {
+				// Can only edit approved ones if the changes were not committed yet
+				$can = $verif->changelogs->every(function($item, $key) {
+					return $item->status == AppChangelog::STATUS_APPROVED;
+				});
+				if(!$can)
+					return false;
+				else
+					return;
+			} else {
+				return;
+			}
+		}
+
+		return false;
 	}
 
 	/**

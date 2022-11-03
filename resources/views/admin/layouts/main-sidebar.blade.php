@@ -73,7 +73,7 @@ $menu_list = [
 		'icon'	=> 'fas fa-users',
 		'route'	=> 'admin.users.index',
 		'match'	=> 'admin.users.',
-		'check'	=> Gate::allows('view-any', 'App\User'),
+		'check'	=> Gate::allows('view-any', App\User::class),
 	],
 	'user_roles'	=> [
 		'text'	=> __('admin/menus.user_roles'),
@@ -113,8 +113,8 @@ $menu_list = [
 	],
 ];
 
-// TODO: different menus based on role
-// ?? or just divide it by the checks??? p good huh?
+// NOTE: different menus based on role
+// divided by the checks, p good huh?
 $menus = [
 	'dashboard',
 

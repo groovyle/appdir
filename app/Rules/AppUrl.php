@@ -55,8 +55,9 @@ class AppUrl implements Rule
 	 */
 	public function message()
 	{
-		return trans('validation.app_url', [
-			'attribute' => lang_or_raw($this->attribute, 'validation.attributes.')
+		return trans('validation.url', [
+			'attribute'	=> lang_or_raw($this->attribute, 'validation.attributes.'),
+			'value' => $this->value,
 		]);
 	}
 }

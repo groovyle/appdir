@@ -62,7 +62,15 @@ $rand = random_string(5);
             </div>
             <div class="col d-table-cell w-auto">
               <dt>@lang('admin/abilities.fields.entity_type')</dt>
-              <dd>@vo_($abl->entity_type)</dd>
+              <dd>
+                @vo_($abl->entity_type)
+                @if($abl->aliased_entity_type)
+                <div class="text-080 text-italic text-secondary mt-n1">
+                  @lang('admin/abilities.details.morphed_from')
+                  <strong>{{ $abl->display_entity_type }}</strong>
+                </div>
+                @endif
+              </dd>
             </div>
             <div class="col d-table-cell w-auto">
               <dt>@lang('admin/abilities.fields.entity_id')</dt>

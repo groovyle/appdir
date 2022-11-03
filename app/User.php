@@ -2,8 +2,6 @@
 
 namespace App;
 
-use App\SystemDataProviders\SystemDataBroker;
-
 use App\DataManagers\UserManager;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;

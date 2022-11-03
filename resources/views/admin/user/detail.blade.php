@@ -135,7 +135,7 @@ $rand = random_string(5);
             @if(!$user->is_system)
             {{ $user->apps_count }}
             @if($user->apps_count > 0)
-            <a href="{{ route('admin.apps.index', ['user' => $user->id]) }}" class="text-secondary px-1 py-1 ml-2" title="@lang('admin/users.see_apps_by_this_user')" data-toggle="tooltip"><span class="fas fa-folder-open"></span> TODO</a>
+            <a href="{{ route('admin.apps.index', $user->is_me ? ['whose' => 'own'] : ['whose' => 'specific', 'user_id' => $user->id]) }}" class="text-info px-1 py-1 ml-2" title="@lang('admin/users.see_apps_by_this_user')" data-toggle="tooltip"><span class="fas fa-folder-open"></span></a>
             @endif
             @else
             @vo_

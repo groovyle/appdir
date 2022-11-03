@@ -33,13 +33,6 @@ if(!$is_edit) {
 
 @section('content')
 
-<div class="alert alert-warning">
-  <div class="icon-text-pair icon-color-reset">
-    <span class="fas fa-exclamation-triangle icon icon-2x mt-2 mr-2"></span>
-    <span>@lang('admin/roles.management_warning')</span>
-  </div>
-</div>
-
 <div class="mb-2">
   @if($back)
   @if($is_edit)
@@ -48,6 +41,13 @@ if(!$is_edit) {
   <a href="{{ $back }}" class="btn btn-sm btn-default">&laquo; {{ __('common.back_to_list') }}</a>
   @endif
   @endif
+</div>
+
+<div class="alert alert-warning">
+  <div class="icon-text-pair icon-color-reset">
+    <span class="fas fa-exclamation-triangle icon icon-2x mt-2 mr-2"></span>
+    <span>@lang('admin/roles.management_warning')</span>
+  </div>
 </div>
 
 <form method="POST" action="{{ $action }}" class="no-enter-submit" id="formInputRole">

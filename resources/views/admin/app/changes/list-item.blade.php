@@ -20,14 +20,12 @@ $show_preview = !!($show_preview ?? true);
 					@endif
 				@endif
 			</span>
-			@if($show_status)
-			<span class="fas fa-recycle text-info text-080 ml-2" title="@lang('admin/apps.changes.this_version_was_a_result_of_version_switch')" data-toggle="tooltip"></span>
-			@if($show_current)
+			@if($show_current && $show_status)
 			<span class="text-090 ml-2">@include('components.app-version-status', ['status' => $cl->status, 'class' => 'align-middle'])</span>
 			@endif
-			@endif
 			<br>
-			<div class="changes-timestamp">@include('components.date-with-tooltip', ['date' => $cl->created_at])</div>
+			<div class="changes-timestamp d-inline-block">@include('components.date-with-tooltip', ['date' => $cl->created_at])</div>
+			<span class="fas fa-recycle text-info text-070 ml-2" title="@lang('admin/apps.changes.this_version_was_a_result_of_version_switch')" data-toggle="tooltip"></span>
 		</h5>
 		<div class="card-tools">
 			@if($show_switch)

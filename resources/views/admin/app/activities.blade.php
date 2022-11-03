@@ -42,13 +42,17 @@ $scroll_content = !isset($goto_item) && ($show_filters || request()->has('page')
         </div>
         @if($view_mode != 'owned')
         <div class="form-group row">
-          <label for="fOwned" class="col-sm-3 col-lg-2">{{ __('admin/apps.fields.filter_is_owned') }}</label>
+          <label for="fWhose" class="col-sm-3 col-lg-2">{{ __('admin/apps.fields.filter_whose') }}</label>
           <div class="col-sm-8 col-lg-5">
-            <select class="form-control" name="owned" id="fOwned" autocomplete="off">
+            <select class="form-control" name="whose" id="fWhose" autocomplete="off">
               <option value="">&ndash; {{ __('admin/common.all') }} &ndash;</option>
-              <option value="mine" {!! old_selected('', $filters['owned'], 'mine') !!}>{{ __('admin/apps.status.my_apps') }}</option>
-              <option value="others" {!! old_selected('', $filters['owned'], 'others') !!}>{{ __('admin/apps.status.other_apps') }}</option>
+              <option value="own" {!! old_selected('', $filters['whose'], 'own') !!}>{{ __('admin/apps.status.my_apps') }}</option>
+              <option value="others" {!! old_selected('', $filters['whose'], 'others') !!}>{{ __('admin/apps.status.others_apps') }}</option>
+              <option value="specific" {!! old_selected('', $filters['whose'], 'specific') !!}>{{ __('admin/apps.status.someones_apps') }}</option>
             </select>
+            <div class="mt-1 filter-user-wrapper">
+              <select class="form-control" name="user_id" id="fUserId"></select>
+            </div>
           </div>
         </div>
         @endif
@@ -164,6 +168,68 @@ jQuery(document).ready(function($) {
   $filterForm.on("expanded.lte.cardwidget", function(e) {
     $filterForm.find("input, textarea, select").trigger("change");
   });
+
+  var $filterWhose = $("#fWhose");
+  var $filterUser = $("#fUserId");
+  $filterUser.select2({
+    closeOnSelect: true,
+    selectOnClose: false,
+    allowClear: true,
+    placeholder: @json(__('admin/apps.fields.filter_whose')),
+    ajax: {
+      url: @json(route('admin.users.lookup')),
+      delay: 500,
+      dataType: "json",
+      cache: true,
+      method: "GET",
+      data: function(params) {
+        var query = {
+          keyword: params.term,
+          page: params.page || 1,
+        };
+        return query;
+      },
+      processResults: function(data, params) {
+        return {
+          results: data.data,
+          total: data.total,
+          pagination: {
+            more: data.more,
+          },
+        };
+      },
+    },
+  });
+  // Pre-populate users
+  var oldUserId = @json($filters['user_id']);
+  if(oldUserId) {
+    $.ajax({
+      url: @json(route('admin.users.lookup')),
+      dataType: "json",
+      cache: true,
+      method: "GET",
+      data: {
+        ids: oldUserId,
+      },
+      success: function(data, status, xhr) {
+        if(!data.success) return;
+        data.data.forEach(function(item) {
+          var opt = new Option(item.text, item.id, true, true);
+          $filterUser.append(opt);
+        });
+        $filterUser.trigger("change");
+      },
+    });
+  }
+
+  $filterWhose.on("change", function(e) {
+    var useUser = $(this).val() == "specific";
+    $(".filter-user-wrapper").toggleClass("d-none", !useUser);
+    if(!useUser) {
+      // $filterUser.val(null).trigger("change");
+    }
+  }).trigger("change");
+
 
 });
 </script>

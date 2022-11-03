@@ -96,7 +96,6 @@ $scroll_content = !isset($goto_item) && ($show_filters || request()->has('page')
               <td>
                 @if($app->num_unresolved_reports > 0)
                 @lang('admin/app_reports.x_unresolved_reports', ['x' => $app->num_unresolved_reports])
-                <!-- TODO: excessive reports info here -->
                 @else
                 @von
                 @endif

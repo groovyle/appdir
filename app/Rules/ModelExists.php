@@ -78,10 +78,14 @@ class ModelExists implements Rule
 	 */
 	public function message()
 	{
-		// TODO: what about just using the validation.exists message?
+		/* // DEBUG
 		return trans('validation.model_exists', [
 			'attribute' => lang_or_raw($this->attribute, 'validation.attributes.'),
 			'model'     => $this->model
-		]).' | '.implode(', ', [$this->key_name, $this->attribute, $this->value]); // TODO: fix message
+		]).' | '.implode(', ', [$this->key_name, $this->attribute, $this->value]);*/
+		return trans('validation.exists', [
+			'attribute'	=> lang_or_raw($this->attribute, 'validation.attributes.'),
+			'value' => $this->value,
+		]);
 	}
 }

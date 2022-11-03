@@ -78,4 +78,11 @@ class AppVisualBase extends Model
 
 		return $texts;
 	}
+
+	public function setToDeleted($state = true) {
+		$this->{$this->getDeletedAtColumn()} = $state ? $this->freshTimestampString() : false;
+		if($state) {
+			$this->order = 99;
+		}
+	}
 }

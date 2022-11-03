@@ -228,7 +228,7 @@ class AppPolicy
 			return false;
 		elseif($app->version_number == $version->version) // cant switch to self
 			return false;
-		elseif($version->updated_at > $app->version->updated_at) // TODO:? target is from the future
+		elseif($version->updated_at > $app->version->updated_at) // NOTE: target cant be from the future... or?
 			return false;
 		elseif(!$version->is_committed) // not an applied version
 			return false;

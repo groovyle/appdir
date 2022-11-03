@@ -68,10 +68,12 @@ return [
 	'violation_types'	=> 'Violation Types',
 	'categories'		=> 'Categories',
 	'reports'			=> 'Reports',
+	'report'			=> 'Report',
+	'report_status'		=> 'Report status',
 	'reason'			=> 'Reason',
 	'comments'			=> 'Comments',
 	'final_comments'	=> 'Final Comments',
-	'final_comments_hint'	=> 'The app owner won\'t be able to see the report texts (they only see the violation/report categories), so make sure to summarize below about which parts of the content are inappropriate. A clear explanation will help the app owner to spot and correct their mistakes.',
+	'final_comments_hint'	=> 'The app owner won\'t be able to see the report submissions (they only see the violation/report categories), so make sure to summarize below about which parts of the content are inappropriate. A clear explanation will help the app owner to spot and correct their mistakes.',
 	'final_comments_placeholder'	=> 'A brief summary to tell the app owner about which parts of the content are inappropriate, and additional details related to the reports...',
 	'verdict'			=> 'Verdict',
 	'verdict_notes'		=> 'Verdict Notes',
@@ -100,6 +102,8 @@ return [
 
 'messages'			=> [
 	'user_app_x_has_inappropriate_content_y'	=> 'This user\'s app, :x, had been found to have inappropriate content: :y',
+	'if_verdict_innocent_all_reports_must_be_invalid'	=> 'If the verdict is innocent, all the reports must be invalid.',
+	'if_verdict_guilty_one_report_must_be_valid'	=> 'If the verdict is guilty, at least one of the reports must be valid.',
 ],
 
 ];

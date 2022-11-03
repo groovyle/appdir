@@ -76,7 +76,16 @@ class UserPolicy
 	public function update(User $user, User $model)
 	{
 		//
-		return $this->standardModelCheck($user, $model);
+		$check = $this->standardModelCheck($user, $model);
+		if($check === false) return false;
+
+		// Can update self
+		if($model->is_me) return true;
+
+		// Cannot edit users on the same level or above - this means can only
+		// edit for users below in hierarchy
+		$role_compare = UserManager::userRoleCompare($user, $model);
+		if($role_compare < 1) return false;
 	}
 
 	/**
@@ -102,7 +111,13 @@ class UserPolicy
 	public function restore(User $user, User $model)
 	{
 		//
-		return $this->standardModelCheck($user, $model);
+		$check = $this->standardModelCheck($user, $model);
+		if($check === false) return false;
+
+		// Cannot edit users on the same level or above - this means can only
+		// edit for users below in hierarchy
+		$role_compare = UserManager::userRoleCompare($user, $model);
+		if($role_compare < 1) return false;
 	}
 
 	/**
@@ -131,7 +146,7 @@ class UserPolicy
 		if($model->is_me) return false;
 
 
-		// Cannot mainpulate users on the same level or above - this means can only
+		// Cannot manipulate users on the same level or above - this means can only
 		// manipulate for users below in hierarchy
 		$role_compare = UserManager::userRoleCompare($user, $model);
 		if($role_compare < ($allow_equal ? 0 : 1)) return false;

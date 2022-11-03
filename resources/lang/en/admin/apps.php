@@ -102,7 +102,8 @@ return [
 	'is_verified'		=> 'Verified',
 	'is_unverified'		=> 'Unverified',
 	'my_apps'			=> 'My apps',
-	'other_apps'		=> 'Other apps',
+	'others_apps'		=> 'Other\'s apps',
+	'someones_apps'		=> 'Someone\'s apps',
 ],
 
 'fields'	=> [
@@ -123,9 +124,12 @@ return [
 	'remove_logo?'				=> 'Remove logo?',
 	'change_logo'				=> 'Change logo',
 	'visuals'					=> 'Visual Media',
+	'new_images'				=> 'New image(s)',
 	'categories'				=> 'Categories',
+	'category'					=> 'Category',
 	'categories_placeholder'	=> 'Categories the app belongs to',
 	'tags'						=> 'Tags',
+	'tag'						=> 'Tag',
 	'tags_hint'					=> 'You can add your own tag by typing it in, items are separated with a space or comma',
 	'tags_placeholder'			=> 'App topics',
 	'status'					=> 'Status',
@@ -135,12 +139,14 @@ return [
 	'upload_image'				=> 'Upload image(s) here',
 	'upload_image_hint'			=> 'Recommended image types: PNG or JPG<br>Other types will be converted into JPG',
 	'or_add_other_visual_types'	=> '...or add other visual media types',
+	'other_visuals_type'		=> 'Other visual\'s type',
+	'other_visuals_value'		=> 'Other visual\'s value',
 	'choose_other_visuals_type'			=> 'Choose type',
 	'visuals_other_value_placeholder'	=> 'Visual media',
 	'submission_status'			=> 'Submission Status',
 	'is_published'				=> 'Published',
 	'is_private'				=> 'Is Private?',
-	'filter_is_owned'			=> 'Whose Apps',
+	'filter_whose'				=> 'Whose Apps',
 	'activity'					=> 'Activity',
 	'prodi'						=> 'Study Program',
 ],
@@ -229,6 +235,8 @@ return [
 	'delete_successful'			=> 'Successfully deleted the app!',
 	'delete_failed'				=> 'An error occurred while trying to delete the app.',
 
+	'max_amount_of_visuals_reached'	=> 'Max amount of visuals (:x) reached.',
+
 	'version_switch_successful'	=> 'App has been switched from Version :x to Version :y',
 
 	'form_showing_pending_changes'			=> 'This form shows your pending changes',
@@ -243,6 +251,7 @@ return [
 	'last_verification_rejected'			=> 'The pending changes you requested were rejected.',
 	'last_verification_approved'			=> "Your pending changes had been approved! \nYou can finalize the edits and make it public now.",
 	'check_verification_details'			=> 'Check verification details',
+	'publish_invalid_verif_ids'				=> 'The specified changes either had already been applied, or is corrupted.',
 	'the_changelogs_data_are_corrupted'		=> "The changes cannot be applied because the data were corrupted. \nPlease contact the administrator to sort this problem out.",
 
 	'congrats!'								=> 'Congrats!',
@@ -253,6 +262,8 @@ return [
 	'app_was_made_not_private'	=> 'App has been set to publicly available.',
 	'app_was_published'			=> 'App has been published.',
 	'app_was_unpublished'		=> 'App has been unpublished.',
+
+	'please_specify_version_to_be_compared'	=> 'Please specify version or items to be compared',
 ],
 
 ];

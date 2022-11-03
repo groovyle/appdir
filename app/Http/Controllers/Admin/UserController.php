@@ -160,18 +160,20 @@ class UserController extends Controller
 	 */
 	public function create()
 	{
+		$cuser = Auth::user();
+
 		// Get view mode
 		$view_mode = UserManager::userViewMode();
 
 		if($view_mode == 'all') {
 			$prodis = Prodi::all();
 		} else {
-			$prodis = optional($user->prodi)->name;
+			$prodis = optional($cuser->prodi)->name;
 		}
 
 		//
 		$back_url = null;
-		if(Auth::user()->can('view-any', User::class)) {
+		if($cuser->can('view-any', User::class)) {
 			$back_url = route('admin.users.index');
 		}
 
@@ -284,30 +286,32 @@ class UserController extends Controller
 	 */
 	public function edit(User $user)
 	{
+		$cuser = Auth::user();
+
 		// Get view mode
 		$view_mode = UserManager::userViewMode();
 
 		if($view_mode == 'all') {
 			$prodis = Prodi::all();
 		} else {
-			$prodis = optional($user->prodi)->name;
+			$prodis = optional($cuser->prodi)->name;
 		}
 
 		//
 		$back_url = null;
 
-		if(Auth::user()->can('view', $user)) {
+		if($cuser->can('view', $user)) {
 			$back_url = route('admin.users.show', ['user' => $user->id]);
 		}
 		$backto = request()->query('backto');
-		if((!$back_url || $backto == 'list') && Auth::user()->can('view-any', User::class)) {
+		if((!$back_url || $backto == 'list') && $cuser->can('view-any', User::class)) {
 			$back_url = route('admin.users.index', ['goto_item' => $user->id]);
 		}
 
 		$user->load(['roles']);
 		$user->roles_ids = $user->roles->modelKeys();
 
-		$allow_role = $user->is_me || Auth::user()->can('manipulate-account', [$user, true]);
+		$allow_role = $user->is_me || $cuser->can('manipulate-account', [$user, true]);
 		$roles = UserManager::getLowerRoles(true);
 
 		$data = [
@@ -386,6 +390,7 @@ class UserController extends Controller
 
 		$cuser = $request->user();
 		$cuser_id = $cuser->id;
+		$view_mode = UserManager::userViewMode();
 
 		// Validation rules
 		request_replace_nl($request);
@@ -415,8 +420,12 @@ class UserController extends Controller
 		try {
 			$user->name			= $request->input('name');
 			$user->email		= $request->input('email');
-			$user->prodi_id		= $request->input('prodi_id');
-			$user->password		= Hash::make($request->input('password'));
+			if(!$is_edit || $view_mode == 'all') {
+				$user->prodi_id		= $request->input('prodi_id');
+			}
+			if(!$is_edit) {
+				$user->password		= Hash::make($request->input('password'));
+			}
 
 			$result = $user->save();
 
@@ -800,6 +809,10 @@ class UserController extends Controller
 		$query = User::query()->regular();
 
 		$ids = $request->query('ids');
+
+		$view_mode = '';
+		UserManager::scopeListQuery($query, $view_mode);
+
 		// TODO: scope by prodi (if no bypass)
 		if($ids) {
 			$ids = explode(',', $ids);
