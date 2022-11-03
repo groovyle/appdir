@@ -411,7 +411,14 @@ class UserController extends Controller
 			'roles.*.id'	=> ['nullable', new ModelExists(Role::class)],
 		];
 
-		$validData = $request->validate($rules);
+		$field_names = [
+			'name'			=> __('admin/users.fields.name'),
+			'email'			=> __('admin/users.fields.email'),
+			'prodi_id'		=> __('admin/users.fields.prodi'),
+			'password'		=> __('admin/users.fields.password'),
+			'roles.*.id'	=> __('admin/users.fields.role'),
+		];
+		$validData = $request->validate($rules, [], $field_names);
 
 		$result = TRUE;
 		$messages = [];
@@ -650,7 +657,11 @@ class UserController extends Controller
 			'reason'			=> ['required', 'string', 'min:20', 'max:200'],
 		];
 
-		$validData = $request->validate($rules);
+		$field_names = [
+			'reason'	=> __('admin/users.fields.block_reason'),
+		];
+
+		$validData = $request->validate($rules, [], $field_names);
 
 		$result = true;
 		$messages = [];

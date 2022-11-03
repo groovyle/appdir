@@ -329,6 +329,12 @@ class RoleController extends Controller
 			})],
 		];
 
+		$field_names = [
+			'abilities.*.id'	=> __('admin/roles.fields.ability'),
+			'abilities.*.mode'	=> __('admin/roles.fields.ability_mode'),
+			'users.*'			=> __('admin/roles.fields.user'),
+		];
+
 		$validData = $request->validate($rules);
 
 		$result = TRUE;

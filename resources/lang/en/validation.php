@@ -152,7 +152,13 @@ return [
 	|
 	*/
 
-	'attributes' => [],
+	'attributes' => [
+		'id'			=> 'ID',
+		'name'			=> 'Name',
+		'short_name'	=> 'Short Name',
+		'title'			=> 'Title',
+		'description'	=> 'Description',
+	],
 
 	'values' => [
 		'video.youtube' => 'YouTube video',

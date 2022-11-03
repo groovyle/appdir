@@ -64,6 +64,7 @@ return [
 	'password_confirmation'	=> 'Confirm Password',
 	'password_confirmation_placeholder'	=> 'Retype the same password to confirm',
 	'roles'				=> 'Roles',
+	'role'				=> 'Role',
 	'profile_picture'	=> 'Profile Picture',
 	'user'				=> 'User',
 	'block_reason'		=> 'Reasons for the block',

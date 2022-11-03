@@ -36,6 +36,7 @@ return [
 'last_verification'		=> 'Last verification',
 'review_public_page'	=> 'Review public page',
 
+'base_version'			=> 'Base version',
 'related_version'		=> 'Related version',
 'related_versions'		=> 'Related versions',
 'discarded_versions'	=> 'Discarded versions',
@@ -68,10 +69,12 @@ return [
 ],
 
 'fields'		=> [
+	'attribute_comment'				=> 'Attribute comment',
 	'add_comment_to_this_data'		=> 'Comment on this attribute',
 	'comment_placeholder'			=> 'Comment...',
 	'overall_comments'				=> 'Verification Notes',
 	'overall_comments_hint'			=> 'Comments on presented data overall, or additional notes',
+	'verification_status'			=> 'Verification Status',
 	'verification_result'			=> 'Verification Result',
 ],
 

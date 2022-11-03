@@ -271,7 +271,12 @@ class SettingController extends Controller
 			'description'	=> ['nullable', 'string', 'max:1000'],
 		];
 
-		$validData = $request->validate($rules);
+		$field_names = [
+			'key'		=> __('admin/settings.fields.key'),
+			'value'		=> __('admin/settings.fields.value'),
+		];
+
+		$validData = $request->validate($rules, [], $field_names);
 
 		$result = TRUE;
 		$messages = [];

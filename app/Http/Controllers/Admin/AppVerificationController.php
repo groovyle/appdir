@@ -248,7 +248,14 @@ class AppVerificationController extends Controller
 			'overall_comment'	=> ['required', 'string', 'max:1000'],
 			'verif_status'		=> ['required', new ModelExists(VVStatus::class)],
 		];
-		$validData = $request->validate($rules);
+		$field_names = [
+			'base_version'		=> __('admin/app_verifications.base_version'),
+			'related_versions'	=> __('admin/app_verifications.related_versions'),
+			'details.*'			=> __('admin/app_verifications.field.attribute_comment'),
+			'overall_comment'	=> __('admin/app_verifications.field.overall_comments'),
+			'verif_status'		=> __('admin/app_verifications.field.verification_status'),
+		];
+		$validData = $request->validate($rules, [], $field_names);
 
 		$input_versions = explode(',', $request->input('related_versions'));
 		$input_versions = array_filter(array_unique($input_versions));
