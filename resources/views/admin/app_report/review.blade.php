@@ -1,10 +1,17 @@
 <?php
+$last_breadcrumb = __('admin/app_reports.page_title.review_x', ['x' => text_truncate($app->name, 50)]);
+
 $show_form = count($reports) > 0;
 $form_show = $show_form ? 'show' : '';
 ?>
 @extends('admin.layouts.main')
 
-@section('page-title', __('admin/app_reports.page-title'))
+@section('title')
+{{ __('admin/app_reports.page_title.review_x', ['x' => text_truncate($app->name, 20)]) }} - @parent
+@endsection
+
+@section('page-title', __('admin/app_reports.page_title.review'))
+
 
 @section('content')
 

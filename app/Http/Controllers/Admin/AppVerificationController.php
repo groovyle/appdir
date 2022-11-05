@@ -220,6 +220,7 @@ class AppVerificationController extends Controller
 		// Make verification item
 		if(!$is_edit) {
 			$ver = new AppVerification;
+			$ver->app_id = $app->id;
 			$ver->verifier_id = $request->user()->id;
 		} else {
 			$ver = AppVerification::find($id);
@@ -282,7 +283,7 @@ class AppVerificationController extends Controller
 			if($is_edit && !$is_dirty) {
 				// Don't do anything if no modifications
 			} else {
-				$result = $app->verifications()->save($ver);
+				$result = $ver->save();
 
 				// Set the verification's related changelog(s)
 				if(!$is_edit) {
@@ -341,9 +342,9 @@ class AppVerificationController extends Controller
 		if(!$result) {
 			DB::rollback();
 
-			// Pass a message...?
+			// Pass a message
 			$request->session()->flash('flash_message', [
-				'message'	=> __('admin.app_verification.message.verify_failed'),
+				'message'	=> __('admin/app_verifications.messages.verify_failed'),
 				'type'		=> 'error'
 			]);
 
@@ -354,7 +355,7 @@ class AppVerificationController extends Controller
 			if(!$is_edit) {
 				// Pass a message
 				$request->session()->flash('flash_message', [
-					'message'	=> __('admin.app_verification.message.verify_successful'),
+					'message'	=> __('admin/app_verifications.messages.verify_successful'),
 					'type'		=> 'success'
 				]);
 				$request->session()->flash('post_verif_status', $verif_status);

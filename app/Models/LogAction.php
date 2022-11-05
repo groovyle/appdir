@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Auth;
 
 class LogAction extends Model
 {
-	use Concerns\Immutable;
 
 	public $timestamps = TRUE;
 	const CREATED_AT = 'at';
@@ -21,6 +20,10 @@ class LogAction extends Model
 
 	protected $dates = [
 		'at',
+	];
+
+	protected $casts = [
+		'data'	=> 'array',
 	];
 
 	public function entity() {
@@ -41,17 +44,29 @@ class LogAction extends Model
 		;
 	}
 
+	public function update(array $attributes = [], array $options = []) {
+		return false;
+	}
+
+	public function delete() {
+		return false;
+	}
+
 	public static function logModel(Model $model, $action, $actor = null, $payload = NULL, $description = NULL, Model $related = NULL) {
 		$actor = $actor === null ? Auth::user() : User::find($actor);
 		/*if(!$user) {
 			$actor = \App\Models\SystemUsers\Guest::instance();
 		}*/
+		$additional_data = null;
+		if($payload) {
+			$additional_data = is_array($payload) ? array_map('json_decode', $payload) : json_decode($payload);
+		}
 		$data = [
 			'entity_id'		=> $model->getKey(),
 			'entity_type'	=> $model->getMorphClass(),
 			'action'		=> $action,
 			'description'	=> $description,
-			'data'			=> $payload ? json_encode($payload) : NULL,
+			'data'			=> $additional_data,
 			'actor_id'		=> optional($actor)->id,
 			// 'actor_name'	=> $user->name,
 			'actor_name'	=> NULL,
@@ -63,7 +78,9 @@ class LogAction extends Model
 				'related_type'	=> $related->getMorphClass(),
 			]);
 		}
-		return static::insert($data);
+
+		$instance = new static($data);
+		return $instance->save();
 	}
 
 }

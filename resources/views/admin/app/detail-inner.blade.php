@@ -204,7 +204,11 @@ $rand = random_alpha(5);
           @endcomponent
         </dt>
         <dd class="col-12">
+          @if(count($app->visuals) > 0)
           @include('admin.app.components.detail-visuals-list', ['visuals' => $app->visuals])
+          @else
+          @von
+          @endif
         </dd>
         @if(is_array($diff_relations['visuals']) && array_key_exists('old', $diff_relations['visuals']))
         <dd class="col-12 collapse collapse-scrollto" id="visuals-old-{{ $rand }}">

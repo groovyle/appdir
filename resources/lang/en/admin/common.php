@@ -62,6 +62,7 @@ return [
 	'delete_failed'		=> 'An error occurred while attempting to delete item.',
 	'save_successful'	=> 'Data has been saved.',
 	'save_failed'		=> 'An error occurred while trying to process and save data.',
+	'action_failed'		=> 'The action you requested couldn\'t be processed because of an error.',
 
 	'upload_error_file'		=> 'Error while processing uploaded file: :file',
 	'upload_x_error_file'	=> 'Error while processing uploaded :x: :file',

@@ -18,7 +18,7 @@ $btn_selector = $btn_selector ?? '.btn-view-verif';
           <h4 class="my-5">loading...</h4>
         </div>
         <div class="error-message alert alert-danger d-none">
-          <h5 class="my-5">@lang('admin/app_verifications.cannot_load_verification_view')</h5>
+          <h5 class="my-5">@lang('admin/app_verifications.messages.cannot_load_verification_view')</h5>
         </div>
       </div>
       <div class="modal-footer text-right">

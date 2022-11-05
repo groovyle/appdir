@@ -17,7 +17,7 @@ return [
 	'app_reports'		=> 'App Reports',
 	'reported_apps'		=> 'Reported apps',
 	'number_of_reported_apps'	=> 'Number of Reported Apps',
-	'report_categories'	=> 'Reports by Category',
+	'report_categories'	=> 'Reports by Violation Type',
 	'report_statuses'	=> 'Reports by Status',
 	'report_valid'		=> 'Valid',
 	'report_invalid'	=> 'Invalid',

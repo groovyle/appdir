@@ -1,4 +1,5 @@
 <?php
+$last_breadcrumb = __('admin/app_verifications.page_title.verify_x', ['x' => text_truncate($ori->name, 50)]);
 
 $old_attributes = optional($version->display_diffs['attributes']['old'] ?? null);
 $diff_relations = optional($version->display_diffs['relations'] ?? null);
@@ -42,7 +43,11 @@ $rand = random_alpha(5);
 
 @extends('admin.layouts.main')
 
-@section('page-title', __('admin.app_verification.page-title'))
+@section('title')
+{{ __('admin/app_verifications.page_title.verify_x', ['x' => text_truncate($ori->name, 20)]) }} - @parent
+@endsection
+
+@section('page-title', __('admin/app_verifications.page_title.verify'))
 
 @section('content')
 <div class="mb-2">
@@ -54,7 +59,7 @@ $rand = random_alpha(5);
 
 @if($app->is_unverified_new)
 <div class="alert alert-info">
-  <p class="mb-0">@lang('admin/app_verifications.messages.this_unverified_item_is_new').</p>
+  <p class="mb-0">@lang('admin/app_verifications.messages.this_unverified_item_is_new')</p>
 </div>
 @endif
 
@@ -337,7 +342,11 @@ $rand = random_alpha(5);
                           <span class="fas fa-comment"></span>
                         </a>
                       </div>
+                      @if(count($app->visuals) > 0)
                       @include('admin.app.components.detail-visuals-list', ['visuals' => $app->visuals])
+                      @else
+                      @von
+                      @endif
                       @if(is_array($diff_relations['visuals']) && array_key_exists('old', $diff_relations['visuals']))
                       <div class="collapse collapse-scrollto" id="visuals-old-{{ $rand }}">
                         <div class="text-090 text-bold">@lang('admin/apps.visuals.old_visuals') ({{ count($diff_relations['visuals']['old']) }})</div>
@@ -363,7 +372,7 @@ $rand = random_alpha(5);
                         <label class="btn btn-outline-{{ $vstatus['approved']->bg_style }} media media-btn pl-3 py-2">
                           <span class="media-icon mr-3 fa-fw {{ $vstatus['approved']->icon }}"></span>
                           <div class="media-body">
-                            <p class="lead">{{ __($vstatus['approved']->name) }}</p>
+                            <p class="lead">{{ $vstatus['approved']->name }}</p>
                             <p>
                               {{ __('admin/app_verifications.status.approved_consequence') }}
                               @if($ori->is_reported)
@@ -379,7 +388,7 @@ $rand = random_alpha(5);
                         <label class="btn btn-outline-{{ $vstatus['rejected']->bg_style }} media media-btn pl-3 py-2">
                           <span class="media-icon mr-3 fa-fw {{ $vstatus['rejected']->icon }}"></span>
                           <div class="media-body">
-                            <p class="lead">{{ __($vstatus['rejected']->name) }}</p>
+                            <p class="lead">{{ $vstatus['rejected']->name }}</p>
                             <p>{{ __('admin/app_verifications.status.rejected_consequence') }}</p>
                             <input type="radio" name="verif_status" value="{{ $vstatus['rejected']->id }}" class="btn-group-input vstatus-radio vstatus-radio-{{ $vstatus['rejected']->id }}" {!! old_checked('verif_status', $verif->status_id, $vstatus['rejected']->id) !!} >
                           </div>
@@ -389,7 +398,7 @@ $rand = random_alpha(5);
                         <label class="btn btn-outline-{{ $vstatus['revision-needed']->bg_style }} media media-btn pl-3 py-2">
                           <span class="media-icon mr-3 fa-fw {{ $vstatus['revision-needed']->icon }}"></span>
                           <div class="media-body">
-                            <p class="lead">{{ __($vstatus['revision-needed']->name) }}</p>
+                            <p class="lead">{{ $vstatus['revision-needed']->name }}</p>
                             <p>{{ __('admin/app_verifications.status.revision-needed_consequence') }}</p>
                             <input type="radio" name="verif_status" value="{{ $vstatus['revision-needed']->id }}" class="btn-group-input vstatus-radio vstatus-radio-{{ $vstatus['revision-needed']->id }}" {!! old_checked('verif_status', $verif->status_id, $vstatus['revision-needed']->id) !!} >
                           </div>

@@ -164,9 +164,6 @@ $rand = random_alpha(5);
         <dt class="col-12">
           {{ __('admin/apps.fields.visuals') }}
           ({{ $app->visuals->count() }})
-          @if(!$is_snippet)
-          <a href="{{ route('admin.apps.visuals', ['app' => $app->id]) }}" class="text-info ml-2" title="@lang('admin/apps.edit_visuals')" data-toggle="tooltip"><span class="fas fa-edit"></span></a>
-          @endif
 
           @if(is_array($diff_relations['visuals']) && array_key_exists('old', $diff_relations['visuals']))
             <a href="#visuals-old-{{ $rand }}" class="fas fa-history text-warning text-090 ml-2" title="@lang('admin/apps.visuals.visual_comparison_detail')" data-toggle="collapse" role="button"></a>
@@ -177,7 +174,11 @@ $rand = random_alpha(5);
           @endcomponent
         </dt>
         <dd class="col-12">
+          @if(count($app->visuals) > 0)
           @include('admin.app.components.detail-visuals-list', ['visuals' => $app->visuals])
+          @else
+          @von
+          @endif
         </dd>
         @if(is_array($diff_relations['visuals']) && array_key_exists('old', $diff_relations['visuals']))
         <dd class="col-12 collapse" id="visuals-old-{{ $rand }}">

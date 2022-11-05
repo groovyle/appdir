@@ -26,4 +26,20 @@ class VerificationStatus extends Model
 	{
 		return static::find(static::STATUS_UNVERIFIED);
 	}
+
+	public function getNameAttribute() {
+		$id = $this->getKey();
+		$name = $this->attributes['name'] ?? null;
+		$name_key = 'common.app_verification_statuses.'.$id;
+
+		if(\Lang::has($name_key))
+			return \Lang::get($name_key);
+		else
+			return $name;
+	}
+
+	public function getRawNameAttribute() {
+		return $this->attributes['name'] ?? null;
+	}
+
 }

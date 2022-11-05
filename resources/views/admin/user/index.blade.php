@@ -163,9 +163,11 @@ $scroll_content = !isset($goto_item) && ($show_filters || request()->has('page')
 									@endcan
 									@can('block', $item)
 									<a href="{{ route('admin.users.block', ['user' => $item->id, 'backto' => 'list']) }}" class="btn btn-dark btn-xs text-nowrap" title="{{ __('admin/users.block_user') }}" data-toggle="tooltip"><span class="fas fa-fw fa-ban"></span></a>
-									@elsecan('unblock', $item)
+									@elseif($item->all_blocks_count > 0)
+									@can('view', $item)
 									<a href="{{ route('admin.users.block_history', ['user' => $item->id, 'backto' => 'list']) }}" class="btn bg-purple btn-xs text-nowrap" title="{{ __('admin/users.blocks_history') }}" data-toggle="tooltip"><span class="fas fa-fw fa-user-slash"></span></a>
 									@endcan
+									@endif
 									@can('delete', $item)
 									<a href="{{ route('admin.users.destroy', ['user' => $item->id, 'backto' => 'back']) }}" class="btn btn-danger btn-xs text-nowrap btn-ays-modal" title="{{ __('common.delete') }}" data-method="DELETE" data-prompt="_delete" data-description="{{ sprintf('<strong>%s</strong>: %s (%s: %s)', __('admin/users._self'), $item->name, __('admin/common.fields.id'), $item->id) }}" data-toggle="tooltip"><span class="fas fa-fw fa-trash"></span></a>
 									@endcan

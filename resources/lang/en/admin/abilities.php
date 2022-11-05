@@ -43,7 +43,7 @@ return [
 	'name_placeholder'			=> 'Ability name',
 	'name_hint'					=> 'Lowercase letters and dashes instead of spaces, e.g edit-non-owned-items.',
 	'name_hint_edit'			=> 'Changing ability name is not supported because the name is used internally by the system.',
-	'attribute_hint_no_edit'	=> 'Changing/editing this field is not supported because the it is used internally by the system.',
+	'attribute_hint_no_edit'	=> 'Changing/editing this field is not supported because it is used internally by the system.',
 	'title'						=> 'Title',
 	'title_placeholder'			=> 'Ability title',
 	'title_hint'				=> 'An ability title that is nice to read. If not supplied, title will be automatically generated based on the name.',
@@ -57,11 +57,11 @@ return [
 	'users_hint'				=> 'Generally, abilities shouldn\'t be granted through direct assignments, but through role abilities instead.',
 	'entity_id'					=> 'Entity ID',
 	'entity_type'				=> 'Entity Type',
-	'entity_type_hint'			=> 'Entity type is the model class name for the rule. This may be morphed automatically if the system has a morph map defined for that entity/model class',
+	'entity_type_hint'			=> 'Entity type is the model class name for the rule. This may be morphed automatically if the system has a morph map defined for that entity/model class.',
 	'only_owned'				=> 'Only Owned?',
 	'scope'						=> 'Scope',
 	'options'					=> 'Options',
-	'some_attributes_cannot_be_edited'	=> 'Some attributes of the ability cannot be edited because those abilities are used internally within the system.',
+	'some_attributes_cannot_be_edited'	=> 'Some attributes of the ability cannot be edited because those attributes are used internally within the system.',
 ],
 
 

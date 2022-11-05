@@ -5,11 +5,11 @@ $collapse_class = $collapse ? 'collapsed-card' : '';
 <div class="card {{ $collapse_class }} user-block-item mb-2">
 	<div class="card-header border-bottom-0">
 		<div class="card-title">
-			<div>
+			<div class="cursor-pointer" data-card-widget="collapse" tabindex="0">
 				@if(!$ub->trashed())
 				<span class="fas fa-ban fa-fw text-090 mr-1 text-danger" title="{{ __('admin/users.block_is_active') }}" data-toggle="tooltip"></span>
 				@else
-				<span class="fas fa-ban fa-fw text-090 mr-1 text-secondary" title="{{ __('admin/users.block_is_inactive') }}" data-toggle="tooltip"></span>
+				<span class="fas fa-ban fa-fw text-090 mr-1 text-success" title="{{ __('admin/users.block_is_inactive') }}" data-toggle="tooltip"></span>
 				@endif
 				@lang('admin/users.block_by_x', ['x' => pretty_username(vo_($ub->createdBy))])
 			</div>
@@ -21,7 +21,7 @@ $collapse_class = $collapse ? 'collapsed-card' : '';
 			<button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="@lang('common.show/hide')"><i class="fas @if(!$collapse) fa-minus @else fa-plus @endif"></i></button>
 		</div>
 	</div>
-	<div class="card-body mt-n2 pt-1 pb-3 px-3 lh-130">
+	<div class="card-body mt-n2 pt-1 lh-130">
 		<div>
 			<div class="text-bold">{{ __('admin/users.fields.block_reason') }}:</div>
 			<span class="text-pre-wrap reason-text init-readmore">@voe($ub->reason)</span>

@@ -49,6 +49,22 @@ return [
 	'your_account_was_blocked'		=> "Your account was blocked. \nContact the administrators to settle problems on your account.",
 ],
 
+'app_verification_statuses'	=> [
+	'unverified'		=> 'Unverified',
+	'reviewing'			=> 'In Review',
+	'revision-needed'	=> 'Needs Revision',
+	'revising'			=> 'Revising',
+	'revised'			=> 'Revised',
+	'rejected'			=> 'Rejected',
+	'resubmitted'		=> 'Resubmitted',
+	'approved'			=> 'Submission Approved',
+	'applied'			=> 'Changes Applied',
+	'published'			=> 'Published',
+	'unlisted'			=> 'Unlisted',
+	'banned'			=> 'Banned',
+	'deleted'			=> 'Deleted',
+	'restored'			=> 'Restored',
+],
 
 'app_report_categories'		=> [
 	'racist/discrimination'					=> 'Racist/Discrimination',

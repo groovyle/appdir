@@ -207,7 +207,7 @@ class AppReportController extends Controller
 					return $item == 'invalid';
 				});
 				if(!$result) {
-					$fail(__('admin/app_reports.if_verdict_innocent_all_reports_must_be_invalid'));
+					$fail(__('admin/app_reports.messages.if_verdict_innocent_all_reports_must_be_invalid'));
 				}
 			};
 		} elseif($verdict_status == AppVerdict::STATUS_GUILTY) {
@@ -215,7 +215,7 @@ class AppReportController extends Controller
 			/*$rules['verdict'][] = function($attr, $value, $fail) use($request) {
 				$result = collect($request->input('report.*.status'))->contains('valid');
 				if(!$result) {
-					$fail(__('admin/app_reports.if_verdict_guilty_one_report_must_be_valid'));
+					$fail(__('admin/app_reports.messages.if_verdict_guilty_one_report_must_be_valid'));
 				}
 			};*/
 		}

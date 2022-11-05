@@ -57,9 +57,9 @@ $scroll_content = !isset($goto_item) && ($show_filters || request()->has('page')
 		@if($list->isEmpty())
 		<div class="card-body">
 			@if($total == 0)
-			<h4 class="text-left">&ndash; {{ __('admin/log_actions.no_log_actions_yet') }} &ndash;</h4>
+			<h4 class="text-left">&ndash; {{ __('admin/log_actions.no_logs_yet') }} &ndash;</h4>
 			@else
-			<h5 class="text-left">&ndash; {{ __('admin/log_actions.no_log_actions_matches') }} &ndash;</h5>
+			<h5 class="text-left">&ndash; {{ __('admin/log_actions.no_logs_matches') }} &ndash;</h5>
 			@endif
 		</div>
 		@else

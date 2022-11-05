@@ -51,12 +51,15 @@ $rand = random_string(5);
       <span class="fas fa-fw fa-ban mr-1"></span>
       {{ __('admin/users.block_user') }}
     </a>
-    @elsecan('unblock', $user)
+    @endcan
+    @if(count($user->all_blocks) > 0)
+    @can('view', $user)
     <a href="{{ route('admin.users.block_history', ['user' => $user->id]) }}" class="btn bg-purple btn-sm text-nowrap mr-1">
       <span class="fas fa-fw fa-user-slash mr-1"></span>
       {{ __('admin/users.blocks_history') }}
     </a>
     @endcan
+    @endif
   </div>
 </div>
 
@@ -159,6 +162,28 @@ $rand = random_string(5);
             {{ __('common.delete') }}
           </a>
           @endcan
+        </div>
+        <div class="mt-2">
+          @can('reset-password', $user)
+          <a href="{{ route('admin.users.reset_password.save', ['user' => $user->id]) }}" class="btn btn-warning btn-xs text-nowrap mr-1 btn-ays-modal btn-reset-password-{{ $rand }}" data-method="PATCH" data-description="{{ sprintf('<strong>%s</strong> %s (%s: %s)', __('admin/users.reset_password_for'), $user->name_email, __('admin/common.fields.id'), $user->id) }}">
+            <span class="fas fa-fw fa-key text-090"></span>
+            {{ __('admin/users.reset_password') }}
+          </a>
+          @endcan
+          @can('block', $user)
+          <a href="{{ route('admin.users.block', ['user' => $user->id]) }}" class="btn btn-dark btn-xs text-nowrap mr-1">
+            <span class="fas fa-fw fa-ban text-090"></span>
+            {{ __('admin/users.block_user') }}
+          </a>
+          @endcan
+          @if(count($user->all_blocks) > 0)
+          @can('view', $user)
+          <a href="{{ route('admin.users.block_history', ['user' => $user->id]) }}" class="btn bg-purple btn-xs text-nowrap mr-1">
+            <span class="fas fa-fw fa-user-slash text-090"></span>
+            {{ __('admin/users.blocks_history') }}
+          </a>
+          @endcan
+          @endif
         </div>
         @endif
       </div>

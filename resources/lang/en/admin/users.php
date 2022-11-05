@@ -36,12 +36,12 @@ return [
 'this_is_you'			=> 'This is you',
 
 'reset_password'		=> 'Reset Password',
-'block_user'			=> 'Block User',
 'reset_password_for'	=> 'Reset password for user',
+'block_user'			=> 'Block User',
+'blocks_history'		=> 'Blocks History',
 'password_has_been_reset_for_user'	=> 'Password has been reset for user',
 'the_new_password_is'	=> 'The new password is',
 'take_note_of_new_password'	=> 'Take note of the new password and/or give it to the user in question because <strong>you won\'t be able to visit this page again</strong>.',
-'blocks_history'		=> 'Blocks History',
 'active_blocks'			=> 'Active Blocks',
 'no_active_blocks'		=> 'This user is not currently being blocked',
 'inactive_blocks'		=> 'Past Blocks',
@@ -50,6 +50,8 @@ return [
 'unblock_by_x'			=> 'Block lifted by :x',
 'lift_all_blocks'		=> 'Lift all blocks',
 'lift_all_blocks_message'	=> 'Lift all blocks for <strong>:x</strong>. The user will be able to access their account again.',
+'block_is_active'		=> 'Block is active',
+'block_is_inactive'		=> 'Block was lifted (and is now inactive)',
 
 'fields'	=> [
 	'name_placeholder'	=> 'User name',
@@ -62,7 +64,7 @@ return [
 	'password_placeholder'	=> 'Password',
 	'password_hint'		=> 'Password must be between :min to :max characters long.',
 	'password_confirmation'	=> 'Confirm Password',
-	'password_confirmation_placeholder'	=> 'Retype the same password to confirm',
+	'password_confirmation_placeholder'	=> 'Re-type the same password to confirm',
 	'roles'				=> 'Roles',
 	'role'				=> 'Role',
 	'profile_picture'	=> 'Profile Picture',

@@ -1,10 +1,16 @@
 <?php
+$last_breadcrumb = __('admin/app_reports.page_title.verdicts_x', ['x' => text_truncate($app->name, 50)]);
+
 $verdicts_count = count($verdicts);
 $show_recent = $show_recent ?? false;
 ?>
 @extends('admin.layouts.main')
 
-@section('page-title', __('admin/app_reports.page-title'))
+@section('title')
+{{ __('admin/app_reports.page_title.verdicts_x', ['x' => text_truncate($app->name, 20)]) }} - @parent
+@endsection
+
+@section('page-title', __('admin/app_reports.page_title.verdicts'))
 
 @section('content')
 

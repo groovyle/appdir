@@ -22,7 +22,7 @@ return [
 	'user_roles'			=> 'User Roles',
 	'system_abilities'		=> 'Abilities',
 
-	'header_system'			=> 'Internal System',
+	'header_system'			=> 'System Internals',
 	'system_settings'		=> 'System Settings',
 	'log_actions'			=> 'Actions Log',
 

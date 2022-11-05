@@ -54,7 +54,8 @@ class UserController extends Controller
 		$filter_count = 0;
 
 		$query = User::withCount('apps')->withoutTrashed();
-		$query->with('roles');
+		$query->with(['roles']);
+		$query->withCount(['all_blocks']);
 
 		$view_mode = '';
 		UserManager::scopeListQuery($query, $view_mode);

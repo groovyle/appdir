@@ -331,11 +331,11 @@ class AbilityController extends Controller
 		];
 
 		$field_names = [
-			'entity_type'		=> __('admin/abilities.field.entity_type'),
-			'entity_id'			=> __('admin/abilities.field.entity_id'),
-			'roles.*.id'		=> __('admin/abilities.field.role'),
-			'roles.*.mode'		=> __('admin/abilities.field.role_mode'),
-			'users.*'			=> __('admin/abilities.field.user'),
+			'entity_type'		=> __('admin/abilities.fields.entity_type'),
+			'entity_id'			=> __('admin/abilities.fields.entity_id'),
+			'roles.*.id'		=> __('admin/abilities.fields.role'),
+			'roles.*.mode'		=> __('admin/abilities.fields.role_mode'),
+			'users.*'			=> __('admin/abilities.fields.user'),
 		];
 
 		$validData = $request->validate($rules, [], $field_names);

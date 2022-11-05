@@ -59,7 +59,7 @@ $scroll_content = !isset($goto_item) && ($show_filters || request()->has('page')
   <!-- Card -->
   <div class="card main-content @if($scroll_content) scroll-to-me @endif">
     <div class="card-header">
-      <h3 class="card-title">{{ __('admin/app_verifications.apps_list') }} ({{ $items->total() }})</h3>
+      <h3 class="card-title">{{ __('admin/app_verifications.verifications_list') }} ({{ $items->total() }})</h3>
     </div>
     @if($items->isEmpty())
     <div class="card-body">

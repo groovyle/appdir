@@ -1535,7 +1535,7 @@ class AppController extends Controller
 
 			// Pass a message
 			$request->session()->flash('flash_message', [
-				'message'	=> __('admin/apps.messages.update_failed'),
+				'message'	=> __('admin/common.messages.action_failed'),
 				'type'		=> 'error'
 			]);
 

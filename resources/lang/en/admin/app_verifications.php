@@ -4,6 +4,8 @@ return [
 
 'page_title'		=> [
 	'index'			=> 'App Verifications',
+	'verify'		=> 'Verify App',
+	'verify_x'		=> 'Verify :x',
 
 	'view_mode'			=> [
 		'all'	=> 'Viewing all apps needing verification',
@@ -11,7 +13,7 @@ return [
 	],
 ],
 
-'apps_list'				=> 'App Verifications List',
+'verifications_list'	=> 'App Verifications List',
 'no_app_verifications_yet'	=> 'No apps need verifications yet',
 'review'				=> 'Review',
 'review_app'			=> 'Review App',
@@ -86,6 +88,14 @@ return [
 ],
 
 'messages'		=> [
+	'verify_successful'		=> 'App verification has been saved.',
+	'verify_failed'			=> 'Failed to verify app.',
+	'verify_edited'			=> 'The selected verification has been revised.',
+
+	'cannot_load_verification_view'	=> 'Error occurred while trying to load verification details.',
+
+	'this_unverified_item_is_new'	=> 'This unverified app is a new item.',
+
 	'app_verification_after_approved'			=> 'The app\'s proposed changes have been approved!',
 	'app_verification_after_rejected'			=> 'The app\'s proposed changes have been rejected and dropped.',
 	'app_verification_after_revision-needed '	=> 'The app and its proposed changes were unaffected. Wait for further changes by the app\'s owner.',

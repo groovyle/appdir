@@ -4,6 +4,10 @@ return [
 
 'page_title'		=> [
 	'index'			=> 'App Moderation',
+	'review'		=> 'Review App Reports',
+	'review_x'		=> 'Review Reports for :x',
+	'verdicts'		=> 'App Verdicts History',
+	'verdicts_x'	=> 'Verdicts History for :x',
 
 	'view_mode'			=> [
 		'all'	=> 'Viewing all reported apps',
@@ -41,7 +45,7 @@ return [
 'this_report_was_reported_on_an_older_version'	=> 'This report was submitted for an older version of the app',
 'go_to_verdict_section'			=> 'Go to verdicts section below',
 'report_from_registered_user'	=> 'Report from a registered user',
-'report_from_anonymous_user'	=> 'Report from an anonymous/public viewer',
+'report_from_anonymous_user'	=> 'Report from an anonymous/public visitor',
 'x_of_y_reports_have_been_validated'	=> ':x of :y reports have been validated',
 'this_app_is_clean'				=> 'This app is spotless!',
 'no_reports_for_this_app'		=> 'There are no reports to this app',
@@ -87,7 +91,7 @@ return [
 	'guilty'				=> 'Guilty',
 	'guilty_explanation'	=> 'This app will be unlisted from the public space until the offending contents are removed, and the app will have to go through verification processes again.',
 	'guilty_block_user'		=> 'Block user',
-	'guilty_block_user_explanation'	=> 'Block the app owner as well. A blocked user won\'t be able to log into the system, and thus cannot modify their apps anymore.',
+	'guilty_block_user_explanation'	=> 'Block the app owner as well. A blocked user won\'t be able to log into the system, and thus cannot modify their apps anymore. All their apps will also be publicly unavailable.',
 ],
 
 'verdicts_past'		=> [

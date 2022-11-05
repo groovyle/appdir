@@ -130,7 +130,7 @@ return [
 	'categories_placeholder'	=> 'Categories the app belongs to',
 	'tags'						=> 'Tags',
 	'tag'						=> 'Tag',
-	'tags_hint'					=> 'You can add your own tag by typing it in, items are separated with a space or comma',
+	'tags_hint'					=> 'Topics that could describe 1 or more aspects of the app. You can add your own tag by typing it in, items are separated with a space or comma',
 	'tags_placeholder'			=> 'App topics',
 	'status'					=> 'Status',
 	'order'						=> 'Order',
@@ -237,8 +237,6 @@ return [
 
 	'max_amount_of_visuals_reached'	=> 'Max amount of visuals (:x) reached.',
 
-	'version_switch_successful'	=> 'App has been switched from Version :x to Version :y',
-
 	'form_showing_pending_changes'			=> 'This form shows your pending changes',
 	'new_items_will_be_staged'				=> 'Apps will not become public immediately, and has to go through verification first',
 	'edits_will_be_staged'					=> 'Any edits will be staged for verification and won\'t take immediate effect',
@@ -263,6 +261,7 @@ return [
 	'app_was_published'			=> 'App has been published.',
 	'app_was_unpublished'		=> 'App has been unpublished.',
 
+	'version_switch_successful'	=> 'App has been switched from Version :x to Version :y',
 	'please_specify_version_to_be_compared'	=> 'Please specify version or items to be compared',
 ],
 
