@@ -136,8 +136,9 @@ return [
 	*/
 
 	'custom' => [
-		'attribute-name' => [
-			'rule-name' => 'custom-message',
+		'new_password' => [
+			// 'different' => 'Please input a different password as the new password.',
+			'different' => 'New password cannot be the same as old password. Please input a different password.',
 		],
 	],
 

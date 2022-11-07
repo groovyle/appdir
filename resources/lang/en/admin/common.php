@@ -45,7 +45,7 @@ return [
 	'short_name'		=> 'Short Name',
 	'title'				=> 'Title',
 	'description'		=> 'Description',
-	'number_of_apps'	=> 'Number of Apps',
+	'number_of_apps'	=> 'Number of Products',
 	'number_of_users'	=> 'Number of Users',
 	'last_updated'		=> 'Last Updated',
 	'status'			=> 'Status',

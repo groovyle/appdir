@@ -15,14 +15,19 @@ $is_self = $is_self ?? false;
 	<div class="row">
 		<div class="col-12 col-md-4 col-xl-3">
 			<div class="card">
-				<div class="card-body">
+				<div class="card-body lh-120">
 					<div class="user-logo-wrapper">
 						<img src="{{ $user->profile_picture }}" rel="User image">
 					</div>
-					<h4>{{ $user->name }} @if($is_self) <span class="fas fa-user text-primary text-070 ml-1" title="{{ __('frontend.users.this_is_your_public_profile') }}" data-toggle="tooltip"></span> @endif</h4>
+					<h4 class="lh-110">{{ $user->name }} @if($is_self) <span class="fas fa-user text-primary text-070 ml-1" title="{{ __('frontend.users.this_is_your_public_profile') }}" data-toggle="tooltip"></span> @endif</h4>
 					@if($user->prodi)
 					<p class="text-secondary">{{ $user->prodi->complete_name }}</p>
 					@endif
+					<p class="text-090 mt-3">
+						<span class="text-secondary">@lang('frontend.users.date_joined')</span>
+						<br>
+						@include('components.date-with-tooltip', ['date' => $user->created_at, 'format' => 'j F Y'])
+					</p>
 				</div>
 			</div>
 		</div>

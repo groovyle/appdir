@@ -23,6 +23,7 @@ return [
 	|
 	*/
 
+	// https://gist.github.com/nyancodeid/eb0858d7c69cd0d9ec3c3917526d0771
 	'accepted'             => 'Isian :attribute harus diterima.',
 	'active_url'           => 'Isian :attribute bukan URL yang sah.',
 	'after'                => 'Isian :attribute harus tanggal setelah :date.',
@@ -103,7 +104,7 @@ return [
 	'not_in'               => 'Isian :attribute yang dipilih tidak valid.',
 	'not_regex'            => 'Isian :attribute format tidak valid.',
 	'numeric'              => 'Isian :attribute harus berupa angka.',
-	'password'             => 'Kata sandi tidak benar',
+	'password'             => 'Password tidak benar',
 	'present'              => 'Isian :attribute wajib ada.',
 	'regex'                => 'Format isian :attribute tidak valid.',
 	'required'             => 'Isian :attribute wajib diisi.',
@@ -146,8 +147,9 @@ return [
 	*/
 
 	'custom' => [
-		'attribute-name' => [
-			'rule-name' => 'custom-message',
+		'new_password' => [
+			// 'different' => 'Silakan masukkan password yang berbeda sebagai password baru.',
+			'different' => 'Password baru tidak boleh sama dengan password lama. Silakan masukkan password yang berbeda.',
 		],
 	],
 

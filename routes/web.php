@@ -11,21 +11,22 @@
 |
 */
 
-Route::get('/', function () {
-	return view('welcome');
-});
-
-Auth::routes();
+Auth::routes([
+	// See Illuminate\Routing\Router::auth()
+	'reset'	=> false,
+]);
 Route::get('/register/done', 'Auth\\AfterRegisterController@afterRegister')->name('after_register');
 
 Route::get('/', 'HomeController@index')->name('index');
-Route::get('/home', 'HomeController@home')->name('home');
+// Route::get('/home', 'HomeController@home')->name('home');
+Route::redirect('/home', URL::to('/'))->name('home');
 Route::get('/apps', 'AppController@index')->name('apps');
 Route::get('/apps/{slug}', 'AppController@page')->name('apps.page');
 Route::get('/apps/{slug}/preview', 'AppController@preview')->name('apps.preview');
 Route::post('/apps/{slug}/submit_report', 'AppController@postReport')->name('apps.report.save');
 Route::get('/user/{user}', 'UserController@profile')->name('user.profile');
 Route::get('/login/error', 'Auth\\LoginController@errorPage')->name('login_error');
+Route::patch('/change_language', 'UserController@changeLanguage')->name('change_language');
 
 Route::get('/stats/apps', 'StatisticsController@apps')->name('stats.apps');
 

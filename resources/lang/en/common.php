@@ -43,6 +43,7 @@ return [
 'note'				=> 'Note',
 'or'				=> 'or',
 'and'				=> 'and',
+'show/hide_password'	=> 'Show/hide password',
 
 
 'messages'	=> [

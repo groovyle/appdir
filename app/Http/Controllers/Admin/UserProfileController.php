@@ -8,6 +8,8 @@ use App\Models\App;
 use App\Models\Prodi;
 use App\User;
 
+use App\DataManagers\LanguageManager as LangMan;
+
 use Bouncer;
 
 use Illuminate\Http\Request;
@@ -51,11 +53,16 @@ class UserProfileController extends Controller
 		//
 		$user = $model = Auth::user();
 		$back_url = route('admin.profile.index');
+		$app_locale = config('app.default_locale');
+		$app_locale_text = LangMan::getTranslated($app_locale);
 		$data = [
 			'model'		=> $model,
 			'action'	=> route('admin.profile.edit.save'),
 			'method'	=> 'PATCH',
 			'user'		=> $user,
+			'lang_list'	=> LangMan::getTranslatedList(),
+			'app_locale'	=> $app_locale,
+			'app_locale_text'	=> $app_locale_text,
 			'back'		=> $back_url,
 		];
 
@@ -75,9 +82,14 @@ class UserProfileController extends Controller
 		$rules = [
 			// 'dummy'			=> ['required'],
 			'name'			=> ['required', 'max:100'],
+			'language'		=> ['nullable', Rule::in(LangMan::$languages)],
 		];
 
-		$validData = $request->validate($rules);
+		$field_names = [
+			'language'	=> __('admin/users.fields.language'),
+		];
+
+		$validData = $request->validate($rules, [], $field_names);
 
 		$result = true;
 		$messages = [];
@@ -85,6 +97,11 @@ class UserProfileController extends Controller
 		// Begin storing entries
 		try {
 			$user->name			= $request->input('name');
+			if($lang = $request->input('language')) {
+				$user->lang		= $lang;
+			} else {
+				$user->lang		= config('app.default_locale');
+			}
 
 			$result = $user->save();
 		} catch(\Illuminate\Database\QueryException $e) {
@@ -151,16 +168,20 @@ class UserProfileController extends Controller
 			'pic_todo'			=> ['nullable'],
 			'new_pic'			=> ['nullable'],
 		];
+		$field_names = [
+			'new_pic'	=> __('admin/profile.fields.new_picture'),
+		];
+
 		$pic_todo = $request->input('pic_todo');
 		$input_new_pic = $request->input('new_pic');
 
-		$validData = $request->validate($rules);
+		$validData = $request->validate($rules, [], $field_names);
 
 		if($pic_todo == 'change') {
 			// Validate files
 			$validFiles = Filepond::field($input_new_pic)->validate([
 				'new_pic'	=> ['nullable', 'image', 'max:2048'],
-			]);
+			], [], $field_names);
 		}
 
 		$result = true;
@@ -326,13 +347,27 @@ class UserProfileController extends Controller
 
 		// Validation rules
 		request_replace_nl($request);
-		$rules = [
-			// 'dummy'			=> ['required'],
-			'old_password'		=> ['required', 'password'],
-			'new_password'		=> ['required', 'bail', 'min:5', 'max:50', 'confirmed'],
+
+		/**
+		 * NOTE: separate validation, because we need the old password to be correct
+		 * first before validating anything else.
+		 * */
+
+		$field_names = [
+			'old_password'	=> __('admin/profile.fields.old_password'),
+			'new_password'	=> __('admin/profile.fields.new_password'),
 		];
 
-		$validData = $request->validate($rules);
+		$rules1 = [
+			'old_password'		=> ['required', 'password'],
+		];
+		$validData = $request->validate($rules1, [], $field_names);
+
+		$rules2 = [
+			// 'dummy'			=> ['required'],
+			'new_password'		=> ['required', 'bail', 'between:5,50', 'confirmed', 'different:old_password'],
+		];
+		$validData = $validData && $request->validate($rules2, [], $field_names);
 
 		$result = true;
 		$messages = [];

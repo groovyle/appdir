@@ -3,7 +3,7 @@
 return [
 
 'app_activities'	=> [
-	'page_title'		=> 'Ringkasan Aktivitas Karya',
+	'page_title'		=> 'Rekap Aktivitas Karya',
 
 	'new_apps'			=> 'Karya Baru',
 	'verified_apps'		=> 'Karya Terverifikasi',

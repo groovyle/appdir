@@ -43,6 +43,7 @@ return [
 'note'				=> 'Catatan',
 'or'				=> 'atau',
 'and'				=> 'dan',
+'show/hide_password'	=> 'Tengok/tutup password',
 
 
 'messages'	=> [

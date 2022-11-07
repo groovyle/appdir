@@ -131,8 +131,8 @@ class AppPolicy
 			}
 		}
 
-		// Check app owner
-		if(Gate::forUser($user)->denies('view-public', $app->owner)) {
+		// Check app owner status, blocked or...?
+		if(Gate::denies('view-public', $app->owner)) {
 			$result['status'] = false;
 			return $return();
 		}

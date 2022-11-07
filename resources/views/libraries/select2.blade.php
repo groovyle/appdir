@@ -5,5 +5,7 @@
 
 @push('load-scripts')
 <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
+@if(app()->isLocale('id'))
 <script src="{{ asset('plugins/select2/js/i18n/id.js') }}" defer></script>
+@endif
 @endpush

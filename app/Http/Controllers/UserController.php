@@ -6,9 +6,13 @@ use App\User;
 use App\Models\App;
 use App\Rules\ModelExists;
 
+use App\DataManagers\LanguageManager as LangMan;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -55,6 +59,41 @@ class UserController extends Controller
 		$data['apps_filter_count'] = $apps_filter_count;
 
 		return view('user/profile', $data);
+	}
+
+	// PATCH
+	public function changeLanguage(Request $request) {
+		$user = Auth::user();
+
+		$rules = [
+			'language'	=> ['required', Rule::in(LangMan::$languages)],
+		];
+		$field_names = [
+			'language'	=> __('frontend.lang.language'),
+		];
+
+		$val = Validator::make($request->all(), $rules, [], $field_names);
+
+		if($val->fails()) {
+			// No messages... or?
+			return redirect()->back();
+		}
+
+
+		// Set session locale
+		$input_language = $request->input('language');
+		session(['locale' => $input_language]);
+
+		// If logged in, also change the settings
+		if($user) {
+			$user->lang = $input_language;
+			$user->save();
+		}
+
+
+		// Done!
+
+		return redirect()->back();
 	}
 
 }

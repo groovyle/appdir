@@ -11,16 +11,34 @@ $scroll_content = !isset($goto_item) && ($show_filters || request()->has('page')
 
 @section('page-title')
 {{ __('admin/apps.page_title.index') }}
+@if($total_scoped > 0)
 <span class="page-sub-title">{{ __('common.total_x', ['x' => $total_scoped]) }}</span>
 @if($view_mode == 'prodi')
 <span class="page-sub-title text-r100">@lang('admin/apps.page_title.view_mode.'.$view_mode, ['x' => vo_($prodi->complete_name)])</span>
 @else
 <span class="page-sub-title text-r100">{{ __('admin/apps.page_title.view_mode.'.$view_mode) }}</span>
 @endif
+@endif
 @endsection
 
 @section('content')
   @include('components.page-message', ['dismiss' => true])
+
+  @if($total_scoped == 0)
+
+  <div class="card main-content">
+    <div class="card-body">
+      <h4 class="text-left">&ndash; {{ __('admin/apps.no_app_submissions_yet') }} &ndash;</h4>
+
+      <div class="mt-4">
+        @can('create', App\Models\App::class)
+        <a href="{{ route('admin.apps.create') }}" class="btn btn-primary">{{ __('admin/apps.submit_an_app') }}</a>
+        @endcan
+      </div>
+    </div>
+  </div>
+
+  @else
 
   <div class="mt-2 mb-3">
     @can('create', App\Models\App::class)
@@ -137,11 +155,7 @@ $scroll_content = !isset($goto_item) && ($show_filters || request()->has('page')
     </div>
     @if($items->isEmpty())
     <div class="card-body">
-      @if($total_scoped == 0)
-      <h4 class="text-left">&ndash; {{ __('admin/apps.no_app_submissions_yet') }} &ndash;</h4>
-      @else
       <h5 class="text-left">&ndash; {{ __('admin/apps.no_apps_matches') }} &ndash;</h5>
-      @endif
     </div>
     @else
     <div class="card-body p-0">
@@ -260,6 +274,8 @@ $scroll_content = !isset($goto_item) && ($show_filters || request()->has('page')
     @endif
     @endif
   </div>
+
+  @endif
 @endsection
 
 @include('libraries.select2')

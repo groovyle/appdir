@@ -27,6 +27,7 @@ return [
 'make_your_first_app'			=> 'Masukkan karya pertama Anda',
 
 'this_is_default_user_picture'	=> 'Ini adalah foto profil bawaan; Anda belum mengunggah foto profil Anda',
+'use_default_language'		=> 'Pakai bahasa bawaan',
 
 'fields'	=> [
 	'name_placeholder'	=> 'Nama Anda',
@@ -42,7 +43,7 @@ return [
 	'remove_picture'	=> 'Hapus foto',
 	'change_picture'	=> 'Ubah ke foto baru',
 
-	'old_password'				=> 'Masukkan Password yang Sekarang',
+	'old_password'				=> 'Password Sekarang',
 	'old_password_placeholder'	=> 'Password Anda yang sekarang...',
 	'new_password'				=> 'Password Baru',
 	'new_password_placeholder'	=> 'Password baru...',

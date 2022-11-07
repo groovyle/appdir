@@ -182,7 +182,7 @@ class UserPolicy
 	}
 
 
-	public function viewPublic(User $user, User $model) {
+	public function viewPublic(User $user = null, User $model) {
 		if(!$model)
 			return false;
 
@@ -191,6 +191,12 @@ class UserPolicy
 			if(!$is_admin) {
 				return false;
 			}
+		}
+
+		if(!$user) {
+			// Bypass Bouncer because if the user is a guest, Bouncer checks
+			// will always return false
+			return true;
 		}
 	}
 }

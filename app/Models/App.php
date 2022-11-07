@@ -167,6 +167,10 @@ class App extends Model
 		return $this->belongsTo('App\User', 'owner_id')->withDefault();
 	}
 
+	public function prodi() {
+		return $this->hasOneThrough('App\Models\Prodi', 'App\User', 'prodi_id', 'owner_id');
+	}
+
 	public function verifications() {
 		return $this->hasMany('App\Models\AppVerification', 'app_id')
 			->orderBy(AppVerification::UPDATED_AT)

@@ -244,6 +244,14 @@ input.checkbox-xl, .form-check.checkbox-xl .form-check-input {
 	margin-left: -1.75rem;
 }
 
+.border-shadow {
+	box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+}
+
+.fi {
+	/*height: 1em;*/
+}
+
 .valign-top,
 .valign-top th,
 .valign-top td {

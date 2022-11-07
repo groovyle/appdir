@@ -27,6 +27,11 @@ $user = Auth::user();
 				</div>
 			</li>
 			--}}
+			<!-- Language button -->
+			<li class="nav-item">
+				<a class="btn btn-sm btn-default btn-flat my-1 mr-1" href="#chLangModal" data-toggle="modal" title="{{ __('frontend.lang.click_to_change_language') }}"><span class="text-monospace">{{ strtoupper($lang) }}</span></a>
+			</li>
+
 			<!-- User menu -->
 			<li class="nav-item dropdown user-menu">
 				<a href="{{ route('admin.profile.index') }}" class="nav-link dropdown-toggle" data-toggle="dropdown">
@@ -64,6 +69,7 @@ $user = Auth::user();
 		</ul>
 	</nav>
 	@push('hidden-contents')
+		@include('components.language-modal')
 		@include('components.logout-form')
 	@endpush
 	<!-- /.navbar -->

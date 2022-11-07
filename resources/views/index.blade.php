@@ -8,9 +8,11 @@ list($theme, $counter_theme) = theme_timely();
 @section('content')
 <div class="container px-4">
 	<div class="text-center mb-4">
-		<img src="{{ asset('img/logo-'.$counter_theme.'.png') }}" class="logo" rel="{{ app_name() }}" style="max-width: 200px;">
-		<br>
-		<img src="{{ asset('img/fineprint-'.$counter_theme.'.png') }}" class="logo" rel="{{ app_name() }}" style="max-width: 150px;">
+		<a href="{{ route('index') }}">
+			<img src="{{ asset('img/logo-'.$counter_theme.'.png') }}" class="logo" rel="{{ app_name() }}" style="max-width: 200px;">
+			<br>
+			<img src="{{ asset('img/fineprint-'.$counter_theme.'.png') }}" class="logo" rel="{{ app_name() }}" style="max-width: 150px;">
+		</a>
 	</div>
 	<div class="text-center">
 		<div class="text-r110">
@@ -40,11 +42,11 @@ list($theme, $counter_theme) = theme_timely();
 			<a href="{{ route('register') }}" class="btn btn-link btn-lg">{{ __('frontend.navs.register') }}</a>
 			@else
 			<p class="mt-0 mb-1">@lang('frontend.splash.hey_x_you_are_logged_in', ['x' => $user->name])</p>
-			<a href="#" class="btn btn-link btn-lg">{{ __('frontend.navs.submit_an_app') }}</a>
+			<a href="{{ route('admin.apps.create') }}" class="btn btn-link btn-lg"><span class="fas fa-plus text-070 mr-1" style="vertical-align: 2px;"></span> {{ __('frontend.navs.submit_an_app') }}</a>
 			|
 			<a href="{{ route('admin') }}" class="btn btn-link btn-lg">{{ __('frontend.navs.admin_panel') }}</a>
 			|
-			<a href="{{ route('admin.apps.index', ['whose' => 'own']) }}" class="btn btn-link btn-lg">{{ __('frontend.splash.your_apps_x', ['x' => $user->apps->count()]) }}</a>
+			<a href="{{ route('admin.apps.index', ['whose' => Auth::user()->isA('mahasiswa') ? null : 'own']) }}" class="btn btn-link btn-lg">{{ __('frontend.splash.your_apps_x', ['x' => $user->apps->count()]) }}</a>
 			<br>
 			<a href="{{ route('logout') }}" class="btn btn-link mt-2 btn-logout">{{ __('frontend.navs.logout') }}</a>
 			@endguest

@@ -35,7 +35,7 @@ $last_breadcrumb = __('admin/profile.change_password');
 						<div class="input-group password-wrapper">
 							<input type="password" name="old_password" class="form-control" id="inputOldPassword" placeholder="{{ __('admin/profile.fields.old_password_placeholder') }}" value="" autocomplete="off" required>
 							<div class="input-group-append">
-								<a href="#" class="input-group-text plain btn-see-password" data-targets="#inputOldPassword"><span class="far fa-eye"></span></a>
+								<a href="#" class="input-group-text plain btn-see-password" data-targets="#inputOldPassword" title="{{ __('common.show/hide_password') }}" data-toggle="tooltip"><span class="far fa-eye fa-fw"></span></a>
 							</div>
 						</div>
 					</div>
@@ -44,7 +44,7 @@ $last_breadcrumb = __('admin/profile.change_password');
 						<div class="input-group password-wrapper">
 							<input type="password" name="new_password" class="form-control" id="inputNewPassword" placeholder="{{ __('admin/profile.fields.new_password_placeholder') }}" value="" autocomplete="off" minlength="5" maxlength="50" required>
 							<div class="input-group-append">
-								<a href="#" class="input-group-text plain btn-see-password" data-targets="#inputNewPassword, #inputNewPassword2"><span class="far fa-eye"></span></a>
+								<a href="#" class="input-group-text plain btn-see-password" data-targets="#inputNewPassword, #inputNewPassword2" title="{{ __('common.show/hide_password') }}" data-toggle="tooltip"><span class="far fa-eye fa-fw"></span></a>
 							</div>
 						</div>
 					</div>

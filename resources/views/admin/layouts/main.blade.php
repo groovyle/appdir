@@ -1,6 +1,9 @@
-@if(!request()->ajax())
+<?php
+$lang = app()->getLocale();
+$lang_text = langtext()
+?>@if(!request()->ajax())
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', $lang) }}">
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -94,7 +97,7 @@
 <!-- Scripts -->
 <script>
 window.AppGlobals = {
-	lang: @json(app()->getLocale()),
+	lang: @json($lang),
 }
 </script>
 <script src="{{ asset('js/app.js') }}"></script>

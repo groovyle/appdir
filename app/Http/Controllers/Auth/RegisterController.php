@@ -7,11 +7,15 @@ use App\Providers\RouteServiceProvider;
 use App\User;
 use App\Models\Prodi;
 use App\Rules\ModelExists;
+use App\DataManagers\LanguageManager as LangMan;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Str;
 use Illuminate\Support\Facades\Validator;
+
+use Bouncer;
 
 class RegisterController extends Controller
 {
@@ -51,6 +55,8 @@ class RegisterController extends Controller
 	{
 		$data = [
 			'prodis'	=> Prodi::all(),
+			'lang_list'	=> LangMan::getTranslatedList(),
+			'lang'		=> app()->getLocale(),
 		];
 
 		return view('auth.register', $data);
@@ -65,10 +71,17 @@ class RegisterController extends Controller
 	protected function validator(array $data)
 	{
 		return Validator::make($data, [
-			'name' => ['required', 'string', 'max:255'],
-			'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-			'password' => ['required', 'string', 'min:5', 'max:50', 'confirmed'],
-			'prodi' => ['required', new ModelExists(Prodi::class)],
+			'name'		=> ['required', 'string', 'max:255'],
+			'email'		=> ['required', 'string', 'email', 'max:255', 'unique:users'],
+			'password'	=> ['required', 'string', 'between:5,50', 'confirmed'],
+			'prodi'		=> ['required', new ModelExists(Prodi::class)],
+			'language'	=> ['required', Rule::in(LangMan::$languages)],
+		], [], [
+			'name'		=> __('frontend.auth.fields.name'),
+			'email'		=> __('frontend.auth.fields.email'),
+			'password'	=> __('frontend.auth.fields.password'),
+			'prodi'		=> __('frontend.auth.fields.prodi'),
+			'language'	=> __('frontend.auth.fields.language'),
 		]);
 	}
 
@@ -90,9 +103,14 @@ class RegisterController extends Controller
 				'email' => $data['email'],
 				'password' => Hash::make($data['password']),
 				'prodi_id' => $data['prodi'],
+				'lang' => $data['language'],
 			]);
 
 			$result = $user->save();
+
+			if($result) {
+				$result = Bouncer::assign('mahasiswa')->to($user);
+			}
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = false;
 			$message = $e->getMessage();
@@ -101,7 +119,7 @@ class RegisterController extends Controller
 		if($result) {
 			DB::commit();
 
-			// Pass a message...?
+			// Pass a message
 			session()->flash('flash_message', [
 				'message'	=> __('frontend.auth.messages.registration_successful'),
 				'type'		=> 'success'
@@ -111,7 +129,7 @@ class RegisterController extends Controller
 		} else {
 			DB::rollback();
 
-			// Pass a message...?
+			// Pass a message
 			$message = $message ? $message : __('frontend.auth.messages.registration_failed');
 			session()->flash('flash_message', [
 				'message'	=> $message,

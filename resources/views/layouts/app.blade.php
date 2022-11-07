@@ -14,8 +14,11 @@ if(!$transparent_navs) {
 	$navbar_theme = $navbar_theme ?? $navbar_bg.' navbar-'.$theme.' shadow-none';
 	$footer_theme = $footer_theme ?? 'bg-transparent shadow-none';
 }
+
+$lang = app()->getLocale();
+$lang_text = langtext();
 ?><!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100">
+<html lang="{{ str_replace('_', '-', $lang) }}" class="h-100">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -39,6 +42,7 @@ if(!$transparent_navs) {
 
 	<!-- Fonts -->
 	<link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
+	<link rel="stylesheet" href="{{ asset('plugins/flag-icons/css/flag-icons.min.css') }}">
 	<link rel="dns-prefetch" href="//fonts.gstatic.com">
 	<link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
 
@@ -54,7 +58,7 @@ if(!$transparent_navs) {
 	@stack('head-additional')
 </head>
 <body class="h-100">
-	<div id="app" class="d-flex flex-column minh-100 {{ $body_theme }}">
+	<div id="app" class="d-flex flex-column minh-100 theme-{{ $theme }} {{ $body_theme }}">
 		<header>
 			<nav class="navbar navbar-expand-md {{ $navbar_theme }}" id="navbar">
 				<div class="container">
@@ -78,6 +82,11 @@ if(!$transparent_navs) {
 
 						<!-- Right Side Of Navbar -->
 						<ul class="navbar-nav ml-auto">
+							<!-- Language Button -->
+							<li class="nav-item mx-2">
+								<a class="nav-link" href="#chLangModal" data-toggle="modal" title="{{ __('frontend.lang.click_to_change_language') }}"><span class="py-1 px-2 border-shadow text-monospace">{{ strtoupper($lang) }}</span></a>
+							</li>
+
 							<!-- Authentication Links -->
 							@guest
 								<li class="nav-item">
@@ -130,12 +139,13 @@ if(!$transparent_navs) {
 
 	<div id="to-top" title="@lang('frontend.back_to_top_button')"></div>
 
+	@include('components.language-modal')
 	@include('components.logout-form')
 
 	<!-- Scripts -->
 	<script>
 	window.AppGlobals = {
-		lang: @json(app()->getLocale()),
+		lang: @json($lang),
 	}
 	</script>
 	<script src="{{ asset('js/app.js') }}"></script>

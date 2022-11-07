@@ -34,6 +34,7 @@ return [
 	'register'				=> 'Pendaftaran',
 	'logout'				=> 'Logout',
 	'profile'				=> 'Profil',
+	'submit_an_app'			=> 'Buat Karya',
 	'admin_panel'			=> 'Panel Admin',
 	'account_settings'		=> 'Pengaturan Akun',
 ],
@@ -149,6 +150,7 @@ return [
 ],
 
 'users'	=> [
+	'date_joined'					=> 'Terdaftar sejak',
 	'this_users_apps_x_total'		=> 'Karya pengguna ini (total :x)',
 	'this_user_has_x_apps'			=> 'Pengguna ini mempunyai :x karya',
 	'this_is_your_public_profile'	=> 'Ini adalah profil publik Anda',
@@ -176,6 +178,15 @@ return [
 		'other_tags'		=> 'Tag lainnya',
 		'x_other_tags'		=> ':x tag lain',
 
+		'by_prodi'			=> 'Per prodi',
+		'no_prodis_yet'		=> 'Belum ada prodi',
+		'apps_by_prodi'		=> 'Karya per prodi',
+		'list_of_prodi'		=> 'Daftar program studi',
+		'prodi'				=> 'Prodi',
+		'_none_prodi'		=> 'Tanpa prodi',
+		'other_prodi'		=> 'Prodi lainnya',
+		'x_other_prodi'		=> ':x prodi lain',
+
 		'fields'	=> [
 			'total_apps'	=> 'Total Karya',
 			'percentage'	=> 'Persentase',
@@ -187,7 +198,7 @@ return [
 	'login_header'				=> 'Login ke akun Anda',
 	'login_btn'					=> 'Login',
 	'register_header'			=> 'Form Pendaftaran',
-	'register_btn'				=> 'Mendaftar',
+	'register_btn'				=> 'Buat Akun',
 	'your_login_failed'			=> 'Login Anda gagal',
 	'error_accessing_account'	=> 'Error mengakses akun Anda',
 	'message_error_login'		=> 'Error terjadi saat pemrosesan login Anda.',
@@ -200,6 +211,8 @@ return [
 		'email'					=> 'Alamat Email',
 		'prodi'					=> 'Program Studi',
 		'choose_prodi'			=> 'Pilih satu prodi',
+		'language'				=> 'Bahasa',
+		'choose_language'		=> 'Pilih bahasa',
 		'password'				=> 'Password',
 		'password_confirm'		=> 'Konfirmasi Password',
 		'remember_login'		=> 'Ingat login saya',
@@ -212,6 +225,12 @@ return [
 		'registration_successful_sub'	=> 'Anda sekarang telah memiliki akun. Selamat datang di :app!',
 		'registration_failed'			=> 'Error terjadi saat mendaftarkan akun Anda ke sistem.',
 	],
+],
+
+'lang'	=> [
+	'language'						=> 'Bahasa',
+	'click_to_change_language'		=> 'Klik untuk mengubah bahasa',
+	'change_language'				=> 'Ganti bahasa',
 ],
 
 ];

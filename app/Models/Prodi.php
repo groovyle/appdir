@@ -30,16 +30,24 @@ class Prodi extends Model
 		return $this->hasMany('App\User', 'prodi_id');
 	}
 
+	public function apps() {
+		return $this->hasManyThrough('App\Models\App', 'App\User', 'prodi_id', 'owner_id');
+	}
+
 	public function getCompactNameAttribute() {
 		return $this->attributes['short_name'] ?? $this->attributes['name'] ?? null;
 	}
 
 	public function getCompleteNameAttribute() {
-		if(empty($this->attributes['name']))
+		$name = $this->attributes['name'] ?? null;
+		$short_name = $this->attributes['short_name'] ?? null;
+		if(empty($name) && empty($short_name))
 			return null;
 
-		$complete = $this->attributes['name'];
-		if($short_name = $this->attributes['short_name'])
+		if(empty($name)) return $short_name;
+
+		$complete = $name;
+		if(!empty($short_name))
 			$complete .= ' ('.$short_name.')';
 		return $complete;
 	}

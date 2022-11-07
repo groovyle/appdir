@@ -1531,6 +1531,13 @@ if(jQuery) {
 			}
 			$target.focus();
 			Helpers.moveCursorToEnd($target);
+
+			// Switch icon (if)
+			var $icon = $this.find(".fa-eye, .fa-eye-slash");
+			if($icon.length > 0) {
+				$icon.toggleClass("fa-eye", !toVisible);
+				$icon.toggleClass("fa-eye-slash", toVisible);
+			}
 		}
 	});
 

@@ -25,10 +25,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // Locale
-        setlocale(LC_TIME, config('app.locale'), config('app.fallback_locale'));
-        Carbon::setLocale(config('app.locale'));
-        Carbon::setFallbackLocale(config('app.fallback_locale'));
 
         //
         Blade::directive('tabtitle', function($title = '') {

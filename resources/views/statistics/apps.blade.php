@@ -19,6 +19,7 @@ $menu_active_stats = true;
 			<div class="nav flex-column nav-pills" id="app-stats-tab" role="tablist" aria-orientation="vertical">
 				<a class="nav-link active" id="app-stats-by-cat-tab" data-toggle="pill" href="#app-stats-by-cat" role="tab" aria-controls="app-stats-by-cat" aria-selected="true">{{ __('frontend.statistics.apps.by_category') }}</a>
 				<a class="nav-link" id="app-stats-by-tag-tab" data-toggle="pill" href="#app-stats-by-tag" role="tab" aria-controls="app-stats-by-tag" aria-selected="false">{{ __('frontend.statistics.apps.by_tag') }}</a>
+				<a class="nav-link" id="app-stats-by-prodi-tab" data-toggle="pill" href="#app-stats-by-prodi" role="tab" aria-controls="app-stats-by-prodi" aria-selected="false">{{ __('frontend.statistics.apps.by_prodi') }}</a>
 			</div>
 		</div>
 		<div class="col-12 col-sm-8 col-lg-9 col-xl-10">
@@ -48,7 +49,7 @@ $menu_active_stats = true;
 										</thead>
 										<tbody>
 											@foreach($categories as $cat)
-											@if($cat->id == '__others') @continue @endif
+											@if($cat->_id == '__others') @continue @endif
 											<tr>
 												<td class="text-right text-secondary pr-2">{{ $loop->iteration }}</td>
 												<td class="pr-4">{{ $cat->name }}</td>
@@ -85,12 +86,49 @@ $menu_active_stats = true;
 										</thead>
 										<tbody>
 											@foreach($tags as $tag)
-											@if($tag->id == '__others') @continue @endif
+											@if($tag->_id == '__others') @continue @endif
 											<tr>
 												<td class="text-right text-secondary pr-2">{{ $loop->iteration }}</td>
 												<td class="pr-4">{{ $tag->name }}</td>
 												<td class="text-right pr-3">{{ $tag->apps_count }}</td>
 												<td class="text-right pr-3">{{ $tag->percentage }}%</td>
+											</tr>
+											@endforeach
+										</tbody>
+									</table>
+								</div>
+							</div>
+							@endif
+						</div>
+						<div class="tab-pane fade" id="app-stats-by-prodi" role="tabpanel" aria-labelledby="app-stats-by-prodi-tab">
+							@if(count($prodis) == 0)
+							<h4 class="m-4">{{ __('frontend.statistics.apps.no_prodis_yet') }}</h4>
+							@else
+							<h3 class="text-center mb-2">{{ __('frontend.statistics.apps.apps_by_prodi') }}</h3>
+							<div class="mb-4">
+								<div class="maxw-100 position-relative mx-auto" style="height: 300px;">
+									<canvas id="app-stats-by-prodi-pie" width="600"></canvas>
+								</div>
+							</div>
+							<div class="mt-4">
+								<h5 class="text-center mb-2">{{ __('frontend.statistics.apps.list_of_prodis') }} ({{ count($prodis) }})</h5>
+								<div class="table-responsive">
+									<table class="table table-hover border w-fit-content mx-auto lh-120">
+										<thead>
+											<tr class="bg-light">
+												<th class="text-right pr-2" style="width: 1%;">#</th>
+												<th>{{ __('frontend.statistics.apps.prodi') }}</th>
+												<th class="text-nowrap" colspan="2" style="width: 10%;">{{ __('frontend.statistics.apps.fields.total_apps') }}</th>
+											</tr>
+										</thead>
+										<tbody>
+											@foreach($prodis as $prodi)
+											@if($prodi->_id == '__others') @continue @endif
+											<tr>
+												<td class="text-right text-secondary pr-2">{{ $loop->iteration }}</td>
+												<td class="pr-4">{{ $prodi->complete_name }}</td>
+												<td class="text-right pr-3">{{ $prodi->apps_count }}</td>
+												<td class="text-right pr-3">{{ $prodi->percentage }}%</td>
 											</tr>
 											@endforeach
 										</tbody>
@@ -128,6 +166,15 @@ foreach($pie_tags as $t) {
 	$tag_pie_data[] = $t->apps_count;
 	$tag_pie_labels[] = $t->name;
 	$tag_pie_percents[] = $t->percentage;
+}
+
+$prodi_pie_data = [];
+$prodi_pie_labels = [];
+$prodi_pie_percents = [];
+foreach($pie_prodis as $p) {
+	$prodi_pie_data[] = $p->apps_count;
+	$prodi_pie_labels[] = $p->name;
+	$prodi_pie_percents[] = $p->percentage;
 }
 ?>
 
@@ -211,6 +258,48 @@ jQuery(document).ready(function($) {
 			plugins: {
 				colorschemes: {
 					scheme: "brewer.DarkTwo8",
+				}
+			},
+		},
+	});
+	@endif
+
+	@if(count($prodis) > 0)
+	var ctx = $("#app-stats-by-prodi-pie");
+	var prodiPieData = @json($prodi_pie_data);
+	var prodiPieLabels = @json($prodi_pie_labels);
+	var prodiPiePercents = @json($prodi_pie_percents);
+	var prodiPieChart = new Chart(ctx, {
+		type: "pie",
+		data: {
+			datasets: [{
+				data: prodiPieData,
+				// backgroundColor: Helpers.getChartColors("so-luca-mastro", catPieData.length),
+			}],
+			labels: prodiPieLabels,
+			percentages: prodiPiePercents,
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			tooltips: {
+				enabled: true,
+				callbacks: {
+					label: function(tip, data) {
+						var label = data.labels[tip.index];
+						var value = data.datasets[tip.datasetIndex].data[tip.index];
+						var percent = data.percentages[tip.index];
+						return " "+ label +": "+ value +" ("+ percent +"%)";
+					},
+				},
+			},
+			legend: {
+				display: true,
+			},
+			plugins: {
+				colorschemes: {
+					// scheme: "brewer.SetTwo8",
+					scheme: "tableau.Classic10",
 				}
 			},
 		},

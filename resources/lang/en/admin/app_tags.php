@@ -20,7 +20,7 @@ return [
 'no_tags_yet'			=> 'There are no tags yet',
 'no_tags_matches'		=> 'No tags match your search',
 'edit_tag'				=> 'Edit tag',
-'see_apps_in_this_tag'	=> 'See apps in this tag',
+'see_apps_in_this_tag'	=> 'See products in this tag',
 'add_tag'				=> 'Add tag',
 
 'fields'	=> [

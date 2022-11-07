@@ -21,12 +21,13 @@ return [
 'change_my_profile'			=> 'Edit profile info',
 'change_profile_picture'	=> 'Change profile picture',
 'change_password'			=> 'Change password',
-'you_have_x_apps'			=> 'You have :x apps',
-'check_your_apps'			=> 'View your apps',
-'you_dont_have_any_apps_yet'	=> 'You don\'t have any apps yet',
-'make_your_first_app'			=> 'Create your first app',
+'you_have_x_apps'			=> 'You have :x products',
+'check_your_apps'			=> 'View your products',
+'you_dont_have_any_apps_yet'	=> 'You don\'t have any products yet',
+'make_your_first_app'			=> 'Create your first product',
 
 'this_is_default_user_picture'	=> 'This is the default user profile picture; you haven\'t set your profile picture yet',
+'use_default_language'		=> 'Use default language',
 
 'fields'	=> [
 	'name_placeholder'	=> 'Your name',
@@ -42,7 +43,7 @@ return [
 	'remove_picture'	=> 'Remove current picture',
 	'change_picture'	=> 'Change to a new picture',
 
-	'old_password'				=> 'Enter Current Password',
+	'old_password'				=> 'Current Password',
 	'old_password_placeholder'	=> 'Your current password...',
 	'new_password'				=> 'New Password',
 	'new_password_placeholder'	=> 'New password...',

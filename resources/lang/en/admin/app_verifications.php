@@ -3,23 +3,23 @@
 return [
 
 'page_title'		=> [
-	'index'			=> 'App Verifications',
-	'verify'		=> 'Verify App',
+	'index'			=> 'Product Verifications',
+	'verify'		=> 'Verify Product',
 	'verify_x'		=> 'Verify :x',
 
 	'view_mode'			=> [
-		'all'	=> 'Viewing all apps needing verification',
-		'prodi'	=> 'Viewing app verifications list in your study program - :x',
+		'all'	=> 'Viewing all products needing verification',
+		'prodi'	=> 'Viewing product verifications list in your study program - :x',
 	],
 ],
 
-'verifications_list'	=> 'App Verifications List',
-'no_app_verifications_yet'	=> 'No apps need verifications yet',
+'verifications_list'	=> 'Product Verifications List',
+'no_app_verifications_yet'	=> 'No products need verifications yet',
 'review'				=> 'Review',
-'review_app'			=> 'Review App',
+'review_app'			=> 'Review Product',
 'verify'				=> 'Verify',
 'verification_history'	=> 'Verification History',
-'app_versions'			=> 'App Versions',
+'app_versions'			=> 'Product Versions',
 'version_x'				=> 'Version :x',
 'current'				=> 'current',
 'active'				=> 'active',
@@ -43,9 +43,9 @@ return [
 'related_versions'		=> 'Related versions',
 'discarded_versions'	=> 'Discarded versions',
 'previous_version'		=> 'Previous version',
-'this_form_shows_the_app\'s_pending_changes'	=> 'This form shows data from the app\'s pending changes.',
-'this_app_does_not_have_any_pending_changes_to_be_reviewed'	=> 'This app does not have any pending changes to be reviewed.',
-'this_form_shows_version_x_the_app\'s_current_version'	=> 'This form shows data from Version :x, which is the app\'s version with no changes applied yet.',
+'this_form_shows_the_app\'s_pending_changes'	=> 'This form shows data from the product\'s pending changes.',
+'this_app_does_not_have_any_pending_changes_to_be_reviewed'	=> 'This product does not have any pending changes to be reviewed.',
+'this_form_shows_version_x_the_app\'s_current_version'	=> 'This form shows data from Version :x, which is the product\'s version with no changes applied yet.',
 'you_are_editing_the_last_verification'	=> 'You are editing the last verification.',
 
 'you_can_add_comments_to_any_related_fields_by_clicking_the_icon'	=> 'You can add comments to any field by clicking the comment icon next to it',
@@ -59,8 +59,8 @@ return [
 'auto_discard_unapplied_changes'	=> 'Automatic discard of any pending/unapplied changes during version switch',
 'switch_version_from_x_to_y'	=> 'Version switch: from Version :x to Version :y',
 'new_version_x'			=> 'New version: Version :x',
-'this_app_was_unlisted_because_of_reports'	=> 'This app was unlisted because of reports of inappropriate content',
-'this_app_was_recently_found_guilty_for_inappropriate_content'	=> 'This app was recently found guilty for having inappropriate contents.',
+'this_app_was_unlisted_because_of_reports'	=> 'This product was unlisted because of reports of inappropriate content',
+'this_app_was_recently_found_guilty_for_inappropriate_content'	=> 'This product was recently found guilty for having inappropriate contents.',
 'please_make_sure_the_offending_contents_have_been_removed'	=> 'Please make sure the offending contents have been removed.',
 
 'titles'		=> [
@@ -81,24 +81,24 @@ return [
 ],
 
 'status'		=> [
-	'approved_consequence'			=> 'The app owner will be able to publish any proposed changes.',
-	'approved_reported_consequence'	=> 'The existing ban/block for the app will be lifted as well.',
-	'rejected_consequence'			=> 'All the proposed changes will be rejected and dropped, and the app owner will have to propose different changes.',
-	'revision-needed_consequence'	=> 'The app as well as the proposed changes will be unaffected. Choose this to communicate with the app owner about additional, necessary changes.',
+	'approved_consequence'			=> 'The product owner will be able to publish any proposed changes.',
+	'approved_reported_consequence'	=> 'The existing ban/block for the product will be lifted as well.',
+	'rejected_consequence'			=> 'All the proposed changes will be rejected and dropped, and the product owner will have to propose different changes.',
+	'revision-needed_consequence'	=> 'The product as well as the proposed changes will be unaffected. Choose this to communicate with the product owner about additional, necessary changes.',
 ],
 
 'messages'		=> [
-	'verify_successful'		=> 'App verification has been saved.',
-	'verify_failed'			=> 'Failed to verify app.',
+	'verify_successful'		=> 'Product verification has been saved.',
+	'verify_failed'			=> 'Failed to verify product.',
 	'verify_edited'			=> 'The selected verification has been revised.',
 
 	'cannot_load_verification_view'	=> 'Error occurred while trying to load verification details.',
 
-	'this_unverified_item_is_new'	=> 'This unverified app is a new item.',
+	'this_unverified_item_is_new'	=> 'This unverified product is a new item.',
 
-	'app_verification_after_approved'			=> 'The app\'s proposed changes have been approved!',
-	'app_verification_after_rejected'			=> 'The app\'s proposed changes have been rejected and dropped.',
-	'app_verification_after_revision-needed '	=> 'The app and its proposed changes were unaffected. Wait for further changes by the app\'s owner.',
+	'app_verification_after_approved'			=> 'The product\'s proposed changes have been approved!',
+	'app_verification_after_rejected'			=> 'The product\'s proposed changes have been rejected and dropped.',
+	'app_verification_after_revision-needed '	=> 'The product and its proposed changes were unaffected. Wait for further changes by the product\'s owner.',
 ],
 
 'status_unverified'		=> 'Unverified',

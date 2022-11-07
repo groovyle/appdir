@@ -19,7 +19,7 @@ $transparent_navs = true;
 					<h3>{{ __('frontend.auth.register_header') }}</h3>
 				</div>
 
-				<form method="POST" action="{{ route('register') }}" class="login-form">
+				<form method="POST" action="{{ route('register') }}" class="login-form text-left">
 					@csrf
 
 					<div class="form-group row">
@@ -29,7 +29,7 @@ $transparent_navs = true;
 							<input id="name" type="text" class="login-form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
 
 							@error('name')
-								<span class="invalid-feedback" role="alert">
+								<span class="invalid-feedback d-block" role="alert">
 									<strong>{{ $message }}</strong>
 								</span>
 							@enderror
@@ -43,7 +43,7 @@ $transparent_navs = true;
 							<input id="email" type="email" class="login-form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email">
 
 							@error('email')
-								<span class="invalid-feedback" role="alert">
+								<span class="invalid-feedback d-block" role="alert">
 									<strong>{{ $message }}</strong>
 								</span>
 							@enderror
@@ -62,7 +62,7 @@ $transparent_navs = true;
 							</select>
 
 							@error('prodi')
-								<span class="invalid-feedback" role="alert">
+								<span class="invalid-feedback d-block" role="alert">
 									<strong>{{ $message }}</strong>
 								</span>
 							@enderror
@@ -76,12 +76,12 @@ $transparent_navs = true;
 							<div class="input-group password-wrapper">
 								<input id="password" type="password" class="login-form-control form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
 								<div class="input-group-append">
-									<button type="button" class="input-group-text plain text-decoration-none rounded-0 btn-see-password" data-targets="#password, #password-confirm"><span class="far fa-eye"></span></button>
+									<button type="button" class="input-group-text plain text-decoration-none rounded-0 btn-see-password" data-targets="#password, #password-confirm" title="{{ __('common.show/hide_password') }}" data-toggle="tooltip"><span class="far fa-eye fa-fw"></span></button>
 								</div>
 							</div>
 
 							@error('password')
-								<span class="invalid-feedback" role="alert">
+								<span class="invalid-feedback d-block" role="alert">
 									<strong>{{ $message }}</strong>
 								</span>
 							@enderror
@@ -93,6 +93,25 @@ $transparent_navs = true;
 
 						<div class="col-md-7">
 							<input id="password-confirm" type="password" class="login-form-control" name="password_confirmation" required autocomplete="new-password">
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<label for="language" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.language') }}</label>
+
+						<div class="col-md-7">
+							<select id="language" name="language" class="login-form-select custom-select" required autocomplete="off">
+								<option value="">&ndash; {{ __('frontend.auth.fields.choose_language') }} &ndash;</option>
+								@foreach($lang_list as $l => $text)
+								<option value="{{ $l }}" {!! old_selected('language', $lang, $l) !!}>{{ $text }}</option>
+								@endforeach
+							</select>
+
+							@error('language')
+								<span class="invalid-feedback d-block" role="alert">
+									<strong>{{ $message }}</strong>
+								</span>
+							@enderror
 						</div>
 					</div>
 

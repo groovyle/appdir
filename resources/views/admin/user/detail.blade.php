@@ -145,6 +145,9 @@ $rand = random_string(5);
             @endif
           </dd>
 
+          <dt>@lang('admin/users.fields.date_created')</dt>
+          <dd>@include('components.date-with-tooltip', ['date' => $user->created_at])</dd>
+
           <dt>@lang('admin/common.fields.last_updated')</dt>
           <dd>@include('components.date-with-tooltip', ['date' => $user->updated_at])</dd>
         </dl>

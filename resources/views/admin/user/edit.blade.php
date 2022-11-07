@@ -96,7 +96,7 @@ if(!$is_edit) {
             <div class="input-group password-wrapper">
               <input type="password" name="password" class="form-control text-monospace" id="inputUserPassword" placeholder="{{ __('admin/users.fields.password_placeholder') }}" value="" minlength="5" maxlength="50" autocomplete="off" required>
               <div class="input-group-append">
-                <a href="#" class="input-group-text plain btn-see-password" data-targets="#inputUserPassword, #inputUserPasswordConfirmation"><span class="far fa-eye"></span></a>
+                <a href="#" class="input-group-text plain btn-see-password" data-targets="#inputUserPassword, #inputUserPasswordConfirmation" title="{{ __('common.show/hide_password') }}" data-toggle="tooltip"><span class="far fa-eye fa-fw"></span></a>
               </div>
             </div>
           </div>

@@ -10,11 +10,10 @@
 
 @section('content')
 <div class="row">
-	<div class="col-md-3">
-
+	<div class="col-md-4 col-xl-3">
 		<!-- Profile Image -->
 		<div class="card card-primary card-outline">
-			<div class="card-body box-profile">
+			<div class="card-body box-profile lh-120">
 				<div class="text-center">
 					<div class="d-inline-block position-relative">
 						<a href="{{ $user->profile_picture }}" target="_blank">
@@ -33,23 +32,58 @@
 				</h3>
 
 				@if($user->roles_text)
-				<p class="text-secondary text-center mb-1">{{ $user->roles_text }}</p>
+				<p class="text-purple text-center mb-1">{{ $user->roles_text }}</p>
 				@endif
 
 				@if(!$user->is_system && $user->prodi)
 				<p class="text-center mb-1">{{ $user->prodi->complete_name }}</p>
 				@endif
 
+
+				<p class="text-center text-090 mt-3 mb-n2 lh-110">
+					<span class="text-secondary">@lang('admin/users.fields.date_created')</span>
+					<br>
+					@include('components.date-with-tooltip', ['date' => $user->created_at, 'format' => 'j F Y'])
+				</p>
+
 				<a href="{{ route('user.profile', ['user' => $user->id]) }}" class="btn btn-primary btn-block btn-sm mt-4" target="_blank">{{ __('admin/profile.see_public_profile') }}</a>
 			</div>
 			<!-- /.card-body -->
 		</div>
 		<!-- /.card -->
+	</div>
+	<!-- /.col -->
+	<div class="col-md-8 col-xl-6">
+		<div class="card">
+			<div class="card-body">
+				@if($user->apps_count > 0)
+				{{ __('admin/profile.you_have_x_apps', ['x' => $user->apps_count]) }}.
+				@can('view-any', App\Models\App::class)
+				<a href="{{ route('admin.apps.index', ['whose' => 'own']) }}" class="text-primary">{{ __('admin/profile.check_your_apps') }} &raquo;</a>
+				@endcan
+				@else
+				{{ __('admin/profile.you_dont_have_any_apps_yet') }}!
+				@can('create', App\Models\App::class)
+				<br>
+				<a href="{{ route('admin.apps.create') }}" class="btn btn-link">{{ __('admin/profile.make_your_first_app') }} &raquo;</a>
+				@endcan
+				@endif
+			</div><!-- /.card-body -->
+		</div>
+		<!-- /.nav-tabs-custom -->
+	</div>
+	<!-- /.col -->
 
+	<div class="col-12 col-md-4 col-xl-3">
 		<!-- Settings Box -->
 		<div class="card card-primary settings-box">
 			<div class="card-header">
-				<h3 class="card-title">{{ __('admin/profile.settings') }}</h3>
+				<h3 class="card-title">
+					<span class="icon-text-pair icon-color-reset">
+						<span class="fas fa-cog icon text-090"></span>
+						<span>{{ __('admin/profile.settings') }}</span>
+					</span>
+				</h3>
 			</div>
 			<!-- /.card-header -->
 			<div class="card-body">
@@ -83,26 +117,6 @@
 			<!-- /.card-body -->
 		</div>
 		<!-- /.card -->
-	</div>
-	<!-- /.col -->
-	<div class="col-md-9">
-		<div class="card">
-			<div class="card-body">
-				@if($user->apps_count > 0)
-				{{ __('admin/profile.you_have_x_apps', ['x' => $user->apps_count]) }}.
-				@can('view-any', App\Models\App::class)
-				<a href="{{ route('admin.apps.index', ['whose' => 'own']) }}" class="text-primary">{{ __('admin/profile.check_your_apps') }} &raquo;</a>
-				@endcan
-				@else
-				{{ __('admin/profile.you_dont_have_any_apps_yet') }}!
-				@can('create', App\Models\App::class)
-				<br>
-				<a href="{{ route('admin.apps.create') }}" class="btn btn-link">{{ __('admin/profile.make_your_first_app') }} &raquo;</a>
-				@endcan
-				@endif
-			</div><!-- /.card-body -->
-		</div>
-		<!-- /.nav-tabs-custom -->
 	</div>
 	<!-- /.col -->
 </div>

@@ -26,7 +26,7 @@ return [
 'no_users_yet'			=> 'There are no users yet',
 'no_users_matches'		=> 'No users match your search',
 'edit_user'				=> 'Edit user',
-'see_apps_by_this_user'	=> 'See apps owned by this user',
+'see_apps_by_this_user'	=> 'See products owned by this user',
 'add_user'				=> 'Add user',
 'user_data'				=> 'User data',
 'user_roles'			=> 'User roles',
@@ -71,6 +71,8 @@ return [
 	'user'				=> 'User',
 	'block_reason'		=> 'Reasons for the block',
 	'block_reason_placeholder'	=> 'Explain why the user is being blocked...',
+	'language'			=> 'Language',
+	'date_created'		=> 'Account Created at',
 ],
 
 'messages'	=> [

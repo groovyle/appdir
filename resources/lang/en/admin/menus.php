@@ -4,11 +4,11 @@ return [
 
 	'dashboard'				=> 'Dashboard',
 
-	'header_app_management'	=> 'App Management',
-	'app_list'				=> 'Apps List',
-	'app_verifications'		=> 'App Verifications',
-	'app_reports'			=> 'App Reports',
-	'app_moderation'		=> 'App Moderation',
+	'header_app_management'	=> 'Product Management',
+	'app_list'				=> 'Products List',
+	'app_verifications'		=> 'Product Verifications',
+	'app_reports'			=> 'Product Reports',
+	'app_moderation'		=> 'Product Moderation',
 	'app_activities'		=> 'Activities',
 
 	'header_master_data'	=> 'Master Data',
@@ -27,6 +27,6 @@ return [
 	'log_actions'			=> 'Actions Log',
 
 	'header_statistics'		=> 'Summaries',
-	'stats_app_activities'	=> 'App Activities',
+	'stats_app_activities'	=> 'Product Activities',
 
 ];

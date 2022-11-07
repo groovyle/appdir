@@ -53,6 +53,16 @@ $last_breadcrumb = __('admin/profile.change_my_profile');
 						<label for="inputProfileName">{{ __('admin/common.fields.name') }}</label>
 						<input type="text" name="name" class="form-control" id="inputProfileName" placeholder="{{ __('admin/profile.fields.name_placeholder') }}" value="{{ old('name', $model->name) }}" maxlength="100" required>
 					</div>
+
+					<div class="form-group">
+						<label for="inputProfileLanguage">{{ __('admin/users.fields.language') }}</label>
+						<select name="language" for="inputProfileLanguage" class="form-control">
+							<option value="">&ndash; {{ __('admin/profile.use_default_language') }} ({{ $app_locale_text }}) &ndash;</option>
+							@foreach($lang_list as $l => $text)
+							<option value="{{ $l }}" {!! old_selected('language', $model->lang, $l) !!}>{{ $text }} ({{ $l }})</option>
+							@endforeach
+						</select>
+					</div>
 				</div>
 				<div class="col-12">
 					<div class="mt-4 text-center">

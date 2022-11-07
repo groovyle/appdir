@@ -1,6 +1,9 @@
 <?php
 $theme = $theme ?? 'dark';
 extract(theme_vars($theme));
+
+$lang = app()->getLocale();
+$lang_text = langtext();
 ?><!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100">
 <head>
@@ -37,7 +40,9 @@ extract(theme_vars($theme));
 	@stack('head-additional')
 </head>
 <body class="h-100">
-	<div id="app" class="minh-100 splash-page bg-{{ $theme_bg }} {{ $theme_text }}">
+	<div id="app" class="minh-100 splash-page theme-{{ $theme }} bg-{{ $theme_bg }} {{ $theme_text }}">
+		<a class="floating-lang-btn text-monospace" href="#chLangModal" data-toggle="modal" title="{{ __('frontend.lang.click_to_change_language') }}">{{ strtoupper($lang) }}</a>
+
 		@section('outer-content')
 		<main class="flex-shrink-0 pt-3 pb-4 mt-auto">
 			@yield('content')
@@ -49,6 +54,7 @@ extract(theme_vars($theme));
 		</footer>
 	</div>
 
+	@include('components.language-modal')
 	@include('components.logout-form')
 
 	<!-- Scripts -->

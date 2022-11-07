@@ -71,6 +71,8 @@ return [
 	'user'				=> 'Pengguna',
 	'block_reason'		=> 'Alasan pemblokiran',
 	'block_reason_placeholder'	=> 'Jelaskan mengapa pengguna diblokir...',
+	'language'			=> 'Bahasa',
+	'date_created'		=> 'Akun Dibuat pada',
 ],
 
 'messages'	=> [

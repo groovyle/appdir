@@ -51,6 +51,13 @@ function make_title($title = '', $app_title = NULL) {
 	return $title ? sprintf($title_format, $title, $app_title) : $app_title;
 }
 
+function langtext($lang = null) {
+	if($lang === null)
+		$lang = app()->getLocale();
+
+	return \App\DataManagers\LanguageManager::getTranslated($lang);
+}
+
 // https://www.php.net/manual/en/function.parse-url.php#106731
 /**
  * Re-assembles the result from parsed_url() function into a string.
