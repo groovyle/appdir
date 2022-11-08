@@ -7,6 +7,7 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\DataManagers\LanguageManager as LangMan;
 
 class LoginController extends Controller
 {
@@ -100,6 +101,43 @@ class LoginController extends Controller
 		return $this->sendFailedLoginResponse($request);
 	}
 
+	/**
+	 * The user has been authenticated.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @param  mixed  $user
+	 * @return mixed
+	 */
+	protected function authenticated(Request $request, $user)
+	{
+		// Set locale
+		if(in_array($user->lang, LangMan::$languages)) {
+			session(['locale' => $user->lang]);
+		}
+	}
+
+
+	/**
+	 * Log the user out of the application.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @return \Illuminate\Http\Response
+	 */
+	public function logout(Request $request)
+	{
+		// Store user locale to maintain language even after logging out
+		$user = \Auth::user();
+		if($user)
+			$this->user_lang = $user->lang;
+
+		$this->guard()->logout();
+
+		$request->session()->invalidate();
+
+		$request->session()->regenerateToken();
+
+		return $this->loggedOut($request) ?: redirect('/');
+	}
 
 	/**
 	 * The user has logged out of the application.
@@ -109,6 +147,9 @@ class LoginController extends Controller
 	 */
 	protected function loggedOut(Request $request)
 	{
+		if(!empty($this->user_lang) && in_array($this->user_lang, LangMan::$languages))
+			session(['locale' => $this->user_lang]);
+
 		// If the user was on admin, redirect to login form instead...?
 		$was_on_admin = \Str::startsWith( url()->previous(), url('/admin') );
 		if($was_on_admin) {
