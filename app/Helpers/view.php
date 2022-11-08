@@ -190,13 +190,21 @@ function pretty_username($user, $is_an_owner = false) {
 		$atts['class'][] = 'is-owner';
 	}
 
+	$tag = 'span';
 	$color = null;
 	if( !($user instanceof \App\User) ) {
 		$name = $user;
 	} else {
 		$name = $user->display_name ?? $user->name;
 		if($user->is_system) {
+			$color = 'text-brown text-italic';
+			$tag = 'abbr';
+			$atts['title'] = __('users.entity.system');
+			$atts['data-toggle'] = 'tooltip';
+		} elseif($user->isA('superadmin')) {
 			$color = 'text-purple';
+		} elseif($user->isAn('admin')) {
+			$color = 'text-olive';
 		}
 	}
 
@@ -205,7 +213,7 @@ function pretty_username($user, $is_an_owner = false) {
 	}
 
 	$atts['class'] = implode(' ', $atts['class']);
-	$text = sprintf('<span %s>%s</span>', html_attributes($atts), $name);
+	$text = sprintf("<$tag %s>%s</$tag>", html_attributes($atts), $name);
 	return $text;
 }
 

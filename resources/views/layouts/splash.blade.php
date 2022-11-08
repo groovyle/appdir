@@ -41,7 +41,7 @@ $lang_text = langtext();
 </head>
 <body class="h-100">
 	<div id="app" class="minh-100 splash-page theme-{{ $theme }} bg-{{ $theme_bg }} {{ $theme_text }}">
-		<a class="floating-lang-btn text-monospace" href="#chLangModal" data-toggle="modal" title="{{ __('frontend.lang.click_to_change_language') }}">{{ strtoupper($lang) }}</a>
+		<a class="floating-lang-btn" href="#chLangModal" data-toggle="modal" title="{{ __('frontend.lang.click_to_change_language') }}"><span class="text-monospace">{{ strtoupper($lang) }}</span></a>
 
 		@section('outer-content')
 		<main class="flex-shrink-0 pt-3 pb-4 mt-auto">

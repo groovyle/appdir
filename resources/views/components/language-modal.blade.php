@@ -7,7 +7,12 @@ $curlang = app()->getLocale();
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="chLangModalLabel">{{ __('frontend.lang.change_language') }}</h5>
+				<h5 class="modal-title" id="chLangModalLabel">
+					<span class="icon-text-pair icon-color-reset align-items-center">
+						<span class="fas fa-language icon text-120"></span>
+						<span>{{ __('frontend.lang.change_language') }}</span>
+					</span>
+				</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>

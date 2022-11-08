@@ -155,6 +155,7 @@ span.icon-text-pair {
 .text-unbold { font-weight: normal !important; }
 .text-italic { font-style: italic !important; }
 .text-unitalic { font-style: normal !important; }
+.text-underline { text-decoration: underline !important; }
 
 .w-100 { width: 100%; }
 .maxw-100 { max-width: 100%; }
@@ -288,3 +289,5 @@ input.checkbox-xl, .form-check.checkbox-xl .form-check-input {
 
 .pointer-none { pointer-events: none !important; }
 
+.text-brown { color: #8e2a12 !important; }
+.text-abbr { text-decoration: underline dotted; }

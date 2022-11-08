@@ -22,7 +22,9 @@ class LoginController extends Controller
 	|
 	*/
 
-	use AuthenticatesUsers;
+	use AuthenticatesUsers {
+		logout as _logout;
+	}
 
 	/**
 	 * Where to redirect users after login.
@@ -130,13 +132,7 @@ class LoginController extends Controller
 		if($user)
 			$this->user_lang = $user->lang;
 
-		$this->guard()->logout();
-
-		$request->session()->invalidate();
-
-		$request->session()->regenerateToken();
-
-		return $this->loggedOut($request) ?: redirect('/');
+		return $this->_logout($request);
 	}
 
 	/**
@@ -153,7 +149,8 @@ class LoginController extends Controller
 		// If the user was on admin, redirect to login form instead...?
 		$was_on_admin = \Str::startsWith( url()->previous(), url('/admin') );
 		if($was_on_admin) {
-			return redirect()->route('login');
+			// return redirect()->route('login');
+			return redirect()->route('admin');
 		} else {
 			// If on portal just go back
 			return redirect()->back();

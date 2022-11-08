@@ -84,7 +84,7 @@ $lang_text = langtext();
 						<ul class="navbar-nav ml-auto">
 							<!-- Language Button -->
 							<li class="nav-item mx-2">
-								<a class="nav-link" href="#chLangModal" data-toggle="modal" title="{{ __('frontend.lang.click_to_change_language') }}"><span class="py-1 px-2 border-shadow text-monospace">{{ strtoupper($lang) }}</span></a>
+								<a class="nav-link" href="#chLangModal" data-toggle="modal" title="{{ __('frontend.lang.click_to_change_language') }}"><span class="py-1 px-2 border-shadow"><span class="text-monospace">{{ strtoupper($lang) }}</span></a>
 							</li>
 
 							<!-- Authentication Links -->
