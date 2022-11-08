@@ -23,7 +23,7 @@ $transparent_navs = true;
 					@csrf
 
 					<div class="form-group row">
-						<label for="name" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.name') }}</label>
+						<label for="name" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.name') }} @include('components.label-mandatory', ['flying' => true])</label>
 
 						<div class="col-md-7">
 							<input id="name" type="text" class="login-form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
@@ -37,7 +37,7 @@ $transparent_navs = true;
 					</div>
 
 					<div class="form-group row">
-						<label for="email" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.email') }}</label>
+						<label for="email" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.email') }} @include('components.label-mandatory', ['flying' => true])</label>
 
 						<div class="col-md-7">
 							<input id="email" type="email" class="login-form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email">
@@ -51,7 +51,7 @@ $transparent_navs = true;
 					</div>
 
 					<div class="form-group row">
-						<label for="prodi" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.prodi') }}</label>
+						<label for="prodi" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.prodi') }} @include('components.label-mandatory', ['flying' => true])</label>
 
 						<div class="col-md-7">
 							<select id="prodi" name="prodi" class="login-form-select custom-select" required autocomplete="prodi">
@@ -70,7 +70,7 @@ $transparent_navs = true;
 					</div>
 
 					<div class="form-group row">
-						<label for="password" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.password') }}</label>
+						<label for="password" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.password') }} @include('components.label-mandatory', ['flying' => true])</label>
 
 						<div class="col-md-7">
 							<div class="input-group password-wrapper">
@@ -89,7 +89,7 @@ $transparent_navs = true;
 					</div>
 
 					<div class="form-group row">
-						<label for="password-confirm" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.password_confirm') }}</label>
+						<label for="password-confirm" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.password_confirm') }} @include('components.label-mandatory', ['flying' => true])</label>
 
 						<div class="col-md-7">
 							<input id="password-confirm" type="password" class="login-form-control" name="password_confirmation" required autocomplete="new-password">
@@ -97,7 +97,7 @@ $transparent_navs = true;
 					</div>
 
 					<div class="form-group row">
-						<label for="language" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.language') }}</label>
+						<label for="language" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.language') }} @include('components.label-mandatory', ['flying' => true])</label>
 
 						<div class="col-md-7">
 							<select id="language" name="language" class="login-form-select custom-select" required autocomplete="off">
@@ -121,6 +121,14 @@ $transparent_navs = true;
 						</div>
 					</div>
 				</form>
+
+				<div class="login-footer">
+					<ul class="login-footer-links">
+						<li>
+							<a href="{{ route('login') }}">@lang('frontend.auth.fields.already_have_an_account_log_in')</a>
+						</li>
+					</ul>
+				</div>
 			</div>
 		</div>
 	</div>

@@ -65,7 +65,7 @@ $append_breadcrumb = [
           </div>
 
           <div class="form-group">
-            <label for="inputBlockReason" class="text-danger">{{ __('admin/users.fields.block_reason') }}</label>
+            <label for="inputBlockReason" class="text-danger">{{ __('admin/users.fields.block_reason') }} @include('components.label-mandatory')</label>
             <textarea name="reason" class="form-control" id="inputBlockReason" placeholder="{{ __('admin/users.fields.block_reason_placeholder') }}" rows="2" minlength="20" maxlength="200" style="max-height: 300px;" required>{{ old('reason') }}</textarea>
           </div>
         </div>

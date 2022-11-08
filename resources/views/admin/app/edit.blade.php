@@ -84,7 +84,7 @@ if(!$is_edit) {
         <div class="row gutter-lg">
           <div class="col-12 col-md-8 col-xl-6">
             <div class="form-group">
-              <label for="inputAppName">{{ __('admin/apps.fields.name') }}</label>
+              <label for="inputAppName">{{ __('admin/apps.fields.name') }} @include('components.label-mandatory')</label>
               <input type="text" name="app_name" class="form-control" id="inputAppName" placeholder="{{ __('admin/apps.fields.name_placeholder') }}" value="{{ old('app_name', $app->name) }}" maxlength="100" required>
             </div>
 
@@ -109,7 +109,7 @@ if(!$is_edit) {
 
           <div class="col-12 col-md-4 col-xl-6">
             <div class="form-group">
-              <label for="inputAppCategories">{{ __('admin/apps.fields.categories') }}</label>
+              <label for="inputAppCategories">{{ __('admin/apps.fields.categories') }} @include('components.label-mandatory')</label>
               <div class="select2-dark">
                 <select name="categories[]" class="form-control" id="inputAppCategories" multiple="multiple" data-placeholder="&ndash; {{ __('admin/apps.fields.categories_placeholder') }} &ndash;" data-dropdown-css-class="select2-dark" style="width: 100%;" required>
                   @if (!empty($categories))

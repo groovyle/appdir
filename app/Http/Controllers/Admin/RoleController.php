@@ -9,6 +9,7 @@ use App\Models\Prodi;
 use App\User;
 use App\Models\Role;
 use App\Models\Ability;
+use App\Models\LogAction;
 
 use App\Rules\ModelExists;
 
@@ -370,12 +371,24 @@ class RoleController extends Controller
 			Bouncer::sync($role)->abilities($abilities_allowed);
 			Bouncer::sync($role)->forbiddenAbilities($abilities_forbidden);
 
+			// Log
+			$result = $result && LogAction::logModel($role, 'sync', null, [
+				'ability_allow_ids' => implode(',', $abilities_allowed),
+				'ability_forbid_ids' => implode(',', $abilities_forbidden),
+			], null, Ability::class);
+
 
 			// Users
-			$input_user_ids = $request->input('users', []);
-			$role->syncUsers($input_user_ids);
+			if($result) {
+				$input_user_ids = $request->input('users', []);
+				$role->syncUsers($input_user_ids);
+				// Log
+				$result = $result && LogAction::logModel($role, 'sync', null, ['user_ids' => implode(',', $input_user_ids)], null, User::class);
+			}
 
-			Bouncer::refresh();
+			if($result) {
+				Bouncer::refresh();
+			}
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = false;
 			$messages[] = $e->getMessage();

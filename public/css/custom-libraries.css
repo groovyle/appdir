@@ -143,6 +143,8 @@ textarea.auto-height-init-bypass {
 	padding: 0.1em 0.25em;
 	width: auto;
 	cursor: pointer;
+	color: #007bff;
+	text-decoration: none;
 	background-color: #fff;
 	box-shadow: 0 1em 1em 1em rgba(255, 255, 255, 0.95);
 
@@ -157,6 +159,7 @@ textarea.auto-height-init-bypass {
 .read-more-wrapper .read-more-handle:hover,
 .read-more-wrapper .read-more-handle:focus,
 .read-more-wrapper .read-more-handle:active {
+	color: #0056b3;
 	text-decoration: underline;
 }
 .read-more-wrapper.collapsed .read-more-handle {

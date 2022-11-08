@@ -360,7 +360,7 @@ $rand = random_alpha(5);
               </div>
               <div class="list-group-item verif-form-fields">
                 <div class="form-group">
-                  <label for="inputOverallComment">{{ __('admin/app_verifications.fields.overall_comments') }}</label>
+                  <label for="inputOverallComment">{{ __('admin/app_verifications.fields.overall_comments') }} @include('components.label-mandatory')</label>
                   <textarea name="overall_comment" id="inputOverallComment" class="form-control" placeholder="{{ __('admin/app_verifications.fields.overall_comments_hint') }}" rows="2" maxlength="1000" required>{{ old('overall_comment', $verif->comment) }}</textarea>
                 </div>
 

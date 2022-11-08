@@ -82,9 +82,16 @@ if(!$is_edit) {
           <div class="form-group">
             <label for="inputAbilityName">
               {{ __('admin/abilities.fields.name') }}
-              @component('admin.slots.label-hint')
-              @lang('admin/abilities.fields.name_hint')
-              @endcomponent
+              @if($is_edit)
+                @component('admin.slots.label-hint', ['icon' => 'fas fa-info-circle'])
+                @lang('admin/abilities.fields.name_hint_edit')
+                @endcomponent
+              @else
+                @include('components.label-mandatory')
+                @component('admin.slots.label-hint')
+                @lang('admin/abilities.fields.name_hint')
+                @endcomponent
+              @endif
             </label>
             @if(!$is_edit)
             <input type="text" name="name" class="form-control" id="inputAbilityName" placeholder="{{ __('admin/abilities.fields.name_placeholder') }}" value="{{ old('name', $abl->name) }}" maxlength="100" required>

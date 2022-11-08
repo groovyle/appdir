@@ -25,12 +25,12 @@ $last_breadcrumb = __('admin/profile.change_password');
 	@include('components.page-message', ['show_errors' => true])
 
 	<!-- Card -->
-	<div class="card main-content scroll-to-me">
+	<div class="card main-content">
 		<div class="card-body">
 			<div class="row gutter-lg">
 				<div class="col-12 col-md-8 col-xl-6 mx-auto">
 					<div class="form-group">
-						<label for="inputOldPassword">{{ __('admin/profile.fields.old_password') }}</label>
+						<label for="inputOldPassword">{{ __('admin/profile.fields.old_password') }} @include('components.label-mandatory')</label>
 
 						<div class="input-group password-wrapper">
 							<input type="password" name="old_password" class="form-control" id="inputOldPassword" placeholder="{{ __('admin/profile.fields.old_password_placeholder') }}" value="" autocomplete="off" required>
@@ -40,7 +40,7 @@ $last_breadcrumb = __('admin/profile.change_password');
 						</div>
 					</div>
 					<div class="form-group">
-						<label for="inputNewPassword">{{ __('admin/profile.fields.new_password') }}</label>
+						<label for="inputNewPassword">{{ __('admin/profile.fields.new_password') }} @include('components.label-mandatory')</label>
 						<div class="input-group password-wrapper">
 							<input type="password" name="new_password" class="form-control" id="inputNewPassword" placeholder="{{ __('admin/profile.fields.new_password_placeholder') }}" value="" autocomplete="off" minlength="5" maxlength="50" required>
 							<div class="input-group-append">
@@ -49,7 +49,7 @@ $last_breadcrumb = __('admin/profile.change_password');
 						</div>
 					</div>
 					<div class="form-group">
-						<label for="inputNewPassword2">{{ __('admin/profile.fields.new_password2') }}</label>
+						<label for="inputNewPassword2">{{ __('admin/profile.fields.new_password2') }} @include('components.label-mandatory')</label>
 						<input type="password" name="new_password_confirmation" class="form-control" id="inputNewPassword2" placeholder="{{ __('admin/profile.fields.new_password2_placeholder') }}" value="" autocomplete="off" required>
 					</div>
 				</div>

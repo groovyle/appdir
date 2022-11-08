@@ -9,6 +9,7 @@ use App\Models\Prodi;
 use App\User;
 use App\Models\Role;
 use App\Models\Ability;
+use App\Models\LogAction;
 
 use Bouncer;
 
@@ -368,11 +369,18 @@ class AbilityController extends Controller
 				$input_role_ids = $request->input('roles', []);
 				$role_ids_used = [];
 				$role_ids_unused = [];
+				$role_ids_allowed = [];
+				$role_ids_forbidden = [];
 				foreach($input_role_ids as $irole) {
 					if(!isset($irole['check'])) {
 						$role_ids_unused[] = $irole['id'];
 					} else {
-						$role_ids_used[$irole['id']] = ['forbidden' => ($irole['mode'] ?? null) == 'forbid' ? 1 : 0];
+						$forbidden = ($irole['mode'] ?? null) == 'forbid' ? 1 : 0;
+						$role_ids_used[$irole['id']] = ['forbidden' => $forbidden];
+						if($forbidden)
+							$role_ids_forbidden[] = $irole['id'];
+						else
+							$role_ids_allowed[] = $irole['id'];
 					}
 				}
 				// Can't do the following because it discards the forbidden attribute
@@ -395,13 +403,20 @@ class AbilityController extends Controller
 						Bouncer::allow($r)->to($abl);
 					}
 				}
+
+				// Log
+				$result = $result && LogAction::logModel($abl, 'sync', null, [
+					'role_allow_ids' => implode(',', $role_ids_allowed),
+					'role_forbid_ids' => implode(',', $role_ids_forbidden),
+				], null, Role::class);
 			}
 
 
 			if($result) {
 				// Users
-				$user_ids = $request->input('users', []);
-				$abl->syncUsers($user_ids);
+				$input_user_ids = $request->input('users', []);
+				$abl->syncUsers($input_user_ids);
+				$result = $result && LogAction::logModel($abl, 'sync', null, ['user_ids' => implode(',', $input_user_ids)], null, User::class);
 			}
 
 			if($result) {

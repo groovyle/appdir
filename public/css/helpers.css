@@ -149,6 +149,20 @@ span.icon-text-pair {
 	transform: translateY(-50%);
 }
 
+.mandatory-icon {
+	font-size: 40%;
+	vertical-align: super;
+	padding-left: 0.25rem;
+	padding-right: 0.25rem;
+}
+.mandatory-icon.flying {
+	position: absolute;
+	left: auto;
+	top: auto;
+	margin-top: 1em;
+	margin-left: 0.5ch;
+}
+
 
 
 .text-bold { font-weight: bold !important; }

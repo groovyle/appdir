@@ -16,6 +16,9 @@ class Role extends BaseRole
 	 *
 	 */
 
+	use Concerns\LoggedActions;
+
+
 	public static function boot() {
 		parent::boot();
 

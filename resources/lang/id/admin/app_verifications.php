@@ -98,7 +98,7 @@ return [
 
 	'app_verification_after_approved'			=> 'Perubahan karya yang diajukan telah disetujui!',
 	'app_verification_after_rejected'			=> 'Perubahan karya yang diajukan ditolak dan dibuang.',
-	'app_verification_after_revision-needed '	=> 'Perubahan karya yang diajukan tidak terkena efek apapun. Tunggu perubahan lebih lanjut dari pembuat karya.',
+	'app_verification_after_revision-needed'	=> 'Perubahan karya yang diajukan tidak terkena efek apapun. Tunggu perubahan lebih lanjut dari pembuat karya.',
 ],
 
 'status_unverified'		=> 'Belum Diverifikasi',

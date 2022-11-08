@@ -57,7 +57,7 @@ if(!$is_edit) {
       <div class="row gutter-lg">
         <div class="col-12 col-md-8 col-xl-6 mx-auto">
           <div class="form-group">
-            <label for="inputTagName">{{ __('admin/common.fields.name') }}</label>
+            <label for="inputTagName">{{ __('admin/common.fields.name') }} @include('components.label-mandatory')</label>
             <input type="text" name="name" class="form-control" id="inputTagName" placeholder="{{ __('admin/app_tags.fields.name_placeholder') }}" value="{{ old('name', $tag->name) }}" maxlength="100" required>
           </div>
 

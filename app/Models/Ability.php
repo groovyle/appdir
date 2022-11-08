@@ -10,11 +10,15 @@ use Silber\Bouncer\Database\Models as BouncerModels;
 
 class Ability extends BaseAbility
 {
+
 	/**
 	 * Just a proxy so naming gets easier, I guess.
 	 * Also just a placeholder in case there's a need to extend the default model.
 	 *
 	 */
+
+	use Concerns\LoggedActions;
+
 
 	public function scopeDefaultOrder($query, $asc = true, $with_permissions = false) {
 		$ascending = $asc ? 'asc' : 'desc';

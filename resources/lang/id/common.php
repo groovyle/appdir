@@ -44,6 +44,7 @@ return [
 'or'				=> 'atau',
 'and'				=> 'dan',
 'show/hide_password'	=> 'Tengok/tutup password',
+'field_mandatory'	=> 'wajib diisi',
 
 
 'messages'	=> [

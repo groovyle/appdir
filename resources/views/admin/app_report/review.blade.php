@@ -226,7 +226,7 @@ $form_show = $show_form ? 'show' : '';
 	<div class="card report-verdict-wrapper mt-4">
 		<div class="card-body">
 			<div class="form-group">
-				<label for="input-final-comments">@lang('admin/app_reports.fields.final_comments')</label>
+				<label for="input-final-comments">@lang('admin/app_reports.fields.final_comments') @include('components.label-mandatory')</label>
 				<div class="callout callout-warning py-2 px-3 mb-1 text-090">
 					<span class="icon-text-pair icon-2x">
 						<span class="fas fa-info-circle icon text-150 text-warning"></span>
@@ -236,7 +236,7 @@ $form_show = $show_form ? 'show' : '';
 				<textarea class="form-control" name="final_comments" id="input-final-comments" placeholder="{{ __('admin/app_reports.fields.final_comments_placeholder') }}" rows="2" minlength="50" maxlength="1000" required>{{ old('final_comments') }}</textarea>
 			</div>
 			<div class="form-group accordion" id="verdict-collapse-group">
-				<label for="input-verdict">@lang('admin/app_reports.fields.verdict')</label>
+				<label for="input-verdict">@lang('admin/app_reports.fields.verdict') @include('components.label-mandatory')</label>
 				<div class="verdict-item lh-120 mb-2">
 					<div class="form-check">
 						<input type="radio" name="verdict" value="innocent" class="form-check-input input-verdict" id="input-verdict-innocent" required {!! old_checked('verdict', null, 'innocent') !!}>

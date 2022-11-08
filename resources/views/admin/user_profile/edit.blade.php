@@ -25,7 +25,7 @@ $last_breadcrumb = __('admin/profile.change_my_profile');
 	@include('components.page-message', ['show_errors' => true])
 
 	<!-- Card -->
-	<div class="card main-content scroll-to-me">
+	<div class="card main-content">
 		<div class="card-body">
 			<div class="row gutter-lg">
 				<div class="col-12 col-md-8 col-xl-6 mx-auto">
@@ -50,13 +50,13 @@ $last_breadcrumb = __('admin/profile.change_my_profile');
 					</div>
 
 					<div class="form-group">
-						<label for="inputProfileName">{{ __('admin/common.fields.name') }}</label>
+						<label for="inputProfileName">{{ __('admin/common.fields.name') }} @include('components.label-mandatory')</label>
 						<input type="text" name="name" class="form-control" id="inputProfileName" placeholder="{{ __('admin/profile.fields.name_placeholder') }}" value="{{ old('name', $model->name) }}" maxlength="100" required>
 					</div>
 
 					<div class="form-group">
-						<label for="inputProfileLanguage">{{ __('admin/users.fields.language') }}</label>
-						<select name="language" for="inputProfileLanguage" class="form-control">
+						<label for="inputProfileLanguage">{{ __('admin/users.fields.language') }} @include('components.label-mandatory')</label>
+						<select name="language" id="inputProfileLanguage" class="form-control">
 							<option value="">&ndash; {{ __('admin/profile.use_default_language') }} ({{ $app_locale_text }}) &ndash;</option>
 							@foreach($lang_list as $l => $text)
 							<option value="{{ $l }}" {!! old_selected('language', $model->lang, $l) !!}>{{ $text }} ({{ $l }})</option>

@@ -59,13 +59,14 @@ if(!$is_edit) {
           <div class="form-group">
             <label for="inputUserName">
               {{ __('admin/common.fields.name') }}
+              @include('components.label-mandatory')
               @include('admin.user.components.is-me-icon', ['user' => $model])
             </label>
             <input type="text" name="name" class="form-control" id="inputUserName" placeholder="{{ __('admin/users.fields.name_placeholder') }}" value="{{ old('name', $model->name) }}" maxlength="100" required>
           </div>
 
           <div class="form-group">
-            <label for="inputUserEmail">{{ __('admin/users.fields.email') }}</label>
+            <label for="inputUserEmail">{{ __('admin/users.fields.email') }} @include('components.label-mandatory')</label>
             <input type="text" name="email" class="form-control" id="inputUserEmail" placeholder="{{ __('admin/users.fields.email_placeholder') }}" value="{{ old('email', $model->email) }}" maxlength="200" required>
           </div>
 
@@ -89,6 +90,7 @@ if(!$is_edit) {
           <div class="form-group">
             <label for="inputUserPassword">
               {{ __('admin/users.fields.password') }}
+              @include('components.label-mandatory')
               @component('admin.slots.label-hint')
               @lang('admin/users.fields.password_hint', ['min' => 5, 'max' => 50])
               @endcomponent
@@ -101,7 +103,7 @@ if(!$is_edit) {
             </div>
           </div>
           <div class="form-group">
-            <label for="inputUserPasswordConfirmation">{{ __('admin/users.fields.password_confirmation') }}</label>
+            <label for="inputUserPasswordConfirmation">{{ __('admin/users.fields.password_confirmation') }} @include('components.label-mandatory')</label>
             <input type="password" name="password_confirmation" class="form-control text-monospace" id="inputUserPasswordConfirmation" placeholder="{{ __('admin/users.fields.password_confirmation_placeholder') }}" value="" autocomplete="off" required>
           </div>
           @endif

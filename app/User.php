@@ -21,6 +21,7 @@ class User extends Authenticatable
 	use HasRolesAndAbilities;
 	use SoftDeletes;
 	use HasFilepond;
+	use Models\Concerns\LoggedActions;
 
 	protected $attributes = [
 		'entity' => 'user',

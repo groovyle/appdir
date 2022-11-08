@@ -44,6 +44,7 @@ return [
 'or'				=> 'or',
 'and'				=> 'and',
 'show/hide_password'	=> 'Show/hide password',
+'field_mandatory'	=> 'mandatory',
 
 
 'messages'	=> [

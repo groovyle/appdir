@@ -102,9 +102,11 @@ trait LoggedActions {
 	 */
 	protected function logUpdating($model)
 	{
-		if($model->isDirty()) {
-			$model->loggedActionsSetTransientData($model->getDirty());
-			// $model->logAction($model, 'updating', $model->getDirty());
+		// NOTE: don't use isDirty() or getDirty() since we need to hide fields
+		// hidden with $this->hidden[]
+		if($model->isNonHiddenDirty()) {
+			$model->loggedActionsSetTransientData($model->getNonHiddenDirty());
+			// $model->logAction($model, 'updating', $model->getNonHiddenDirty());
 		}
 	}
 
@@ -118,7 +120,7 @@ trait LoggedActions {
 		$data = $model->loggedActionsGetTransientData();
 		if(!empty($data)) {
 			$model->logAction($model, 'update', null, $data);
-			// $model->logAction($model, 'update', $model->getDirty());
+			// $model->logAction($model, 'update', $model->getNonHiddenDirty());
 		}
 	}
 
@@ -180,6 +182,17 @@ trait LoggedActions {
 		$data = $this->loggedActionsTransientData;
 		$this->loggedActionsTransientData = NULL;
 		return $data;
+	}
+
+	public function getNonHiddenDirty() {
+		return collect($this->getDirty())->except($this->hidden)->all();
+	}
+
+	// SEE: Illuminate\Database\Eloquent\Concerns\HasAttributes::isDirty()
+	public function isNonHiddenDirty($attributes = null) {
+		return $this->hasChanges(
+			$this->getNonHiddenDirty(), is_array($attributes) ? $attributes : func_get_args()
+		);
 	}
 
 	/**

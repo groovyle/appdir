@@ -78,6 +78,7 @@ if(!$is_edit) {
                 @lang('admin/roles.fields.name_hint_edit')
                 @endcomponent
               @else
+                @include('components.label-mandatory')
                 @component('admin.slots.label-hint')
                 @lang('admin/roles.fields.name_hint')
                 @endcomponent

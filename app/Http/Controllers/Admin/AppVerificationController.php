@@ -363,7 +363,7 @@ class AppVerificationController extends Controller
 				if($is_dirty) {
 					// Pass a message
 					$request->session()->flash('flash_message', [
-						'message'	=> __('admin.app_verification.message.verify_edited'),
+						'message'	=> __('admin/app_verifications.messages.verify_edited'),
 						'type'		=> 'success'
 					]);
 					$request->session()->flash('post_verif_status', $verif_status);

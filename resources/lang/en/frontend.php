@@ -218,6 +218,7 @@ return [
 		'remember_login'		=> 'Remember my login',
 		'forgot_your_password'	=> 'Forgot your password?',
 		'register_an_account'	=> 'Register an account',
+		'already_have_an_account_log_in'	=> 'Already have an account? Login instead',
 	],
 
 	'messages'	=> [

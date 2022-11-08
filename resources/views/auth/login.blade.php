@@ -60,7 +60,6 @@ $transparent_navs = true;
 				<button type="submit" class="btn-login">@lang('frontend.auth.login_btn')</button>
 			</div>
 		</form>
-		<?php?>
 		<div class="login-footer">
 			<ul class="login-footer-links">
 				@if (Route::has('password.request'))

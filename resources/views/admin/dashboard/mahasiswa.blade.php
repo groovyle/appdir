@@ -12,6 +12,15 @@
 <section class="content">
 	<section class="content-header">
 		<div class="container-fluid">
+			@if($total_apps == 0)
+			<div class="row">
+				<div class="col-12">
+					<h4>{{ __('admin/profile.you_dont_have_any_apps_yet') }}!</h4>
+					<a href="{{ route('admin.apps.create') }}" class="btn btn-primary">{{ __('admin/profile.make_your_first_app') }} &raquo;</a>
+				</div>
+			</div>
+			<hr class="my-5">
+			@endif
 			<div class="row">
 				<div class="col-12 col-md-3">
 					<div class="info-box mb-3">

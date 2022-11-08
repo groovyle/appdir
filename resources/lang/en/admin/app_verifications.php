@@ -98,7 +98,7 @@ return [
 
 	'app_verification_after_approved'			=> 'The product\'s proposed changes have been approved!',
 	'app_verification_after_rejected'			=> 'The product\'s proposed changes have been rejected and dropped.',
-	'app_verification_after_revision-needed '	=> 'The product and its proposed changes were unaffected. Wait for further changes by the product\'s owner.',
+	'app_verification_after_revision-needed'	=> 'The product and its proposed changes were unaffected. Wait for further changes by the product\'s owner.',
 ],
 
 'status_unverified'		=> 'Unverified',

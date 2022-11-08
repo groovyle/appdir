@@ -66,6 +66,7 @@ if(!$is_edit) {
           <div class="form-group">
             <label for="inputSttKey">
               {{ __('admin/settings.fields.key') }}
+              @include('components.label-mandatory')
               @component('admin.slots.label-hint')
               @lang('admin/settings.fields.key_hint')
               @endcomponent

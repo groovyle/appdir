@@ -10,6 +10,7 @@ use App\User;
 use App\Models\Role;
 use App\Models\Ability;
 use App\Models\UserBlock;
+use App\Models\LogAction;
 
 use App\DataManagers\UserManager;
 
@@ -438,18 +439,25 @@ class UserController extends Controller
 			$result = $user->save();
 
 			// Roles
-			if(!$is_edit || $cuser->can('manipulate-account', $user)) {
-				$input_role_ids = $request->input('roles', []);
-				$role_ids = [];
-				foreach($input_role_ids as $irole) {
-					if(!isset($irole['check'])) continue;
-					$role_ids[] = $irole['id'];
+			if($result) {
+				if(!$is_edit || $cuser->can('manipulate-account', $user)) {
+					$input_role_ids = $request->input('roles', []);
+					$role_ids = [];
+					foreach($input_role_ids as $irole) {
+						if(!isset($irole['check'])) continue;
+						$role_ids[] = $irole['id'];
+					}
+					Bouncer::sync($user)->roles($role_ids);
+
+					// Log
+					$result = $result && LogAction::logModel($user, 'sync', null, ['role_ids' => implode(',', $role_ids)], null, Role::class);
 				}
-				Bouncer::sync($user)->roles($role_ids);
 			}
 
 			// Refresh user authorization cache
-			Bouncer::refreshFor($user);
+			if($result) {
+				Bouncer::refreshFor($user);
+			}
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = false;
 			$messages[] = $e->getMessage();
@@ -539,7 +547,7 @@ class UserController extends Controller
 		$messages = [];
 		try {
 			$user->password = Hash::make($new_pass);
-			$result = $user->save();
+			$result = $user->/*dontLogNextAction()->*/save();
 		} catch(\Illuminate\Database\QueryException $e) {
 			$result = false;
 			$messages[] = $e->getMessage();

@@ -218,6 +218,7 @@ return [
 		'remember_login'		=> 'Ingat login saya',
 		'forgot_your_password'	=> 'Lupa password?',
 		'register_an_account'	=> 'Pendaftaran akun',
+		'already_have_an_account_log_in'	=> 'Sudah punya akun? Login saja',
 	],
 
 	'messages'	=> [

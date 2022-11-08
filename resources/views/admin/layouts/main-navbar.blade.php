@@ -9,7 +9,7 @@ $user = Auth::user();
 				<a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
 			</li>
 			<li class="nav-item">
-				<a class="btn btn-sm btn-default btn-flat my-1 ml-1" href="{{ route('index') }}" target="_blank">{{ __('admin/common.portal_button') }}</a>
+				<a class="btn btn-sm btn-default btn-flat my-1 mx-1" href="{{ route('index') }}" target="_blank">{{ __('admin/common.portal_button') }}</a>
 			</li>
 		</ul>
 
@@ -29,7 +29,7 @@ $user = Auth::user();
 			--}}
 			<!-- Language button -->
 			<li class="nav-item">
-				<a class="btn btn-sm btn-default btn-flat my-1 mr-1" href="#chLangModal" data-toggle="modal" title="{{ __('frontend.lang.click_to_change_language') }}"><span class="text-monospace">{{ strtoupper($lang) }}</span></a>
+				<a class="btn btn-sm btn-default btn-flat my-1 mx-1" href="#chLangModal" data-toggle="modal" title="{{ __('frontend.lang.click_to_change_language') }}"><span class="text-monospace">{{ strtoupper($lang) }}</span></a>
 			</li>
 
 			<!-- User menu -->
