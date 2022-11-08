@@ -25,3 +25,5 @@ public_html/hot
 /.vagrant
 .phpunit.result.cache
 =====
+composer.lock
+package-lock.json
