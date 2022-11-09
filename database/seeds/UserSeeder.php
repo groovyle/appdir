@@ -13,8 +13,8 @@ class UserSeeder extends Seeder
 	 */
 	public function run()
 	{
-		User::newQuery()->delete();
-		Prodi::newQuery()->delete();
+		User::query()->delete();
+		Prodi::query()->delete();
 
 
 		// Prodi first
