@@ -14,8 +14,10 @@ class MasterDataSeeder extends Seeder
 	 */
 	public function run()
 	{
-		AppCategory::query()->delete();
-		AppTag::query()->delete();
+		config()->set('database.action_logging', false);
+
+		AppCategory::query()->withoutGlobalScopes()->toBase()->delete();
+		AppTag::query()->withoutGlobalScopes()->toBase()->delete();
 
 
 		// Categories

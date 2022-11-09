@@ -14,6 +14,13 @@ trait LoggedActions {
 	 *
 	 * @var bool
 	 */
+	public static $globalActionsLogged = true;
+
+	/**
+	 * Indicates if all the actions are logged in a log table.
+	 *
+	 * @var bool
+	 */
 	public $actionsLogged = true;
 
 	/**
@@ -54,7 +61,6 @@ trait LoggedActions {
 	public static function bootLoggedActions()
 	{
 		// Boot
-
 		static::registerModelEvent('created', function($model) {
 			return $model->logCreated($model);
 		});
@@ -84,6 +90,12 @@ trait LoggedActions {
 	{
 		// Init
 	}
+
+	public static function globalToggle($state = true)
+	{
+		static::$globalActionsLogged = $state;
+	}
+
 
 	/**
 	 * Do stuff post-create, like logging.
@@ -202,7 +214,10 @@ trait LoggedActions {
 	 */
 	public function actionsLogged()
 	{
-		return $this->actionsLogged;
+		return config('database.action_logging')
+			&& static::$globalActionsLogged
+			&& $this->actionsLogged
+		;
 	}
 
 	/**

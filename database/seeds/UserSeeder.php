@@ -1,8 +1,10 @@
 <?php
 
 use Illuminate\Database\Seeder;
+
 use App\User;
 use App\Models\Prodi;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -13,8 +15,10 @@ class UserSeeder extends Seeder
 	 */
 	public function run()
 	{
-		User::query()->delete();
-		Prodi::query()->delete();
+		config()->set('database.action_logging', false);
+
+		User::query()->withoutGlobalScopes()->toBase()->delete();
+		Prodi::query()->withoutGlobalScopes()->toBase()->delete();
 
 
 		// Prodi first

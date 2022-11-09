@@ -11,8 +11,10 @@ class BouncerSeeder extends Seeder
 	 */
 	public function run()
 	{
-		Bouncer::role()->newQuery()->delete();
-		Bouncer::ability()->newQuery()->delete();
+		config()->set('database.action_logging', false);
+
+		Bouncer::role()->newQuery()->withoutGlobalScopes()->delete();
+		Bouncer::ability()->newQuery()->withoutGlobalScopes()->delete();
 
 
 		$this->abilities();

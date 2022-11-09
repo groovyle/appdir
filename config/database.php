@@ -156,6 +156,7 @@ return [
 
 
     // CUSTOM
+    'action_logging' => env('DB_ACTION_LOGGING', true),
     'global_logging' => env('DB_GLOBAL_LOGGING', false),
 
 ];
