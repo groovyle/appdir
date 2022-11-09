@@ -10,7 +10,6 @@ use App\Models\AppChangelog;
 use App\Models\AppTag;
 use App\Models\AppLogo;
 use App\Models\AppVisualMedia;
-use App\Models\AppType;
 use App\Models\AppVerification;
 use App\Models\LogActions;
 use App\Models\Prodi;
@@ -246,7 +245,6 @@ class AppController extends Controller
 	protected function _getFormPreps() {
 		$data = [];
 		$data['user'] = Auth::user();
-		$data['types'] = AppType::get();
 		$data['categories'] = AppCategory::get();
 		$data['tags'] = AppTag::get()->pluck('name');
 
