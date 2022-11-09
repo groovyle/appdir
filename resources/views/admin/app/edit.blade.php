@@ -126,9 +126,7 @@ if(!$is_edit) {
               @endcomponent
               <div class="select2-light">
                 <select name="tags[]" class="form-control w-100" id="inputAppTags" multiple="multiple" data-placeholder="&ndash; {{ __('admin/apps.fields.tags_placeholder') }} &ndash;" data-dropdown-css-class="select2-light">
-                  @if (!empty($tags))
-                  {!! generate_options($tags, old('tags', $app->tags->pluck('name')->toArray()), 'name', 'name') !!}
-                  @endif
+                  {!! generate_options($tags, old('tags', $app->tags->pluck('name')->toArray()), 'name', 'name', true) !!}
                 </select>
               </div>
             </div>
@@ -323,12 +321,12 @@ jQuery(document).ready(function($) {
       },
       @endforeach
       --}}
-      @foreach(old('app_logo', []) as $filehash)
+      @if($old_app_logo = old('app_logo'))
       {
-        source: @json($filehash),
+        source: @json($old_app_logo),
         options: { type: 'limbo' },
       },
-      @endforeach
+      @endif
     ],
     onupdatefiles: Helpers.debounce(function(files) {
       logoFileOnChange(files.length == 0);

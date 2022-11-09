@@ -17,9 +17,11 @@ function tab_title($title = '') {
 	return $title;
 }
 
-function generate_options($arr, $selected_values = '', $value_key = 'id', $text_key = 'name') {
+function generate_options($arr, $selected_values = '', $value_key = 'id', $text_key = 'name', $tagging = false) {
 	$html = array();
 	$selected_values = array_map('strval', (array) $selected_values);
+	$intersect = [];
+	$options = [];
 	foreach($arr as $i => $item) {
 		if(is_object($item)) {
 			$value = $item->$value_key;
@@ -31,8 +33,28 @@ function generate_options($arr, $selected_values = '', $value_key = 'id', $text_
 			$value = $text = $item;
 		}
 		$value = (string) $value;
-		$selected = in_array($value, $selected_values) ? 'selected="selected"' : '';
-		$html[] = sprintf('<option value="%s" %s>%s</option>', htmlspecialchars($value), $selected, htmlspecialchars($text));
+		$selected = in_array($value, $selected_values);
+		if($selected) {
+			$intersect[] = $value;
+		}
+		$options[] = [
+			'value'		=> $value,
+			'text'		=> $text,
+			'selected'	=> $selected,
+		];
+	}
+	$diff = array_diff($selected_values, $intersect);
+	if($tagging && count($diff) > 0) {
+		foreach($diff as $text) {
+			$options[] = [
+				'value'		=> $text,
+				'text'		=> $text,
+				'selected'	=> true,
+			];
+		}
+	}
+	foreach($options as $opt) {
+		$html[] = sprintf('<option value="%s" %s>%s</option>', htmlspecialchars($opt['value']), $opt['selected'] ? 'selected="selected"' : '', htmlspecialchars($opt['text']));
 	}
 	return implode("\n", $html);
 }

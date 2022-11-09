@@ -396,7 +396,7 @@ class AppController extends Controller
 					['name' => $tag],
 					[
 						'slug'			=> Str::slug($tag),
-						'creator_id'	=> $user_id
+						'created_by'	=> $user_id,
 					]
 				);
 			}
