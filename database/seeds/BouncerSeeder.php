@@ -55,8 +55,6 @@ class BouncerSeeder extends Seeder
 	public function superadmin() {
 		// ----- superadmin - everything
 		Bouncer::allow('superadmin')->everything();
-
-		Bouncer::assign('superadmin')->to(1);
 	}
 
 	public function admin() {
