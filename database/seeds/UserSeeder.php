@@ -13,6 +13,10 @@ class UserSeeder extends Seeder
 	 */
 	public function run()
 	{
+		User::newQuery()->delete();
+		Prodi::newQuery()->delete();
+
+
 		// Prodi first
 		$data_prodi = [
 			[
@@ -61,7 +65,8 @@ class UserSeeder extends Seeder
 		$prodis = Prodi::all()->pluck('id');
 		$get_prodi = function($i) use($prodis) {
 			return $prodis[ $i % count($prodis) ] ?? null;
-		}
+		};
+
 
 
 		// Superuser

@@ -14,6 +14,10 @@ class MasterDataSeeder extends Seeder
 	 */
 	public function run()
 	{
+		AppCategory::newQuery()->delete();
+		AppTag::newQuery()->delete();
+
+
 		// Categories
 		$data_category = [
 			[
