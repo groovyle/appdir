@@ -18,6 +18,8 @@ class AppTag extends Model
 	protected $keyType = 'string';
 	public $incrementing = FALSE;
 
+	protected static $unguarded = true;
+
 	/**
 	 * The "booting" method of the model.
 	 *
