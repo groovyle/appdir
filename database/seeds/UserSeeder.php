@@ -60,13 +60,14 @@ class UserSeeder extends Seeder
 				'short_name'	=> 'PT Meka',
 			],
 		];
+		$prodis = collect();
 		foreach($data_prodi as $dp) {
-			Prodi::create($dp + [
+			$prodis[] = Prodi::create($dp + [
 				'slug'	=> \Str::slug($dp['name']),
 			]);
 		}
 
-		$prodis = Prodi::all()->pluck('id');
+		$prodis = $prodis->pluck('id')->all();
 		$get_prodi = function($i) use($prodis) {
 			return $prodis[ $i % count($prodis) ] ?? null;
 		};
@@ -84,8 +85,8 @@ class UserSeeder extends Seeder
 		// Admin
 		$admins = 3;
 		// $admins = count($prodis);
-		for($i = 0; $i < $admins; $i++) {
-			$prodi_id = $get_prodi($i);
+		for($i = 1; $i <= $admins; $i++) {
+			$prodi_id = $get_prodi($i-1);
 			$admin = User::create([
 				'name'		=> 'Admin '.$i,
 				'email'		=> 'admin'.$i.'@admin.com',
@@ -98,8 +99,8 @@ class UserSeeder extends Seeder
 		// Mahasiswa
 		// $mhss = 5;
 		$mhss = $admins * 2;
-		for($i = 0; $i < $mhss; $i++) {
-			$prodi_id = $get_prodi(ceil($i / 2));
+		for($i = 1; $i <= $mhss; $i++) {
+			$prodi_id = $get_prodi(floor(($i-1) / 2));
 			$mhs = User::create([
 				'name'		=> 'Mahasiswa '.$i.' '.random_string(5),
 				'email'		=> 'mhs'.$i.'@mhs.com',
