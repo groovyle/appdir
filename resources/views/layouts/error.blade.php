@@ -31,7 +31,12 @@ $url_index = $was_on_admin ? route('admin') : route('index');
 					<p class="text-pre-wrap text-150 mt-3">@yield('message')</p>
 
 					<div class="mt-4">
-						<button type="button" class="btn btn-dark rounded-0" onclick="window.history.back()">&laquo; {{ __('common.go_back') }}</button>
+						<button type="button" class="btn btn-dark btn-lg rounded-pill" onclick="window.history.back()">
+							<span class="icon-text-pair icon-color-reset align-items-center">
+								<span class="fas fa-arrow-left mr-1"></span>
+								<span>{{ __('common.go_back') }}</span>
+							</span>
+						</button>
 					</div>
 
 					<div class="login-footer mt-5">
