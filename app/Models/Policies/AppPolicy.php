@@ -137,11 +137,7 @@ class AppPolicy
 			return $return();
 		}
 
-		$result['status'] = $app->is_verified
-			&& $app->is_published
-			&& ! $app->is_reported
-			&& ! $app->is_private
-		;
+		$result['status'] = $app->is_listed;
 		return $return();
 	}
 

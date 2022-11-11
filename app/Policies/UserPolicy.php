@@ -193,6 +193,11 @@ class UserPolicy
 			}
 		}
 
+		if($user && $user->id == $model->id) {
+			// Self
+			return true;
+		}
+
 		if(!$user) {
 			// Bypass Bouncer because if the user is a guest, Bouncer checks
 			// will always return false

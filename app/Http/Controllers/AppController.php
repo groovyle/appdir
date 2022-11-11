@@ -123,8 +123,11 @@ class AppController extends Controller
 
 		if($app->is_original_version) {
 			// Got through, can access
-			$app->increasePageViews();
-			$app->load('thumbnail');
+
+			// Only increase page views if it's publicly viewing...?
+			if($ori->owner && !$ori->owner->is_me && $ori->is_listed) {
+				$app->increasePageViews();
+			}
 		}
 
 		$data = [];

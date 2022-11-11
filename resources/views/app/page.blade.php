@@ -357,7 +357,9 @@ $share_description = __('frontend.apps.share_description', ['app' => $app->compl
 										@endif
 									</div>
 								</div>
-								<p class="text-center text-090">{{ __('frontend.users.this_user_has_x_apps', ['x' => $app->owner->public_apps()->count()]) }}</p>
+								@if($owner_app_count = $app->owner->public_apps()->count())
+								<p class="text-center text-090">{{ __('frontend.users.this_user_has_x_apps', ['x' => $owner_app_count]) }}</p>
+								@endif
 								@if($share_enabled)
 								<div class="text-center mt-2">
 									<a href="#app-{{ $app->id }}-share-modal" class="btn btn-primary btn-sm px-3 btn-flex-row" data-toggle="modal"><span class="fas fa-share-alt mr-2"></span> {{ __('frontend.apps.share_this_app') }}</a>

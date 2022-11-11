@@ -153,7 +153,10 @@ class LoginController extends Controller
 			return redirect()->route('admin');
 		} else {
 			// If on portal just go back
-			return redirect()->back();
+			// return redirect()->back();
+
+			// Actually don't go back, maybe the app page needs authorization
+			return redirect()->route('index');
 		}
 	}
 

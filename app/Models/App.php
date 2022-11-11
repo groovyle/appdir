@@ -356,6 +356,7 @@ class App extends Model
 			&& $this->is_published
 			&& ! $this->is_reported
 			&& ! $this->is_private
+			&& ($this->owner && ! $this->owner->is_blocked)
 		;
 	}
 
