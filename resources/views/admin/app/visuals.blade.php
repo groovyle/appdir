@@ -28,7 +28,7 @@ $append_breadcrumb = [
   @endif
 </div>
 
-@if($use_mock)
+@if($use_mock && $ori->version_number != $app->version_number && !$ori->is_unverified_new)
 <div class="alert alert-info">
   <p class="mb-0">
     @lang('admin/apps.messages.form_showing_pending_changes') (<strong>@lang('admin/apps.changes.version_x', ['x' => $app->version_number])</strong>).
