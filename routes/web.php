@@ -31,6 +31,7 @@ Route::patch('/change_language', 'UserController@changeLanguage')->name('change_
 Route::get('/stats/apps', 'StatisticsController@apps')->name('stats.apps');
 
 Route::get('/color_test', 'TestColorsController@index')->name('color_test');
+Route::get('/_error/{code?}', 'TestErrorPagesController@page')->name('error_test');
 
 Route::redirect('/admin', URL::to('/admin/home'))->name('admin');
 Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {

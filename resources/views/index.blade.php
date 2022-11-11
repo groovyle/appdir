@@ -32,7 +32,7 @@ list($theme, $counter_theme) = theme_timely();
 			@endif
 		</div>
 
-		<hr class="my-4">
+		<hr class="follow-color my-4">
 
 		<div class="text-r100">
 			@guest

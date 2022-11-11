@@ -102,6 +102,16 @@ function self_redirect($query_except = [], $data = []) {
 	return redirect(self_redirect_url($query_except, $data));
 }
 
+function in_admin_panel($url = null) {
+	if(!$url) $url = url()->current();
+	return \Str::startsWith( $url, url('/admin') );
+}
+
+function in_site($url = null) {
+	if(!$url) $url = url()->current();
+	return \Str::startsWith( $url, url('/') );
+}
+
 // A collection of headers to prevent caching
 // https://stackoverflow.com/a/1907705
 function no_cache_headers($response) {

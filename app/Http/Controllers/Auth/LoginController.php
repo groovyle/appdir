@@ -147,7 +147,7 @@ class LoginController extends Controller
 			session(['locale' => $this->user_lang]);
 
 		// If the user was on admin, redirect to login form instead...?
-		$was_on_admin = \Str::startsWith( url()->previous(), url('/admin') );
+		$was_on_admin = in_admin_panel( url()->previous() );
 		if($was_on_admin) {
 			// return redirect()->route('login');
 			return redirect()->route('admin');
