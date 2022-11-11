@@ -3,7 +3,9 @@ $is_report_form = old('is_report_form') ?? request()->has('report');
 $show_report_form = $is_report_form ? 'show' : '';
 
 $notices_count = 0;
-$share_enabled = $app->is_original_version;
+$is_public = $app->is_original_version && $app->is_listed;
+$report_enabled = $is_public;
+$share_enabled = $is_public;
 $share_description = __('frontend.apps.share_description', ['app' => $app->complete_name, 'owner' => $app->owner->share_name, 'site' => app_name()]);
 ?>
 @extends('layouts.app')
@@ -217,7 +219,7 @@ $share_description = __('frontend.apps.share_description', ['app' => $app->compl
 								</button>
 								<h4 class="card-title text-danger">@lang('frontend.apps.report_app'): <strong class="text-danger">{{ $app->complete_name }}</strong></h4>
 
-								@if($app->is_listed && $app->is_original_version)
+								@if($report_enabled)
 								<form class="" id="report-app-form" method="POST" action="{{ route('apps.report.save', ['slug' => $ori->slug]) }}">
 									@csrf
 									@method('POST')

@@ -125,7 +125,7 @@ class AppController extends Controller
 			// Got through, can access
 
 			// Only increase page views if it's publicly viewing...?
-			if($ori->owner && !$ori->owner->is_me && $ori->is_listed) {
+			if($ori->owner && !$ori->owner->is_me && $app->is_listed) {
 				$app->increasePageViews();
 			}
 		}
