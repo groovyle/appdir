@@ -45,21 +45,23 @@ if(isset($section_id))
         </a>
       </div>
       <div class="text-right ml-auto">
-        @if($app->has_committed)
         <span class="text-bold">
-          @lang('admin/apps.changes.version_x', ['x' => $app->version_number])
+          @lang('admin/apps.changes.version_x', ['x' => vo_($app->version_number)])
         </span>
-        @else
-        <span class="text-bold">
-          @lang('admin/apps.this_new_item_is_waiting_verification')
-        </span>
-        @endif
-        @if($show_pending_changes && $app->has_floating_changes)
+        @if($app->has_floating_changes)
+        @canany(['update', 'view-changelog'], $app)
         <br>
         <button class="btn btn-xs btn-warning btn-pending-changes-show" data-app-id="{{ $app->id }}" data-current-version="{{ $app->version_number }}" data-accumulate-changes="false">
           <span class="fas fa-clock"></span>
           @lang('admin/apps.show_pending_changes')
         </button>
+        @endcan
+        @endif
+        @if($app->is_unverified_new)
+        <br>
+        <span class="text-bold">
+          @lang('admin/apps.this_new_item_is_waiting_verification')
+        </span>
         @endif
       </div>
     </div>

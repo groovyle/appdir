@@ -218,9 +218,15 @@ class AppController extends Controller
 			if($reason_limit = settings('app.reports.reason_limit', 500))
 				$rules['report_reason'][] = 'max:'.$reason_limit;
 
+			$field_names = [
+				'report_email'			=> __('frontend.apps.fields.email'),
+				'report_categories'		=> __('frontend.apps.fields.report_categories'),
+				'report_categories.*'	=> __('frontend.apps.fields.report_category'),
+				'report_reason'			=> __('frontend.apps.fields.report_reason'),
+			];
 
 			// Validate
-			$validData = $request->validate($rules);
+			$validData = $request->validate($rules, [], $field_names);
 
 			// dd($request->all());
 		}

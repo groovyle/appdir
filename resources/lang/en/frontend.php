@@ -128,6 +128,7 @@ return [
 		'email'				=> 'Email',
 		'reportee_email_placeholder'	=> 'Enter your email address',
 		'report_categories'	=> 'Violation Type(s)',
+		'report_category'	=> 'Violation Type',
 		'report_reason'		=> 'Reason',
 		'report_reason_placeholder'	=> 'Why do you think this content is inappropriate? Explain in detail which part(s) of the content you are reporting and why it is inappropriate',
 	],

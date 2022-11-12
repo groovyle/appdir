@@ -286,6 +286,9 @@ class AppManager {
 
 	public static function diffSave(App $model, $comment = null)
 	{
+		// Store reference to last changes before writing new changes
+		$last_changes = $model->last_changes()->first();
+
 		$result = static::makeVersionDiff($model, true, $comment);
 		$result['saved'] = false;
 		$result['diff_status'] = $result['status'];
@@ -336,7 +339,7 @@ class AppManager {
 			$verif = new AppVerification;
 			$verif->app_id = $model->id;
 			$verif->verifier_id = request()->user()->id;
-			if($model->last_changes->is_rejected
+			if($last_changes->is_rejected
 				|| $model->last_verification->status == 'resubmitted') {
 				$verif->status_id = 'resubmitted';
 			} elseif(!$model->has_committed) {

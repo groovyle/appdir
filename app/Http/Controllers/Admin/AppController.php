@@ -726,7 +726,7 @@ class AppController extends Controller
 			$verif->app_id = $app->id;
 			$verif->base_changes_id = $app->version_id;
 			$verif->status_id = 'deleted';
-			$verif->concern = AppVerification::CONCERN_DELETE;
+			$verif->concern = AppVerification::CONCERN_DELETE_ITEM;
 
 			$result = $verif->save();
 			/*if($result && $app->version) {
@@ -739,7 +739,6 @@ class AppController extends Controller
 			$messages[] = $e->getMessage();
 		}
 
-		$result = false;
 		if($result) {
 			DB::commit();
 
@@ -1296,12 +1295,13 @@ class AppController extends Controller
 				throw new \UnexpectedValueException(__('admin/apps.messages.the_changelogs_data_are_corrupted'));
 			}
 
-			// Only publish if it's new, otherwise don't change the status
+			// No changing the current status
 			$apply_only = $request->input('apply_only', 0) == 1;
 			if($apply_only) {
 				$publish = false;
 			} else {
-				$publish = $app->is_unverified_new;
+				// $publish = $app->is_unverified_new;
+				$publish = true;
 			}
 			$result = AppManager::verifyAndApplyChanges($app, $changelogs, $publish, $user);
 		} catch(\Exception $e) {

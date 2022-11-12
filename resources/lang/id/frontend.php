@@ -128,6 +128,7 @@ return [
 		'email'				=> 'Email',
 		'reportee_email_placeholder'	=> 'Masukkan alamat email Anda',
 		'report_categories'	=> 'Jenis Pelanggaran',
+		'report_category'	=> 'Jenis Pelanggaran',
 		'report_reason'		=> 'Sebab',
 		'report_reason_placeholder'	=> 'Mengapa menurut Anda konten mengandung hal yang tidak pantas? Jelaskan secara rinci bagian konten mana yang dilaporkan dan mengapa konten tersebut tidak pantas.',
 	],

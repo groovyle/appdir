@@ -25,7 +25,9 @@ $show_preview = !!($show_preview ?? true);
 			@endif
 			<br>
 			<div class="changes-timestamp d-inline-block">@include('components.date-with-tooltip', ['date' => $cl->created_at])</div>
+			@if($cl->is_switch)
 			<span class="fas fa-recycle text-info text-070 ml-2" title="@lang('admin/apps.changes.this_version_was_a_result_of_version_switch')" data-toggle="tooltip"></span>
+			@endif
 		</h5>
 		<div class="card-tools">
 			@if($show_switch)

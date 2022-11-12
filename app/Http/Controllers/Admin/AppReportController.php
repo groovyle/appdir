@@ -251,6 +251,12 @@ class AppReportController extends Controller
 			$details_block_user = $request->input('block_user') == 1;
 			if($verdict_status == AppVerdict::STATUS_INNOCENT) {
 				$verdict->status = $verdict_status;
+
+				// Do we allow unblocking if the app is flagged as innocent?
+				// Or does innocent mean no effect at all (i.e no unblocking
+				// by marking as innocent)?
+				/*$app->setToReported();
+				$result = $result && $app->save();*/
 			} elseif($verdict_status == AppVerdict::STATUS_GUILTY) {
 				$verdict->status = $verdict_status;
 
