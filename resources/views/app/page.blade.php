@@ -16,17 +16,18 @@ $share_description = __('frontend.apps.share_description', ['app' => $app->compl
 @if($share_enabled)
 	<meta property="og:title" content="{{ text_truncate($app->complete_name, 70) }}">
 	<meta property="og:type" content="article" />
-	@if(count($app->visuals) > 0)
-	<meta property="og:image" content="{{ $app->thumbnail_url }}">
+	@if($app->thumbnail)
+	<meta property="og:image" itemprop="image" content="{{ $app->small_thumbnail_url }}">
 	@elseif($app->logo)
-	<meta property="og:image" content="{{ $app->logo->url }}">
+	<meta property="og:image" itemprop="image" content="{{ $app->logo->url }}">
 	@else
-	<meta property="og:image" content="{{ $app->thumbnail_url }}">
+	<meta property="og:image" itemprop="image" content="{{ $app->thumbnail_url }}">
 	@endif
 	<meta property="og:url" content="{{ route('apps.page', ['slug' => $app->id]) }}">
 	<meta name="twitter:card" content="summary_large_image">
 	<meta property="og:description" content="{{ $share_description }}">
 	<meta property="og:site_name" content="{{ app_name() }}">
+	<meta property="og:updated_time" content="{{ $app->updated_at->timestamp }}">
 	<meta name="twitter:image:alt" content="Thumbnail">
 @endif
 @endsection
