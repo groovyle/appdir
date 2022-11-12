@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
 	{
 		config()->set('database.action_logging', false);
 
-		User::query()->withoutGlobalScopes()->toBase()->delete();
+		User::query()->withoutGlobalScopes()->toBase()->where('entity', '=', 'user')->delete();
 		Prodi::query()->withoutGlobalScopes()->toBase()->delete();
 
 

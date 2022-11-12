@@ -1298,12 +1298,9 @@ class AppController extends Controller
 			// No changing the current status
 			$apply_only = $request->input('apply_only', 0) == 1;
 			if($apply_only) {
-				$publish = false;
-			} else {
-				// $publish = $app->is_unverified_new;
-				$publish = true;
+				$app->setToPrivate(true);
 			}
-			$result = AppManager::verifyAndApplyChanges($app, $changelogs, $publish, $user);
+			$result = AppManager::verifyAndApplyChanges($app, $changelogs, false, $user);
 		} catch(\Exception $e) {
 			$result = FALSE;
 			$error[] = $e->getMessage();

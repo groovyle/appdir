@@ -1079,8 +1079,9 @@ class AppManager {
 
 	// This skips the approval and just commits the changes immediately
 	public static function verifyAndApplyChanges(App $model, $changelogs, $publish = false, $user = null) {
-		if(!$user)
+		if(!$user) {
 			$user = \App\Models\SystemUsers\Automator::instance();
+		}
 		$user = optional($user);
 
 		// Make sure all the changelogs status are not rejected
@@ -1096,9 +1097,6 @@ class AppManager {
 		$model->is_verified = 1;
 
 		$model->setToPublished();
-		if(!$publish) {
-			$model->setToPrivate();
-		}
 
 		if($model->is_reported) {
 			$model->setToReported(false);

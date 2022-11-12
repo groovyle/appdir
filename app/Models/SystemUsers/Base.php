@@ -9,6 +9,7 @@ class Base extends User {
 	public $table = 'users';
 	protected $attributes = [
 		'entity' => 'system',
+		'password' => '',
 	];
 	protected $fillable = [];
 
@@ -20,14 +21,16 @@ class Base extends User {
 		return static::find(static::USER_ID);
 	}
 
+	public static function generateInstance() {
+		$user = new static;
+		$user->id = static::USER_ID;
+		$user->password = '';
+		return $user;
+	}
+
 	public function getNameAttribute()
 	{
 		return __($this->email ?: $this->name);
-	}
-
-	public function save(array $options = [])
-	{
-		return false;
 	}
 
 	public function update(array $attributes = [], array $options = [])
