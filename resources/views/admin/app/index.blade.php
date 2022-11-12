@@ -212,6 +212,10 @@ $scroll_content = !isset($goto_item) && ($show_filters || request()->has('page')
                   <a href="{{ Auth::user()->cannot('view', $app) ? '#' : route('admin.apps.show', ['app' => $app->id, 'show_verification' => '']) }}" class="text-info ml-2" title="@lang('admin/apps.app_changes_needs_revision_to_be_approved')" data-toggle="tooltip">
                     <span class="fas fa-question-circle"></span>
                   </a>
+                  @elseif($app->is_unverified_new)
+                  <a href="{{ Auth::user()->cannot('view', $app) ? '#' : route('admin.apps.show', ['app' => $app->id]) }}" class="text-secondary ml-2" title="@lang('admin/apps.this_new_item_is_waiting_verification')" data-toggle="tooltip">
+                    <span class="fas fa-question-circle"></span>
+                  </a>
                   @elseif($app->has_pending)
                   <a href="{{ Auth::user()->cannot('view', $app) ? '#' : route('admin.apps.show', ['app' => $app->id, 'show_pending' => '']) }}" class="text-warning ml-2" title="@lang('admin/apps.app_has_pending_changes')" data-toggle="tooltip">
                     <span class="fas fa-question-circle"></span>

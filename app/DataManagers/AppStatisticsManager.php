@@ -218,7 +218,7 @@ class AppStatisticsManager {
 		return $items;
 	}
 
-	public static function edits($filters = [], $query_only = false, $query_callback = null) {
+	public static function edits($filters = [], $query_only = false, $query_callback = null, $exclude_first = true) {
 		$filters = static::parseFilters($filters);
 
 		$query = DB::query();
@@ -228,7 +228,12 @@ class AppStatisticsManager {
 			$query->on('ac.app_id', '=', 'ac2.app_id');
 			$query->on('ac2.id', '<', 'ac.id');
 		});
-		$query->whereNotNull('ac2.id'); // where not the first version of every app
+		$query->where(function($query) use($exclude_first) {
+			$query->whereNotNull('ac2.id'); // where not the first version of every app
+			if(!$exclude_first) {
+				$query->orWhereColumn('ac.id', '=', 'a.version_id'); // current version
+			}
+		});
 
 		static::applyDateFilters($query, $filters, 'ac.created_at');
 		static::applyAccessScope($query);
@@ -249,7 +254,7 @@ class AppStatisticsManager {
 		return $items;
 	}
 
-	public static function changesStatuses($filters = [], $query_only = false, $query_callback = null) {
+	public static function changesStatuses($filters = [], $query_only = false, $query_callback = null, $exclude_first = true) {
 		$filters = static::parseFilters($filters);
 
 		$query = DB::query();
@@ -259,7 +264,12 @@ class AppStatisticsManager {
 			$query->on('ac.app_id', '=', 'ac2.app_id');
 			$query->on('ac2.id', '<', 'ac.id');
 		});
-		$query->whereNotNull('ac2.id'); // where not the first version of every app
+		$query->where(function($query) use($exclude_first) {
+			$query->whereNotNull('ac2.id'); // where not the first version of every app
+			if(!$exclude_first) {
+				$query->orWhereColumn('ac.id', '=', 'a.version_id'); // current version
+			}
+		});
 
 		static::applyDateFilters($query, $filters, 'ac.updated_at');
 		static::applyAccessScope($query);

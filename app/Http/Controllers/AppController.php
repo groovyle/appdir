@@ -94,7 +94,7 @@ class AppController extends Controller
 		$app = App::getFrontendItem($slug, false, false);
 		$ori = $app;
 		// $this->authorize('view-public', $app ?? App::class);
-		$check = Gate::inspect('view-public', [$app ?? App::class, true]);
+		$check = Gate::inspect('view-public', $app ? [$app, true] : [App::class, null, true]);
 		if(!$check->allowed()) {
 			throw (new \Illuminate\Database\Eloquent\ModelNotFoundException)->setModel(App::class);
 			return;

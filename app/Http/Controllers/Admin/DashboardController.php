@@ -133,9 +133,10 @@ class DashboardController extends Controller
 		$query_public->where('is_published', 1);
 		$query_public->where('is_reported', 0);
 		$query_public->where('is_private', 0);
+		$query_public->where('o.is_blocked', 0);
 		$total_public_apps = $query_public->count();
 
-		$query_changes = StatMan::changesStatuses($filters, true);
+		$query_changes = StatMan::changesStatuses($filters, true, null, false);
 		$changes = optional($query_changes->first());
 		$total_changes_approved = $changes->total_approved ?? 0;
 		$total_changes_pending = $changes->total_pending ?? 0;

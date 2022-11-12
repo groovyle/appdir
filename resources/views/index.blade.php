@@ -8,10 +8,9 @@ list($theme, $counter_theme) = theme_timely();
 @section('content')
 <div class="container px-4">
 	<div class="text-center mb-4">
-		<a href="{{ route('index') }}">
-			<img src="{{ asset('img/logo-'.$counter_theme.'.png') }}" class="logo" rel="{{ app_name() }}" style="max-width: 200px;">
-			<br>
-			<img src="{{ asset('img/fineprint-'.$counter_theme.'.png') }}" class="logo" rel="{{ app_name() }}" style="max-width: 150px;">
+		<a href="{{ route('index') }}" class="d-inline-block">
+			<img src="{{ asset('img/logo-'.$counter_theme.'.png') }}" class="logo d-block mx-auto" rel="{{ app_name() }}" style="max-width: 200px;">
+			<img src="{{ asset('img/fineprint-'.$counter_theme.'.png') }}" class="logo d-block mx-auto" rel="{{ app_name() }}" style="max-width: 150px;">
 		</a>
 	</div>
 	<div class="text-center">
