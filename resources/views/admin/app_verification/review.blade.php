@@ -365,7 +365,7 @@ $rand = random_alpha(5);
                 </div>
 
                 <div class="mt-2 mb-4">
-                  <label>{{ __('admin/app_verifications.fields.verification_result') }}</label>
+                  <label>{{ __('admin/app_verifications.fields.verification_result') }} @include('components.label-mandatory')</label>
                   <div data-toggle="buttons">
                     <div class="row">
                       <div class="col-12 col-sm-6 col-lg-4">

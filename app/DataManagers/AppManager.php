@@ -845,7 +845,10 @@ class AppManager {
 		;
 		if(!$target->is_rejected) {
 			// Exclude rejected versions if the target version isn't rejected
-			$query->rejected(false);
+			$query->where(function($query) {
+				$query->rejected(false);
+				$query->orWhere('version', '1');
+			});
 		}
 		if(is_callable($query_callback)) {
 			$query_callback($query);

@@ -21,7 +21,8 @@ $share_description = __('frontend.apps.share_description', ['app' => $app->compl
 	@elseif($app->logo)
 	<meta property="og:image" itemprop="image" content="{{ $app->logo->url }}">
 	@else
-	<meta property="og:image" itemprop="image" content="{{ $app->thumbnail_url }}">
+	{{-- <meta property="og:image" itemprop="image" content="{{ $app->thumbnail_url }}"> --}}
+	<meta property="og:image" itemprop="image" content="{{ asset('img/default-product-logo.png') }}">
 	@endif
 	<meta property="og:url" content="{{ route('apps.page', ['slug' => $app->id]) }}">
 	<meta name="twitter:card" content="summary_large_image">
