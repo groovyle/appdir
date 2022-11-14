@@ -1,6 +1,7 @@
 
 // Fonts
-@import url('https://fonts.googleapis.com/css2?family=Rubik&family=Nunito&display=swap');
+// Avoid css @import directives because they can't be deferred (they block loading pages)
+// @import url('https://fonts.googleapis.com/css2?family=Rubik&family=Nunito&display=swap');
 
 // Variables
 @import 'variables';

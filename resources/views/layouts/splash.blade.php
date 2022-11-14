@@ -26,9 +26,9 @@ $lang_text = langtext();
 	<!-- Fonts -->
 	<link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
 
-	<!-- <link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Antic+Slab&family=Martel&family=Nunito&display=swap" rel="stylesheet"> -->
+	<link href="https://fonts.googleapis.com/css2?family=Nunito&family=Rubik&display=swap" rel="stylesheet">
 
 	@stack('load-styles')
 
