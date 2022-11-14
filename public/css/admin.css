@@ -18,6 +18,13 @@
 	z-index: -1;
 }
 
+.navbar-nav > .user-menu > .dropdown-toggle.flex-mode {
+	display: flex;
+	align-items: center;
+}
+.navbar-nav > .user-menu > .dropdown-toggle.flex-mode > .user-image {
+	margin-top: 0;
+}
 .navbar-nav > .user-menu > .dropdown-menu > li.user-header {
 	height: auto;
 	min-height: 175px;
@@ -46,6 +53,9 @@
 	flex: 0 1 auto;
 }
 
+.content-header .breadcrumb {
+	line-height: 1.5;
+}
 .breadcrumb-item {
 	word-wrap: break-word;
 	word-break: break-word;

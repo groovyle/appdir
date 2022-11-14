@@ -69,7 +69,7 @@ if(!isset($breadcrumb_paths)) {
 }
 ?>
 @if (!empty($paths))
-<ol class="breadcrumb float-sm-right mt-n1">
+<ol class="breadcrumb float-sm-right">
 @foreach ($paths as $path)
 	<?php
 	$contents = $path['text'];

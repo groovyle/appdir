@@ -34,7 +34,7 @@ $user = Auth::user();
 
 			<!-- User menu -->
 			<li class="nav-item dropdown user-menu">
-				<a href="{{ route('admin.profile.index') }}" class="nav-link dropdown-toggle" data-toggle="dropdown">
+				<a href="{{ route('admin.profile.index') }}" class="nav-link dropdown-toggle flex-mode" data-toggle="dropdown">
 					<img src="{{ $user->profile_picture }}" class="user-image img-circle elevation-1" alt="User Image">
 					<span class="d-none d-md-inline-block text-truncate" style="max-width: 200px;">{{ $user->name }}</span>
 				</a>

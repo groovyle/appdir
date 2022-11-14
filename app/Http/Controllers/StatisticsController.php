@@ -27,7 +27,6 @@ class StatisticsController extends Controller
 			$item->_id = $item->id;
 			return $item;
 		});
-		$categories->keyBy('_id');
 		$sum_categories = $categories->sum('apps_count');
 
 		$cutoff = 5;
@@ -61,7 +60,6 @@ class StatisticsController extends Controller
 			$item->_id = $item->id;
 			return $item;
 		});
-		$tags->keyBy('_id');
 		$sum_tags = $tags->sum('apps_count');
 
 		$cutoff = 10;
@@ -101,10 +99,10 @@ class StatisticsController extends Controller
 		$query->groupBy('pid');
 		$query->orderBy('apps_count', 'desc');
 		$app_prodi = $query->get();
-		$app_prodi->keyBy('pid');
 
 		$prodi = Prodi::all()->transform(function($item) {
 			$item->_id = $item->id;
+			$item->apps_count = 0;
 			return $item;
 		});
 
@@ -122,13 +120,14 @@ class StatisticsController extends Controller
 				$prodi[$item->pid]->apps_count += $item->apps_count;
 			}
 		}
-		$prodi = $prodi->sortByDesc('apps_count');
+		$prodi = $prodi->sortByDesc('apps_count')->values();
 
 		$cutoff = 5;
 		$tmp_prodi = new Prodi;
 		$tmp_prodi->id = $tmp_prodi->_id = '__others';
 		$tmp_prodi->prodi_count = 0;
 		$tmp_prodi->apps_count = 0;
+		$i = $cutoff;
 		for($i = $cutoff; $i < count($prodi); $i++) {
 			$tmp_prodi->prodi_count++;
 			$tmp_prodi->apps_count += $prodi[$i]->apps_count;

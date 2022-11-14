@@ -38,13 +38,13 @@ $lang_text = langtext();
 	<link href="{{ asset('css/base.css') }}" rel="stylesheet">
 	<link href="{{ asset('css/login.css') }}" rel="stylesheet">
 	<link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
-	<link href="{{ asset('plugins/ekko-lightbox/ekko-lightbox.css') }}" rel="stylesheet">
 
 	<!-- Fonts -->
 	<link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
-	<link rel="stylesheet" href="{{ asset('plugins/flag-icons/css/flag-icons.min.css') }}">
-	<link rel="dns-prefetch" href="//fonts.gstatic.com">
-	<link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
+
+	<!-- <link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Antic+Slab&family=Martel&family=Nunito&display=swap" rel="stylesheet"> -->
 
 	@stack('load-styles')
 
@@ -113,7 +113,10 @@ $lang_text = langtext();
 										<a class="dropdown-item" href="{{ route('admin.profile.index') }}">{{ __('frontend.navs.account_settings') }}</a>
 										<div class="dropdown-divider"></div>
 										<a class="dropdown-item btn-logout" href="{{ route('logout') }}">
-											{{ __('frontend.navs.logout') }}
+											<span class="icon-text-pair icon-color-reset align-items-center">
+												<span class="fas fa-power-off text-danger"></span>
+												<span>{{ __('frontend.navs.logout') }}</span>
+											</span>
 										</a>
 									</div>
 								</li>
@@ -150,7 +153,6 @@ $lang_text = langtext();
 	</script>
 	<script src="{{ asset('js/app.js') }}"></script>
 	<script src="{{ asset('plugins/toastr/toastr.min.js') }}"></script>
-	<script src="{{ asset('plugins/ekko-lightbox/ekko-lightbox.min.js') }}"></script>
 
 	@stack('load-scripts')
 
