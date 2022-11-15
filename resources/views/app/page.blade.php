@@ -331,7 +331,7 @@ $share_description = __('frontend.apps.share_description', ['app' => $app->compl
 						</div>
 						@else
 						<div class="placeholder-visuals-empty mock-bg" style="height: 300px;">
-							<h5 class="placeholder-text">@lang('frontend.apps.empties.visual_media')</h5>
+							<h4 class="placeholder-text">@lang('frontend.apps.empties.visual_media')</h4>
 						</div>
 						@endif
 
@@ -358,7 +358,7 @@ $share_description = __('frontend.apps.share_description', ['app' => $app->compl
 								<h4>@lang('frontend.apps.author')</h4>
 								<div class="user-display vertical mb-2">
 									<div class="user-logo-wrapper">
-										<img src="{{ $app->owner->profile_picture }}" rel="User image">
+										<img src="{{ $app->owner->profile_picture }}" alt="User image">
 									</div>
 									<div class="user-text">
 										<a href="{{ route('user.profile', ['user' => $app->owner->id]) }}">{{ $app->owner->name }}</a>

@@ -17,7 +17,7 @@ $is_self = $is_self ?? false;
 			<div class="card">
 				<div class="card-body lh-120">
 					<div class="user-logo-wrapper">
-						<img src="{{ $user->profile_picture }}" rel="User image">
+						<img src="{{ $user->profile_picture }}" alt="User image">
 					</div>
 					<h4 class="lh-110">{{ $user->name }} @if($is_self) <span class="fas fa-user text-primary text-070 ml-1" title="{{ __('frontend.users.this_is_your_public_profile') }}" data-toggle="tooltip"></span> @endif</h4>
 					@if($user->prodi)

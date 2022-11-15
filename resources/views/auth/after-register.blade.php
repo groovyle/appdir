@@ -9,8 +9,8 @@ list($theme, $counter_theme) = theme_timely();
 		<div class="col-12 col-md-6 mx-auto">
 			<div class="text-center mt-n5 mb-4">
 				<a href="{{ route('index') }}" class="d-inline-block" title="{{ __('frontend.navs.home') }}">
-					<img src="{{ asset('img/logo-'.$counter_theme.'.png') }}" class="logo d-block mx-auto" rel="{{ app_name() }}" style="max-width: 150px;">
-					<img src="{{ asset('img/fineprint-'.$counter_theme.'.png') }}" class="logo d-block mx-auto" rel="{{ app_name() }}" style="max-width: 120px;">
+					<img src="{{ asset('img/logo-'.$counter_theme.'.png') }}" class="logo d-block mx-auto" alt="{{ app_name() }} logo" style="max-width: 150px;">
+					<img src="{{ asset('img/fineprint-'.$counter_theme.'.png') }}" class="logo d-block mx-auto" alt="{{ app_name() }} logo" style="max-width: 120px;">
 				</a>
 			</div>
 			<div class="card text-dark">

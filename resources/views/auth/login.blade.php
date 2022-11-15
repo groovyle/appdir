@@ -14,7 +14,7 @@ $transparent_navs = true;
 <div class="login-container text-dark">
 	<div class="login-box">
 		<div class="login-header">
-			<img src="{{ asset('img/logo-dark.png') }}" class="logo" rel="{{ app_name() }}">
+			<img src="{{ asset('img/logo-dark.png') }}" class="logo" alt="{{ app_name() }} logo">
 			<h4 class="text-center mt-n3 mb-0 sr-only">@lang('frontend.auth.login_header')</h4>
 		</div>
 		<form method="POST" action="{{ route('login') }}" class="login-form">

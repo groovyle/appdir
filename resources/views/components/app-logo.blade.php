@@ -39,7 +39,7 @@ $as_link = $as_link ?? true;
 $rand = 'logo-'.random_alpha(5);
 ?>
 @section($rand)
-<img rel="logo" src="{{ $logo_url }}" class="maxw-100 {{ $img_class }}" {!! $style !!}>
+<img alt="item logo" src="{{ $logo_url }}" class="maxw-100 {{ $img_class }}" {!! $style !!}>
 @endsection
 @if($logo_url)
 @if($as_link)

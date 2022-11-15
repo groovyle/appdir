@@ -49,8 +49,8 @@ class BouncerServiceProvider extends ServiceProvider
 		Bouncer::useRoleModel(Role::class);
 
 		// Cross-request caching
-		// Bouncer::cache();
-		Bouncer::dontCache();
+		Bouncer::cache();
+		// Bouncer::dontCache();
 		// Bouncer::refresh();
 
 
