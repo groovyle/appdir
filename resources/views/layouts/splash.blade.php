@@ -21,23 +21,6 @@ $lang_text = langtext();
 
 	<link href="{{ asset('css/base.css') }}" rel="stylesheet">
 	<link href="{{ asset('css/login.css') }}" rel="stylesheet">
-	<link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
-
-	<!-- Fonts -->
-	<link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
-
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Nunito&family=Rubik&display=swap" rel="stylesheet">
-
-	@stack('load-styles')
-
-	<!-- Styles -->
-	<link href="{{ asset('css/custom-libraries.css') }}" rel="stylesheet">
-	<link href="{{ asset('css/app.css') }}" rel="stylesheet">
-	<link href="{{ asset('css/helpers.css') }}" rel="stylesheet">
-
-	@stack('styles')
 
 	@stack('head-additional')
 </head>
@@ -58,6 +41,25 @@ $lang_text = langtext();
 
 	@include('components.language-modal')
 	@include('components.logout-form')
+
+
+	<link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
+
+	<!-- Fonts -->
+	<link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Nunito&family=Rubik&display=swap" rel="stylesheet">
+
+	@stack('load-styles')
+
+	<!-- Styles -->
+	<link href="{{ asset('css/custom-libraries.css') }}" rel="stylesheet">
+	<link href="{{ asset('css/app.css') }}" rel="stylesheet">
+	<link href="{{ asset('css/helpers.css') }}" rel="stylesheet">
+
+	@stack('styles')
 
 	<!-- Scripts -->
 	<script>
