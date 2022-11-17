@@ -24,8 +24,8 @@ $url_index = $was_on_admin ? route('admin') : route('index');
 				<div class="card-body text-center text-r120 lh-120">
 					<div class="text-danger">
 						<div class="">{{ __('errors.error') }}:</div>
-						<div class="text-monospace lh-100 mt-n3" style="font-size: 6rem;">@yield('code')</div>
-						<div class="mt-n2">@yield('code-title')</div>
+						<div class="text-monospace lh-100 mt-n1" style="font-size: 3rem;">@yield('code')</div>
+						<div class="mt-n1">@yield('code-title')</div>
 					</div>
 					<p class="text-pre-wrap text-150 mt-3">@yield('message')</p>
 

@@ -31,7 +31,7 @@ return [
 
 // 500, internal server error
 'internal_server_error_title'		=> 'Internal Server Error',
-'internal_server_error_description'	=> 'Duh, server rusak! Terjadi error internal di server sehingga permintaan Anda tidak dapat diproses. Silakan hubungi admin mengenai error ini.',
+'internal_server_error_description'	=> 'Maaf, terjadi error internal di server sehingga permintaan Anda tidak dapat diproses. Silakan hubungi admin mengenai error ini.',
 
 // 503, service unavailable
 'service_unavailable_title'			=> 'Service Unavailable',

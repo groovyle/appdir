@@ -395,7 +395,7 @@ jQuery(document).ready(function($) {
 	<?php
 	$reports_data = [];
 	foreach($reports as $i => $rp) {
-		$reports_data[] = $rp->total;
+		$reports_data[] = $rp->total_apps;
 	}
 	?>
 	var $reportsChart = $("#reports-chart");

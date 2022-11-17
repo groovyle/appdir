@@ -31,7 +31,7 @@ return [
 
 // 500, internal server error
 'internal_server_error_title'		=> 'Internal Server Error',
-'internal_server_error_description'	=> 'Aww, scuffed server! Internal error occurred on the server such that your request couldn\'t be processed. Please contact administrators about this error.',
+'internal_server_error_description'	=> 'Sorry, internal error occurred on our server such that your request couldn\'t be processed. Please contact administrators about this error.',
 
 // 503, service unavailable
 'service_unavailable_title'			=> 'Service Unavailable',

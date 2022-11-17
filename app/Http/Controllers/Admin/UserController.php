@@ -430,7 +430,11 @@ class UserController extends Controller
 			$user->name			= $request->input('name');
 			$user->email		= $request->input('email');
 			if(!$is_edit || $view_mode == 'all') {
-				$user->prodi_id		= $request->input('prodi_id');
+				if($view_mode == 'prodi') {
+					$user->prodi_id		= $cuser->prodi_id;
+				} else {
+					$user->prodi_id		= $request->input('prodi_id');
+				}
 			}
 			if(!$is_edit) {
 				$user->password		= Hash::make($request->input('password'));

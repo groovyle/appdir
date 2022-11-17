@@ -46,7 +46,7 @@ $lang_text = langtext();
 			<nav class="navbar navbar-expand-md {{ $navbar_theme }}" id="navbar">
 				<div class="container">
 					<a class="navbar-brand" href="{{ route('index') }}" title="{{ app_name() }}">
-						<img src="{{ asset('img/fineprint-'.$counter_theme.'.png') }}" >
+						<img src="{{ asset('img/fineprint-'.$counter_theme.'.png') }}" alt="{{ app_name() }} logo">
 					</a>
 					<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
 						<span class="navbar-toggler-icon"></span>

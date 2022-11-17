@@ -22,6 +22,9 @@ public/hot
 public_html/storage
 public_html/hot
 
+# PHPMetrics and other reports
+/reports/
+
 /.vagrant
 .phpunit.result.cache
 =====

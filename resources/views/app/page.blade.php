@@ -331,7 +331,7 @@ $share_description = __('frontend.apps.share_description', ['app' => $app->compl
 						</div>
 						@else
 						<div class="placeholder-visuals-empty mock-bg" style="height: 300px;">
-							<h4 class="placeholder-text">@lang('frontend.apps.empties.visual_media')</h4>
+							<h3 class="placeholder-text">@lang('frontend.apps.empties.visual_media')</h3>
 						</div>
 						@endif
 
