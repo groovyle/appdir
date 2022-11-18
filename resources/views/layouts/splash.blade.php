@@ -5,7 +5,7 @@ extract(theme_vars($theme));
 $lang = app()->getLocale();
 $lang_text = langtext();
 ?><!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-100">
+<html lang="{{ str_replace('_', '-', $lang) }}" class="h-100">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -64,7 +64,7 @@ $lang_text = langtext();
 	<!-- Scripts -->
 	<script>
 	window.AppGlobals = {
-		lang: @json(app()->getLocale()),
+		lang: @json($lang),
 	}
 	</script>
 	<script src="{{ asset('js/app.js') }}"></script>

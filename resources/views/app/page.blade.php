@@ -358,7 +358,7 @@ $share_description = __('frontend.apps.share_description', ['app' => $app->compl
 								<h4>@lang('frontend.apps.author')</h4>
 								<div class="user-display vertical mb-2">
 									<div class="user-logo-wrapper">
-										<img src="{{ $app->owner->profile_picture }}" alt="User image">
+										<img src="{{ $app->owner->profile_picture }}" alt="User image" width="64" height="64">
 									</div>
 									<div class="user-text">
 										<a href="{{ route('user.profile', ['user' => $app->owner->id]) }}">{{ $app->owner->name }}</a>

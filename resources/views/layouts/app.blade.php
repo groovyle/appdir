@@ -46,7 +46,7 @@ $lang_text = langtext();
 			<nav class="navbar navbar-expand-md {{ $navbar_theme }}" id="navbar">
 				<div class="container">
 					<a class="navbar-brand" href="{{ route('index') }}" title="{{ app_name() }}">
-						<img src="{{ asset('img/fineprint-'.$counter_theme.'.png') }}" alt="{{ app_name() }} logo">
+						<img src="{{ asset('img/fineprint-'.$counter_theme.'.png') }}" alt="{{ app_name() }} logo" width="120" height="30">
 					</a>
 					<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
 						<span class="navbar-toggler-icon"></span>
@@ -84,7 +84,7 @@ $lang_text = langtext();
 								<li class="nav-item dropdown">
 									<a id="navbarDropdown" class="nav-link dropdown-toggle nav-user" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
 										<div class="nav-user-image">
-											<img src="{{ Auth::user()->profile_picture }}" alt="User image">
+											<img src="{{ Auth::user()->profile_picture }}" alt="User image" width="25" height="25">
 										</div>
 										<span class="nav-user-text text-truncate">{{ Auth::user()->name }}</span>
 										<span class="caret"></span>
