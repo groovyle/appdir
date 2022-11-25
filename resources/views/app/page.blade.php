@@ -228,7 +228,7 @@ $share_description = __('frontend.apps.share_description', ['app' => $app->compl
 								<h4 class="card-title text-danger">@lang('frontend.apps.report_app'): <strong class="text-danger">{{ $app->complete_name }}</strong></h4>
 
 								@if($report_enabled)
-								<form class="" id="report-app-form" method="POST" action="{{ route('apps.report.save', ['slug' => $ori->slug]) }}">
+								<form class="" id="report-app-form" method="POST" action="{{ route('apps.report.save', ['slug' => $page_slug]) }}">
 									@csrf
 									@method('POST')
 									<input type="hidden" name="app_id" value="{{ $app->id }}" >

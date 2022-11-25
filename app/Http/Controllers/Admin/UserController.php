@@ -610,12 +610,7 @@ class UserController extends Controller
 			'back'		=> $back_url,
 		];
 
-		// Prevent caching of this page
-		// https://stackoverflow.com/a/1907705
-		$response = no_cache_headers(
-			response()->view('admin/user/after-reset-password', $data)
-		);
-		return $response;
+		return view('admin/user/after-reset-password', $data);
 	}
 
 

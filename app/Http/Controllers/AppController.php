@@ -138,6 +138,7 @@ class AppController extends Controller
 
 		$data['report_categories'] = AppReportCategory::all();
 		$data['report_reason_limit'] = settings('app.reports.reason_limit', 500);
+		$data['page_slug'] = $slug;
 
 		return view('app/page', $data);
 	}

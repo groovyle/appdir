@@ -21,11 +21,10 @@ Route::get('/', 'HomeController@index')->name('index');
 // Route::get('/home', 'HomeController@home')->name('home');
 Route::redirect('/home', URL::to('/'))->name('home');
 Route::get('/apps', 'AppController@index')->name('apps');
-Route::get('/apps/{slug}', 'AppController@page')->name('apps.page');
-Route::get('/apps/{slug}/preview', 'AppController@preview')->name('apps.preview');
+Route::get('/apps/{slug}', 'AppController@page')->middleware(['nocache'])->name('apps.page');
 Route::post('/apps/{slug}/submit_report', 'AppController@postReport')->name('apps.report.save');
-Route::get('/user/{user}', 'UserController@profile')->name('user.profile');
-Route::get('/login/error', 'Auth\\LoginController@errorPage')->name('login_error');
+Route::get('/user/{user}', 'UserController@profile')->middleware(['nocache'])->name('user.profile');
+Route::get('/login/error', 'Auth\\LoginController@errorPage')->middleware(['nocache'])->name('login_error');
 Route::patch('/change_language', 'UserController@changeLanguage')->name('change_language');
 
 Route::get('/stats/apps', 'StatisticsController@apps')->name('stats.apps');
@@ -34,7 +33,12 @@ Route::get('/color_test', 'TestColorsController@index')->name('color_test');
 Route::get('/_error/{code?}', 'TestErrorPagesController@page')->name('error_test');
 
 Route::redirect('/admin', URL::to('/admin/home'))->name('admin');
-Route::prefix('admin')->namespace('Admin')->name('admin.')->group(function() {
+Route::prefix('admin')
+		->namespace('Admin')
+		->name('admin.')
+		->middleware(['auth', 'nocache'])
+		->group(function() {
+
 	Route::get('home', 'DashboardController@index')->name('home');
 
 	Route::get('profile', 'UserProfileController@show')->name('profile.index');
