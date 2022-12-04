@@ -206,6 +206,15 @@ return [
 	'back_to_login_page'		=> 'Back to login page',
 	'back_to_home'				=> 'Back to site homepage',
 
+	'verify_your_email_address'	=> 'Verify Your Email Address',
+	'to_activate_account_please_check_email_for_verification_link'	=> 'To activate your account, please check your email for a verification link.',
+	'please_check_spam_if_not_in_inbox' => 'Make sure to also check the spam folder if it\'s not in your inbox.',
+	'did_not_receive_email?'	=> 'Did not receive the verification link email?',
+	'click_here_to_send_verification_email_again'	=> 'Click here to send it again',
+	'verification_link_has_been_sent_to_email'	=> 'A fresh verification link has been sent to your email address',
+	'activate_your_account'	=> 'Activate your account',
+	'to_get_full_access'	=> 'to finish setting up your account',
+
 	'fields'	=> [
 		'name'					=> 'Name',
 		'username'				=> 'Username',
@@ -225,7 +234,13 @@ return [
 	'messages'	=> [
 		'registration_successful'		=> 'Your registration is successful!',
 		'registration_successful_sub'	=> 'You are now registered with an account. Enjoy :app!',
+		'registration_successful_verify'	=> 'Before proceeding, a verification link has been sent to your email address. Click it to activate your account.',
 		'registration_failed'			=> 'Error occurred while trying to register your account.',
+
+		'account_verified'				=> 'Verification successful!',
+		'account_verified_sub'			=> 'Your account has been verified, and you can now use this website to its fullest. Enjoy :app!',
+
+		'your_email_is_not_verified'	=> 'Your email address is not verified.',
 	],
 ],
 

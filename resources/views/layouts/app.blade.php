@@ -108,6 +108,7 @@ $lang_text = langtext();
 					</div>
 				</div>
 			</nav>
+			@include('components.email-verify-notice')
 		</header>
 
 		@section('outer-content')

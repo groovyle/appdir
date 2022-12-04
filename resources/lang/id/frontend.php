@@ -206,6 +206,15 @@ return [
 	'back_to_login_page'		=> 'Kembali ke halaman login',
 	'back_to_home'				=> 'Kembali ke halaman depan',
 
+	'verify_your_email_address'	=> 'Verifikasi Alamat Email Anda',
+	'to_activate_account_please_check_email_for_verification_link'	=> 'Supaya akun Anda menjadi aktif, silakan cek email Anda untuk verifikasi menggunakan link.',
+	'please_check_spam_if_not_in_inbox' => 'Pastikan cek folder spam jika tidak ada di inbox.',
+	'did_not_receive_email?'	=> 'Tidak menerima email verifikasi?',
+	'click_here_to_send_verification_email_again'	=> 'Klik disini untuk dikirim lagi',
+	'verification_link_has_been_sent_to_email'	=> 'Link verifikasi yang baru telah dikirim ke alamat email Anda',
+	'activate_your_account'	=> 'Aktifkan akun Anda',
+	'to_get_full_access'	=> 'untuk menyelesaikan proses pembuatan akun',
+
 	'fields'	=> [
 		'name'					=> 'Nama',
 		'username'				=> 'Username (nama login)',
@@ -225,7 +234,13 @@ return [
 	'messages'	=> [
 		'registration_successful'		=> 'Pendaftaran akun Anda berhasil!',
 		'registration_successful_sub'	=> 'Anda sekarang telah memiliki akun. Selamat datang di :app!',
+		'registration_successful_verify'	=> 'Sebelum lanjut, sebuah link verifikasi telah dikirim ke email Anda. Klik link tersebut untuk mengaktifkan akun Anda.',
 		'registration_failed'			=> 'Error terjadi saat mendaftarkan akun Anda ke sistem.',
+
+		'account_verified'				=> 'Verifikasi selesai!',
+		'account_verified_sub'			=> 'Akun Anda telah diverifikasi, dan sekarang Anda bisa menggunakan website ini secara lengkap. Selamat datang di :app!',
+
+		'your_email_is_not_verified'	=> 'Alamat email Anda belum diverifikasi.',
 	],
 ],
 

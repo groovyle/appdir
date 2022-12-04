@@ -114,4 +114,8 @@ return [
 
     'password_timeout' => 10800,
 
+
+    // Whether to use email verification or not
+    'verify_email' => env('AUTH_VERIFY_EMAIL', false),
+
 ];

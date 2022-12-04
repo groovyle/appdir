@@ -4,7 +4,6 @@ namespace App;
 
 use App\DataManagers\UserManager;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -15,13 +14,22 @@ use RahulHaque\Filepond\Traits\HasFilepond;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
-class User extends Authenticatable
+use Illuminate\Notifications\Messages\MailMessage;
+
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
+use Illuminate\Auth\MustVerifyEmail;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Mail\VerifyEmail as VerifyEmailMail;
+
+class User extends Authenticatable implements MustVerifyEmailContract
 {
 	use Notifiable;
 	use HasRolesAndAbilities;
 	use SoftDeletes;
 	use HasFilepond;
 	use Models\Concerns\LoggedActions;
+
+	use MustVerifyEmail;
 
 	protected $attributes = [
 		'entity' => 'user',
@@ -33,7 +41,7 @@ class User extends Authenticatable
 	 * @var array
 	 */
 	protected $fillable = [
-		'name', 'email', 'password', 'prodi_id'
+		'name', 'email', 'password', 'prodi_id', 'language',
 	];
 
 	/**
@@ -72,6 +80,10 @@ class User extends Authenticatable
 			// Set to always able to select trashed items
 			$builder->withTrashed();
 		});
+
+
+		// Use our own email format
+		VerifyEmail::toMailUsing([UserManager::class, 'verifyEmailMail']);
 	}
 
 	public function scopeRegular($query, $state = true) {
@@ -234,7 +246,35 @@ class User extends Authenticatable
 		return get_words_before($this->name, 20, 1);
 	}
 
+	public function getIsEmailVerifiedAttribute() {
+		if(!config('auth.verify_email'))
+			return true;
+		else
+			return !is_null($this->email_verified_at);
+	}
+
+	public function getIsVerifiedAttribute() {
+		if($this->isAn('admin') || $this->isA('superadmin'))
+			return true;
+
+		return $this->is_email_verified;
+	}
+
 	public function __toString() {
 		return (string) $this->name;
 	}
+
+
+	/**
+	 * Send the email verification notification.
+	 *
+	 * @return void
+	 */
+	public function sendEmailVerificationNotification()
+	{
+		// $this->notify(new VerifyEmail);
+		$this->notifyNow(new VerifyEmail);
+	}
+
+
 }

@@ -236,7 +236,9 @@ $share_description = __('frontend.apps.share_description', ['app' => $app->compl
 
 									@includeWhen($is_report_form, 'components.page-message', ['show_errors' => true])
 
-									@if(!auth()->check())
+									@if(auth()->check() && auth()->user()->is_verified)
+									<p class="mb-1">@lang('frontend.apps.reporting_as') <strong>{{ auth()->user()->name }}</strong> @if($email = auth()->user()->email) ({{ $email }}) @endif</p>
+									@else
 									<div class="alert alert-info py-2 mb-1">
 										<span class="icon-text-pair icon-color-reset icon-2x">
 											<span class="fa fa-info-circle icon"></span>
@@ -247,8 +249,6 @@ $share_description = __('frontend.apps.share_description', ['app' => $app->compl
 										<label for="reportEmail">@lang('frontend.apps.fields.email'):</label>
 										<input type="email" name="report_email" id="reportEmail" class="form-control" placeholder="@lang('frontend.apps.fields.reportee_email_placeholder')" value="{{ old('report_email') }}" required>
 									</div>
-									@else
-									<p class="mb-1">@lang('frontend.apps.reporting_as') <strong>{{ auth()->user()->name }}</strong> @if($email = auth()->user()->email) ({{ $email }}) @endif</p>
 									@endif
 									<div class="form-group mb-1">
 										<label class="d-block mb-0">@lang('frontend.apps.fields.report_categories'):</label>

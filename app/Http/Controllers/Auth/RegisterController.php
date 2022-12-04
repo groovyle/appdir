@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Providers\RouteServiceProvider;
 use App\User;
 use App\Models\Prodi;
 use App\Rules\ModelExists;
 use App\DataManagers\LanguageManager as LangMan;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\DB;
@@ -34,6 +36,8 @@ class RegisterController extends Controller
 
 	protected $broker;
 
+	protected $usesVerification = null;
+
 	/**
 	 * Where to redirect users after registration.
 	 *
@@ -49,6 +53,8 @@ class RegisterController extends Controller
 	public function __construct()
 	{
 		$this->middleware('guest');
+
+		$this->usesVerification = config('auth.verify_email');
 	}
 
 	public function showRegistrationForm()
@@ -60,6 +66,24 @@ class RegisterController extends Controller
 		];
 
 		return view('auth.register', $data);
+	}
+
+	/**
+	 * Handle a registration request for the application.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @return \Illuminate\Http\Response
+	 */
+	public function register(Request $request)
+	{
+		$this->validator($request->all())->validate();
+
+		event(new Registered($user = $this->create($request->all())));
+
+		$this->guard()->login($user);
+
+		return $this->registered($request, $user)
+						?: redirect($this->redirectPath());
 	}
 
 	/**
@@ -139,6 +163,22 @@ class RegisterController extends Controller
 			redirect()->back()->withInput()->withError($message);
 			return;
 		}
+	}
+
+	/**
+	 * The user has been registered.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @param  mixed  $user
+	 * @return mixed
+	 */
+	protected function registered(Request $request, $user)
+	{
+		/*if($this->usesVerification) {
+			// Email is sent by a system event listener, no need to send it again
+			// $user->sendEmailVerificationNotification();
+			return redirect()->route('after_register.verify_first');
+		}*/
 	}
 
 	protected function redirectTo() {

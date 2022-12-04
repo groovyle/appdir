@@ -11,4 +11,8 @@ class AfterRegisterController extends Controller
 		return view('auth.after-register');
 	}
 
+	public function verifyFirst() {
+		return view('auth.after-register-verify-notice');
+	}
+
 }

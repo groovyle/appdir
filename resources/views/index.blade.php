@@ -36,16 +36,16 @@ list($theme, $counter_theme) = theme_timely();
 		<div class="text-r100">
 			@guest
 			<p class="mt-0 mb-1">@lang('frontend.splash.you_are_not_logged_in_yet')</p>
-			<a href="{{ route('login') }}" class="btn btn-link btn-lg">{{ __('frontend.navs.login') }}</a>
-			|
-			<a href="{{ route('register') }}" class="btn btn-link btn-lg">{{ __('frontend.navs.register') }}</a>
+			<a href="{{ route('login') }}" class="btn btn-link btn-lg d-block d-sm-inline-block">{{ __('frontend.navs.login') }}</a>
+			<span class="d-none d-sm-inline-block">|</span>
+			<a href="{{ route('register') }}" class="btn btn-link btn-lg d-block d-sm-inline-block">{{ __('frontend.navs.register') }}</a>
 			@else
 			<p class="mt-0 mb-1">@lang('frontend.splash.hey_x_you_are_logged_in', ['x' => $user->name])</p>
-			<a href="{{ route('admin.apps.create') }}" class="btn btn-link btn-lg"><span class="fas fa-plus text-070 mr-1" style="vertical-align: 2px;"></span> {{ __('frontend.navs.submit_an_app') }}</a>
-			|
-			<a href="{{ route('admin') }}" class="btn btn-link btn-lg">{{ __('frontend.navs.admin_panel') }}</a>
-			|
-			<a href="{{ route('admin.apps.index', ['whose' => Auth::user()->isA('mahasiswa') ? null : 'own']) }}" class="btn btn-link btn-lg">{{ __('frontend.splash.your_apps_x', ['x' => $user->apps->count()]) }}</a>
+			<a href="{{ route('admin.apps.create') }}" class="btn btn-link btn-lg d-block d-sm-inline-block"><span class="fas fa-plus text-070 mr-1" style="vertical-align: 2px;"></span> {{ __('frontend.navs.submit_an_app') }}</a>
+			<span class="d-none d-sm-inline-block">|</span>
+			<a href="{{ route('admin') }}" class="btn btn-link btn-lg d-block d-sm-inline-block">{{ __('frontend.navs.admin_panel') }}</a>
+			<span class="d-none d-sm-inline-block">|</span>
+			<a href="{{ route('admin.apps.index', ['whose' => Auth::user()->isA('mahasiswa') ? null : 'own']) }}" class="btn btn-link btn-lg d-block d-sm-inline-block">{{ __('frontend.splash.your_apps_x', ['x' => $user->apps->count()]) }}</a>
 			<br>
 			<a href="{{ route('logout') }}" class="btn btn-link mt-2 btn-logout">{{ __('frontend.navs.logout') }}</a>
 			@endguest

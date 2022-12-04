@@ -198,10 +198,7 @@ class UserPolicy
 			return true;
 		}
 
-		if(!$user) {
-			// Bypass Bouncer because if the user is a guest, Bouncer checks
-			// will always return false
-			return true;
-		}
+		// Bypass Bouncer check
+		return true;
 	}
 }

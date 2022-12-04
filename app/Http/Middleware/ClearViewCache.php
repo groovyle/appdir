@@ -19,7 +19,6 @@ class ClearViewCache
     {
         if (env('APP_ENV') === 'local') {
             ini_set('opcache.revalidate_freq', '0');
-            Artisan::call('cache:clear');
             Artisan::call('view:clear');
         }
 

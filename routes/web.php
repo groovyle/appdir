@@ -14,8 +14,11 @@
 Auth::routes([
 	// See Illuminate\Routing\Router::auth()
 	'reset'	=> false,
+	'verify' => true,
 ]);
 Route::get('/register/done', 'Auth\\AfterRegisterController@afterRegister')->name('after_register');
+Route::get('/register/verify', 'Auth\\AfterRegisterController@verifyFirst')->name('after_register.verify_first');
+Route::get('/verify/done', 'Auth\\AfterVerificationController@afterVerify')->name('after_verify');
 
 Route::get('/', 'HomeController@index')->name('index');
 // Route::get('/home', 'HomeController@home')->name('home');
@@ -36,7 +39,7 @@ Route::redirect('/admin', URL::to('/admin/home'))->name('admin');
 Route::prefix('admin')
 		->namespace('Admin')
 		->name('admin.')
-		->middleware(['auth', 'nocache'])
+		->middleware(['auth', 'verified.user', 'nocache'])
 		->group(function() {
 
 	Route::get('home', 'DashboardController@index')->name('home');

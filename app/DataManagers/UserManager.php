@@ -8,6 +8,8 @@ use App\Models\Role;
 use Auth;
 use Bouncer;
 
+use App\Notifications\Messages\MailMessage;
+
 class UserManager {
 
 	public static $role_order = [
@@ -154,5 +156,21 @@ class UserManager {
 			$query->whereRaw('0 = 1');
 		}
 	}
+
+
+	// Verification email
+	public static function verifyEmailMail($notifiable, $verificationUrl) {
+		// return (new VerifyEmailMail($notifiable, $verificationUrl))->to($notifiable->email);
+		return (new MailMessage)
+			->fromNoReply()
+			->subject(__('mails.verify_account.subject'))
+			->greeting(__('mails.verify_account.greeting', ['user' => $notifiable->name]))
+			->line(__('mails.verify_account.intro'))
+			->action(__('mails.verify_account.action'), $verificationUrl)
+			->line(__('mails.verify_account.outro'))
+			->salutation(__('mails.salutation'))
+		;
+	}
+
 
 }

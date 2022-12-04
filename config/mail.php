@@ -59,6 +59,10 @@ return [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
+    'from_noreply' => [
+        'address' => 'noreply@'.env('MAIL_FROM_DOMAIN', 'example.com'),
+        'name' => env('MAIL_FROM_NAME', 'Example'),
+    ],
 
     /*
     |--------------------------------------------------------------------------

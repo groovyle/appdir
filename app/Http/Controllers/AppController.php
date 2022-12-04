@@ -156,7 +156,7 @@ class AppController extends Controller
 
 		$app = App::getFrontendItem($slug, true, false);
 
-		$logged_in = Auth::check();
+		$logged_in = Auth::check() && Auth::user()->is_verified;
 		$user = Auth::user();
 		$user_id = optional($user)->id;
 		$version_id = optional($app->version)->id;

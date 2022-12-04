@@ -40,6 +40,13 @@
   display: flex;
   flex-flow: column nowrap;
 }
+.splash-page .email-verify-notice {
+  position: absolute;
+  top: 0.6rem;
+  left: 1.5rem;
+  right: 5rem;
+  opacity: 0.85;
+}
 .splash-page .main-footer {
   max-width: 100%;
   padding-left: 2rem;
@@ -49,10 +56,10 @@
   background: transparent;
   text-align: center;
 }
-.splash-page .btn-link {
+.splash-page .btn-link:not(.persist-color) {
   color: inherit;
 }
-.splash-page .btn-link:hover, .splash-page .btn-link:focus, .splash-page .btn-link:active {
+.splash-page .btn-link:not(.persist-color):hover, .splash-page .btn-link:not(.persist-color):focus, .splash-page .btn-link:not(.persist-color):active {
   color: inherit;
 }
 .splash-page a:not([class]) {
@@ -674,10 +681,36 @@ img.app-logo {
   border: 1px solid #ccc;
 }
 
-.floating-lang-btn {
+.floating-nav-btn-wrapper {
+  margin-left: 1.5rem;
+  margin-bottom: 0.5rem;
+  width: auto;
+  display: flex;
+  gap: 0.5rem 1.25rem;
+  flex-direction: row-reverse;
+}
+.floating-nav-btn, .floating-nav-btn-wrapper {
   position: absolute;
   top: 0.5rem;
   right: 1.5rem;
+  z-index: 2;
+}
+
+@media (max-width: 575.98px) {
+  .floating-nav-btn-wrapper {
+    margin-left: 1rem;
+    gap: 0.5rem;
+  }
+  .floating-nav-btn, .floating-nav-btn-wrapper {
+    right: 1rem;
+  }
+}
+.floating-nav-btn-wrapper > .floating-nav-btn {
+  position: static;
+}
+
+.floating-nav-btn {
+  display: inline-block;
   color: inherit;
   font-size: 1rem;
   padding: 0.25rem 0.5rem;
@@ -686,11 +719,11 @@ img.app-logo {
   background-color: transparent;
   transition: all 0.15s;
 }
-.floating-lang-btn:hover {
+.floating-nav-btn:hover {
   color: inherit;
   text-decoration: none;
   background-color: rgba(255, 255, 255, 0.5);
 }
-.theme-dark .floating-lang-btn:hover {
+.theme-dark .floating-nav-btn:hover {
   background-color: rgba(0, 0, 0, 0.25);
 }
