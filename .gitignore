@@ -30,6 +30,7 @@ public/css/app.css
 public/css/base.css
 public/css/login.css
 public/js/app.js
+public/js/app.js.LICENSE.txt
 
 /.vagrant
 .phpunit.result.cache
