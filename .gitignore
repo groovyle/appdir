@@ -25,6 +25,12 @@ public_html/hot
 # PHPMetrics and other reports
 /reports/
 
+# Built CSS and JS files
+public/css/app.css
+public/css/base.css
+public/css/login.css
+public/js/app.js
+
 /.vagrant
 .phpunit.result.cache
 =====
