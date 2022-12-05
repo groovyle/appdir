@@ -305,3 +305,7 @@ function theme_vars($theme) {
 
 	return compact('theme', 'counter_theme', 'theme_bg', 'theme_text');
 }
+
+function recaptcha_enabled() {
+	return config('googlerecaptchav2.is_service_enabled', env('RECAPTCHA_ENABLED', false));
+}

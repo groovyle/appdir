@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Providers\RouteServiceProvider;
 use App\User;
 use App\Models\Prodi;
+use App\Rules\GoogleRecaptchaV2;
 use App\Rules\ModelExists;
 use App\DataManagers\LanguageManager as LangMan;
 use Illuminate\Auth\Events\Registered;
@@ -77,6 +78,7 @@ class RegisterController extends Controller
 	public function register(Request $request)
 	{
 		$this->validator($request->all())->validate();
+		User::$ignoreVerificationEmailErrors = true;
 
 		event(new Registered($user = $this->create($request->all())));
 
@@ -100,6 +102,7 @@ class RegisterController extends Controller
 			'password'	=> ['required', 'string', 'between:5,50', 'confirmed'],
 			'prodi'		=> ['required', new ModelExists(Prodi::class)],
 			'language'	=> ['required', Rule::in(LangMan::$languages)],
+			'g-recaptcha-response'	=> ['required', new GoogleRecaptchaV2],
 		], [], [
 			'name'		=> __('frontend.auth.fields.name'),
 			'email'		=> __('frontend.auth.fields.email'),
@@ -174,11 +177,11 @@ class RegisterController extends Controller
 	 */
 	protected function registered(Request $request, $user)
 	{
-		/*if($this->usesVerification) {
+		if($this->usesVerification) {
 			// Email is sent by a system event listener, no need to send it again
 			// $user->sendEmailVerificationNotification();
 			return redirect()->route('after_register.verify_first');
-		}*/
+		}
 	}
 
 	protected function redirectTo() {

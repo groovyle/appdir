@@ -16,7 +16,8 @@
         "laravel/tinker": "^2.0",
         "laravel/ui": "1.*",
         "rahulhaque/laravel-filepond": "~0",
-        "silber/bouncer": "v1.0.0-rc.6"
+        "silber/bouncer": "v1.0.0-rc.6",
+        "timehunter/laravel-google-recaptcha-v2": "~1.0.0"
     },
     "require-dev": {
         "facade/ignition": "^1.4",

@@ -26,9 +26,10 @@ if(!isset($status)) {
 } else {
 	$status_class = $status;
 }
+$classes = $classes ?? '';
 $dismiss = $dismiss ?? false;
 @endphp
-<div class="alert alert-{{ $status_class }}" role="alert">
+<div class="alert alert-{{ $status_class }} {{ $classes }}" role="alert">
 @if($dismiss)
 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
 	<span aria-hidden="true">&times;</span>

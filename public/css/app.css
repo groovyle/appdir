@@ -727,3 +727,7 @@ img.app-logo {
 .theme-dark .floating-nav-btn:hover {
   background-color: rgba(0, 0, 0, 0.25);
 }
+
+.valid-feedback, .invalid-feedback {
+  font-size: 90%;
+}

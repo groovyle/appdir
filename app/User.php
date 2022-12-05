@@ -31,6 +31,8 @@ class User extends Authenticatable implements MustVerifyEmailContract
 
 	use MustVerifyEmail;
 
+	public static $ignoreVerificationEmailErrors = false;
+
 	protected $attributes = [
 		'entity' => 'user',
 	];
@@ -272,8 +274,17 @@ class User extends Authenticatable implements MustVerifyEmailContract
 	 */
 	public function sendEmailVerificationNotification()
 	{
-		// $this->notify(new VerifyEmail);
-		$this->notifyNow(new VerifyEmail);
+		try {
+			// $this->notify(new VerifyEmail);
+			$this->notifyNow(new VerifyEmail);
+		} catch (\Exception $e) {
+			if(static::$ignoreVerificationEmailErrors) {
+				// Do nothing
+			} else {
+				throw $e;
+			}
+			return false;
+		}
 	}
 
 

@@ -130,6 +130,7 @@ return [
 		'report_categories'	=> 'Violation Type(s)',
 		'report_category'	=> 'Violation Type',
 		'report_reason'		=> 'Reason',
+		'report_reason_hint'	=> 'Minimum 50 characters',
 		'report_reason_placeholder'	=> 'Why do you think this content is inappropriate? Explain in detail which part(s) of the content you are reporting and why it is inappropriate',
 	],
 	'empties'	=> [

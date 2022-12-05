@@ -140,6 +140,9 @@ return [
 			// 'different' => 'Please input a different password as the new password.',
 			'different' => 'New password cannot be the same as old password. Please input a different password.',
 		],
+		'g-recaptcha-response' => [
+			'required' => 'The :attribute is required.',
+		],
 	],
 
 	/*
@@ -159,6 +162,7 @@ return [
 		'short_name'	=> 'Short Name',
 		'title'			=> 'Title',
 		'description'	=> 'Description',
+		'g-recaptcha-response'	=> 'Captcha',
 	],
 
 	'values' => [

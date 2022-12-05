@@ -151,6 +151,9 @@ return [
 			// 'different' => 'Silakan masukkan password yang berbeda sebagai password baru.',
 			'different' => 'Password baru tidak boleh sama dengan password lama. Silakan masukkan password yang berbeda.',
 		],
+		'g-recaptcha-response' => [
+			'required' => ':attribute wajib diisi.',
+		],
 	],
 
 	/*
@@ -170,6 +173,7 @@ return [
 		'short_name'	=> 'Nama Pendek',
 		'title'			=> 'Judul',
 		'description'	=> 'Deskripsi',
+		'g-recaptcha-response'	=> 'Captcha',
 	],
 
 	'values' => [

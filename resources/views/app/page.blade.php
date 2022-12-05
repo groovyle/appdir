@@ -2,6 +2,8 @@
 $is_report_form = old('is_report_form') ?? request()->has('report');
 $show_report_form = $is_report_form ? 'show' : '';
 
+$recaptcha_enabled = recaptcha_enabled();
+
 $notices_count = 0;
 $is_public = $app->is_original_version && $app->is_listed;
 $report_enabled = $is_public;
@@ -234,7 +236,7 @@ $share_description = __('frontend.apps.share_description', ['app' => $app->compl
 									<input type="hidden" name="app_id" value="{{ $app->id }}" >
 									<input type="hidden" name="report_user" value="" >
 
-									@includeWhen($is_report_form, 'components.page-message', ['show_errors' => true])
+									@includeWhen($is_report_form, 'components.page-message', ['show_errors' => true, 'classes' => 'lh-125 mb-2 py-2'])
 
 									@if(auth()->check() && auth()->user()->is_verified)
 									<p class="mb-1">@lang('frontend.apps.reporting_as') <strong>{{ auth()->user()->name }}</strong> @if($email = auth()->user()->email) ({{ $email }}) @endif</p>
@@ -262,10 +264,21 @@ $share_description = __('frontend.apps.share_description', ['app' => $app->compl
 										</div>
 									</div>
 									<div class="form-group mb-1">
-										<label for="reportReason" class="d-block mb-0">@lang('frontend.apps.fields.report_reason'):</label>
-										<textarea name="report_reason" id="reportReason" class="form-control show-resize" placeholder="@lang('frontend.apps.fields.report_reason_placeholder')" rows="2" maxlength="{{ $report_reason_limit }}" required>{{ old('report_reason') }}</textarea>
+										<label for="reportReason" class="d-block mb-0">
+											@lang('frontend.apps.fields.report_reason'):
+											@include('components.label-mandatory')
+											@component('components.label-hint')
+											@lang('frontend.apps.fields.report_reason_hint')
+											@endcomponent
+										</label>
+										<textarea name="report_reason" id="reportReason" class="form-control show-resize" placeholder="@lang('frontend.apps.fields.report_reason_placeholder')" rows="2" minlength="50" maxlength="{{ $report_reason_limit }}" required>{{ old('report_reason') }}</textarea>
 									</div>
-									<div class="text-center mt-3">
+									@if($recaptcha_enabled)
+									<div class="form-group mt-2 mb-1">
+										<div id="recaptcha_app_report" class="w-fit-content mx-auto"></div>
+									</div>
+									@endif
+									<div class="text-center {{ $recaptcha_enabled ? 'mt-2' : 'mt-3' }}">
 										<button type="submit" class="btn btn-sm btn-primary btn-min-100">@lang('frontend.apps.submit_report')</button>
 									</div>
 								</form>
@@ -554,6 +567,10 @@ $linkedin_params = http_build_query([
 @endif
 
 @push('scripts')
+@if($recaptcha_enabled)
+{!!  GoogleReCaptchaV2::render('recaptcha_app_report') !!}
+@endif
+
 <script>
 jQuery(document).ready(function($) {
 	$('[data-toggle="popover"]').popover({

@@ -9,7 +9,7 @@ $floating = $floating ?? false;
 ?>
 @if($can_verify && $email_verify_notice && !$user->is_verified)
 @if(!$floating)
-<div class="email-verify-notice alert alert-info text-center py-1 {{ $margin }}">
+<div class="email-verify-notice alert alert-warning text-center py-1 {{ $margin }}">
 	<a href="{{ route('verification.notice') }}">{{ __('frontend.auth.activate_your_account') }}</a> {{ __('frontend.auth.to_get_full_access') }}
 </div>
 @else

@@ -11,6 +11,7 @@ use App\Models\SystemUsers\Guest;
 
 use App\DataManagers\AppManager;
 
+use App\Rules\GoogleRecaptchaV2;
 use App\Rules\ModelExists;
 
 use Illuminate\Http\Request;
@@ -211,6 +212,7 @@ class AppController extends Controller
 				'report_categories'		=> ['required', 'array'],
 				'report_categories.*'	=> ['integer', new ModelExists(AppReportCategory::class)],
 				'report_reason'			=> ['required', 'string', 'min:50'],
+				'g-recaptcha-response'	=> ['required', new GoogleRecaptchaV2],
 			];
 			if(!$logged_in) {
 				$rules['report_email'] = ['required', 'email'];

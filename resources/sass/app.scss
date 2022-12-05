@@ -837,3 +837,8 @@ $input-group-with-icon-icon-width: $input-group-with-icon-padding-outer + $input
 		}
 	}
 }
+
+.valid-feedback, .invalid-feedback {
+	// Improve readability, default is 80%
+	font-size: 90%;
+}

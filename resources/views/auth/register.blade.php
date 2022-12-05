@@ -3,6 +3,7 @@ list($theme, $counter_theme) = theme_timely();
 extract(theme_vars($theme));
 $body_theme = 'bg-'.$theme_bg;
 $transparent_navs = true;
+$recaptcha_enabled = recaptcha_enabled();
 ?>
 @extends('layouts.app')
 
@@ -26,7 +27,7 @@ $transparent_navs = true;
 						<label for="name" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.name') }} @include('components.label-mandatory', ['flying' => true])</label>
 
 						<div class="col-md-7">
-							<input id="name" type="text" class="login-form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
+							<input id="name" type="text" class="login-form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autofocus>
 
 							@error('name')
 								<span class="invalid-feedback d-block" role="alert">
@@ -40,7 +41,7 @@ $transparent_navs = true;
 						<label for="email" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.email') }} @include('components.label-mandatory', ['flying' => true])</label>
 
 						<div class="col-md-7">
-							<input id="email" type="email" class="login-form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email">
+							<input id="email" type="email" class="login-form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required>
 
 							@error('email')
 								<span class="invalid-feedback d-block" role="alert">
@@ -54,7 +55,7 @@ $transparent_navs = true;
 						<label for="prodi" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.prodi') }} @include('components.label-mandatory', ['flying' => true])</label>
 
 						<div class="col-md-7">
-							<select id="prodi" name="prodi" class="login-form-select custom-select" required autocomplete="prodi">
+							<select id="prodi" name="prodi" class="login-form-select custom-select" required>
 								<option value="">&ndash; {{ __('frontend.auth.fields.choose_prodi') }} &ndash;</option>
 								@foreach($prodis as $p)
 								<option value="{{ $p->id }}" {!! old_selected('prodi', null, $p->id) !!}>{{ $p->complete_name }}</option>
@@ -74,7 +75,7 @@ $transparent_navs = true;
 
 						<div class="col-md-7">
 							<div class="input-group password-wrapper">
-								<input id="password" type="password" class="login-form-control form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
+								<input id="password" type="password" class="login-form-control form-control @error('password') is-invalid @enderror" name="password" required>
 								<div class="input-group-append">
 									<button type="button" class="input-group-text plain text-decoration-none rounded-0 btn-see-password" data-targets="#password, #password-confirm" title="{{ __('common.show/hide_password') }}" data-toggle="tooltip"><span class="far fa-eye fa-fw"></span></button>
 								</div>
@@ -92,7 +93,7 @@ $transparent_navs = true;
 						<label for="password-confirm" class="col-md-4 col-form-label text-md-right">{{ __('frontend.auth.fields.password_confirm') }} @include('components.label-mandatory', ['flying' => true])</label>
 
 						<div class="col-md-7">
-							<input id="password-confirm" type="password" class="login-form-control" name="password_confirmation" required autocomplete="new-password">
+							<input id="password-confirm" type="password" class="login-form-control" name="password_confirmation" required>
 						</div>
 					</div>
 
@@ -115,9 +116,27 @@ $transparent_navs = true;
 						</div>
 					</div>
 
-					<div class="form-group row mt-4 mb-0">
-						<div class="col-12 text-center">
-							<button type="submit" class="btn-login">{{ __('frontend.auth.register_btn') }}</button>
+					<div class="mt-4">
+						@if($recaptcha_enabled)
+						<div class="form-group row mb-3">
+							<div class="col d-flex justify-content-center">
+								<div class="w-auto text-center">
+									<div id="recaptcha_register" class="w-fit-content mx-auto"></div>
+
+									@error('g-recaptcha-response')
+										<span class="invalid-feedback d-block" role="alert">
+											<strong>{{ $message }}</strong>
+										</span>
+									@enderror
+								</div>
+							</div>
+						</div>
+						@endif
+
+						<div class="form-group row mb-0">
+							<div class="col-12 text-center">
+								<button type="submit" class="btn-login">{{ __('frontend.auth.register_btn') }}</button>
+							</div>
 						</div>
 					</div>
 				</form>
@@ -138,6 +157,10 @@ $transparent_navs = true;
 @endsection
 
 @push('scripts')
+@if($recaptcha_enabled)
+{!!  GoogleReCaptchaV2::render('recaptcha_register') !!}
+@endif
+
 <script type="text/javascript">
 jQuery(document).ready(function($) {
 

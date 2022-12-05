@@ -130,6 +130,7 @@ return [
 		'report_categories'	=> 'Jenis Pelanggaran',
 		'report_category'	=> 'Jenis Pelanggaran',
 		'report_reason'		=> 'Sebab',
+		'report_reason_hint'	=> 'Minimal 50 karakter',
 		'report_reason_placeholder'	=> 'Mengapa menurut Anda konten mengandung hal yang tidak pantas? Jelaskan secara rinci bagian konten mana yang dilaporkan dan mengapa konten tersebut tidak pantas.',
 	],
 	'empties'	=> [
@@ -234,7 +235,7 @@ return [
 	'messages'	=> [
 		'registration_successful'		=> 'Pendaftaran akun Anda berhasil!',
 		'registration_successful_sub'	=> 'Anda sekarang telah memiliki akun. Selamat datang di :app!',
-		'registration_successful_verify'	=> 'Sebelum lanjut, sebuah link verifikasi telah dikirim ke email Anda. Klik link tersebut untuk mengaktifkan akun Anda.',
+		'registration_successful_verify'	=> "Sebelum lanjut, sebuah link verifikasi telah dikirim ke email Anda. \nKlik link tersebut untuk mengaktifkan akun Anda.",
 		'registration_failed'			=> 'Error terjadi saat mendaftarkan akun Anda ke sistem.',
 
 		'account_verified'				=> 'Verifikasi selesai!',

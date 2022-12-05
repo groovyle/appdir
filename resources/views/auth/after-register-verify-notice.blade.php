@@ -16,7 +16,8 @@ list($theme, $counter_theme) = theme_timely();
 			<div class="card text-dark">
 				<div class="card-body">
 					<h3 class="text-center text-success">{{ __('frontend.auth.messages.registration_successful') }}</h3>
-					<p class="text-pre-wrap lh-125 text-center">{{ __('frontend.auth.messages.registration_successful_verify') }}</p>
+					<p class="text-pre-wrap lh-150 text-center">{{ __('frontend.auth.messages.registration_successful_verify') }}</p>
+					<p class="lh-150 text-center"><a href="{{ route('verification.notice') }}">{{ __('frontend.auth.did_not_receive_email?') }}</a></p>
 				</div>
 			</div>
 		</div>
