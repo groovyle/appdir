@@ -335,42 +335,48 @@ class AppManager {
 		} else {
 			// Edit
 
-			// Generate verification step for the edit
-			$verif = new AppVerification;
-			$verif->app_id = $model->id;
-			$verif->verifier_id = request()->user()->id;
-			if($last_changes->is_rejected
-				|| $model->last_verification->status == 'resubmitted') {
-				$verif->status_id = 'resubmitted';
-			} elseif(!$model->has_committed) {
-				$verif->status_id = 'unverified';
-			} else {
-				$verif->status_id = 'revised';
-			}
-			$verif->base_changes_id = optional($model->version)->id;
-			$verif->concern = AppVerification::CONCERN_EDIT_ITEM;
-			$result['saved'] = $verif->save();
-
-			if($result['saved'])
-				$verif->changelogs()->attach($result['model']);
-
-			if($verf_edit) {
-				// Pending updates, save nothing to the main item, the diff
-				// had been saved earlier by makeVersionDiff
+			if(empty($result['changes'])) {
+				// No changes, no edit
 				$result['saved'] = true;
+				return $result;
 			} else {
-				// Apply changes immediately
-				// NOTE: do not use $result['changes'], because we're saving all pending
-				// updates
+				// Generate verification step for the edit
+				$verif = new AppVerification;
+				$verif->app_id = $model->id;
+				$verif->verifier_id = request()->user()->id;
+				if($last_changes->is_rejected
+					|| $model->last_verification->status == 'resubmitted') {
+					$verif->status_id = 'resubmitted';
+				} elseif(!$model->has_committed) {
+					$verif->status_id = 'unverified';
+				} else {
+					$verif->status_id = 'revised';
+				}
+				$verif->base_changes_id = optional($model->version)->id;
+				$verif->concern = AppVerification::CONCERN_EDIT_ITEM;
+				$result['saved'] = $verif->save();
 
-				// Reset item before saving because we might be using a pending
-				// item right now, so that current relations deletion
-				// can be done accurately
-				$to_save = $model->find($model->getKey());
-				$compiled = static::getVersionsChanges($to_save, 'void', null, function($query) {
-					$query->floating();
-				});
-				$result['saved'] = static::verifyAndApplyChanges($to_save, $compiled['versions'], false);
+				if($result['saved'])
+					$verif->changelogs()->attach($result['model']);
+
+				if($verf_edit) {
+					// Pending updates, save nothing to the main item, the diff
+					// had been saved earlier by makeVersionDiff
+					$result['saved'] = true;
+				} else {
+					// Apply changes immediately
+					// NOTE: do not use $result['changes'], because we're saving all pending
+					// updates
+
+					// Reset item before saving because we might be using a pending
+					// item right now, so that current relations deletion
+					// can be done accurately
+					$to_save = $model->find($model->getKey());
+					$compiled = static::getVersionsChanges($to_save, 'void', null, function($query) {
+						$query->floating();
+					});
+					$result['saved'] = static::verifyAndApplyChanges($to_save, $compiled['versions'], false);
+				}
 			}
 		}
 
