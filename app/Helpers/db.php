@@ -117,14 +117,16 @@ function find_item_offset_from_list_query($query, $id) {
 		}
 
 		// Apply gradual filters
-		for($i = 0; $i < count($orders_to_apply); $i++) {
-			$offset_query->orWhere(function($query) use($orders_to_apply, $i) {
-				for($j = 0; $j <= $i; $j++) {
-					$orders_to_apply[$j]($query, $j == $i);
-				}
-			});
-		}
-		$offset_query->orWhere($item_keyname, $item_key);
+		$offset_query->where(function($offset_query) use($orders_to_apply, $item_keyname, $item_key) {
+			for($i = 0; $i < count($orders_to_apply); $i++) {
+				$offset_query->orWhere(function($query) use($orders_to_apply, $i) {
+					for($j = 0; $j <= $i; $j++) {
+						$orders_to_apply[$j]($query, $j == $i);
+					}
+				});
+			}
+			$offset_query->orWhere($item_keyname, $item_key);
+		});
 
 		$offset = $offset_query->count();
 	} else {
