@@ -115,6 +115,9 @@ class LoginController extends Controller
 		// Set locale
 		if(in_array($user->lang, LangMan::$languages)) {
 			session(['locale' => $user->lang]);
+		} else {
+			// Reset language to system default
+			session()->forget('locale');
 		}
 	}
 
