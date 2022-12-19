@@ -242,6 +242,7 @@ return [
 		'account_verified_sub'			=> 'Your account has been verified, and you can now use this website to its fullest. Enjoy :app!',
 
 		'your_email_is_not_verified'	=> 'Your email address is not verified.',
+		'failed_sending_verification_email'	=> 'Couldn\'t send verification email at the moment. Please contact administrators if this problem persists.',
 	],
 ],
 

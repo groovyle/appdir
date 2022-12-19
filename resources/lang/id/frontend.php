@@ -242,6 +242,7 @@ return [
 		'account_verified_sub'			=> 'Akun Anda telah diverifikasi, dan sekarang Anda bisa menggunakan website ini secara lengkap. Selamat datang di :app!',
 
 		'your_email_is_not_verified'	=> 'Alamat email Anda belum diverifikasi.',
+		'failed_sending_verification_email'	=> 'Pengiriman email verifikasi tidak dapat dilakukan saat ini. Silakan hubungi admin jika masalah ini berlanjut.',
 	],
 ],
 

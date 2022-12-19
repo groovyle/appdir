@@ -30,6 +30,8 @@ list($theme, $counter_theme) = theme_timely();
 						<div class="alert alert-success mb-0 mt-2" role="alert">
 							{{ __('frontend.auth.verification_link_has_been_sent_to_email') }}
 						</div>
+					@else
+						@include('components.page-message', ['show_errors' => true, 'classes' => 'mb-0 mt-2'])
 					@endif
 				</div>
 			</div>
