@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\Providers\RouteServiceProvider;
 use App\User;
 use App\Models\Prodi;
@@ -80,7 +81,15 @@ class RegisterController extends Controller
 		$this->validator($request->all())->validate();
 		User::$ignoreVerificationEmailErrors = true;
 
-		event(new Registered($user = $this->create($request->all())));
+		$user = $this->create($request->all());
+		if(is_response($user)) {
+			return $user;
+		} elseif(!$user) {
+			// Something wrong happened but dunno what
+			return abort(500);
+		}
+
+		event(new Registered($user));
 
 		$this->guard()->login($user);
 
@@ -96,13 +105,17 @@ class RegisterController extends Controller
 	 */
 	protected function validator(array $data)
 	{
+		$recaptcha_enabled = recaptcha_enabled();
 		return Validator::make($data, [
 			'name'		=> ['required', 'string', 'max:255'],
 			'email'		=> ['required', 'string', 'email', 'max:255', 'unique:users'],
 			'password'	=> ['required', 'string', 'between:5,50', 'confirmed'],
 			'prodi'		=> ['required', new ModelExists(Prodi::class)],
 			'language'	=> ['required', Rule::in(LangMan::$languages)],
-			'g-recaptcha-response'	=> ['required', new GoogleRecaptchaV2],
+			'g-recaptcha-response'	=> [
+				Rule::requiredIf($recaptcha_enabled),
+				new GoogleRecaptchaV2
+			],
 		], [], [
 			'name'		=> __('frontend.auth.fields.name'),
 			'email'		=> __('frontend.auth.fields.email'),
@@ -163,8 +176,7 @@ class RegisterController extends Controller
 				'type'		=> 'error'
 			]);
 
-			redirect()->back()->withInput()->withError($message);
-			return;
+			return redirect()->back()->withInput()->withError($message);
 		}
 	}
 

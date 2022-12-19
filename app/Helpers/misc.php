@@ -124,6 +124,18 @@ function no_cache_headers($response) {
 	return $response;
 }
 
+function is_response($obj) {
+	if($obj instanceof Illuminate\Http\Response
+		|| $obj instanceof Illuminate\Http\RedirectResponse
+		|| $obj instanceof Symfony\Component\HttpFoundation\Response
+		|| $obj instanceof Symfony\Component\HttpFoundation\RedirectResponse
+	) {
+		return true;
+	}
+
+	return false;
+}
+
 
 // NOTE: per the docs, a value of 0 means unlimited
 function ini_max_post_size() {
