@@ -126,6 +126,7 @@ class DashboardController extends Controller
 		$filters = ['_no_dates' => true];
 
 		$query_apps = StatMan::newApps($filters, true);
+		$query_apps->whereNull('a.deleted_at');
 		$total_apps = $query_apps->count();
 
 		$query_public = clone $query_apps;
@@ -137,11 +138,14 @@ class DashboardController extends Controller
 		$total_public_apps = $query_public->count();
 
 		$query_changes = StatMan::changesStatuses($filters, true, null, false);
+		$query_changes->whereNull('a.deleted_at');
 		$changes = optional($query_changes->first());
 		$total_changes_approved = $changes->total_approved ?? 0;
 		$total_changes_pending = $changes->total_pending ?? 0;
 
-		$reports = optional(StatMan::reports($filters)->first());
+		$query_reports = StatMan::reports($filters, true);
+		$query_reports->whereNull('a.deleted_at');
+		$reports = optional($query_reports->first());
 		$total_apps_reported = $reports->total_apps;
 
 		$app_activities_query = AppController::activityLogQuery()['query'];
