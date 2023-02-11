@@ -140,7 +140,7 @@ class DashboardController extends Controller
 		$query_changes = StatMan::changesStatuses($filters, true, null, false);
 		$query_changes->whereNull('a.deleted_at');
 		$changes = optional($query_changes->first());
-		$total_changes_approved = $changes->total_approved ?? 0;
+		$total_changes_approved = $changes->total_uncommitted ?? 0;
 		$total_changes_pending = $changes->total_pending ?? 0;
 
 		$query_reports = StatMan::reports($filters, true);

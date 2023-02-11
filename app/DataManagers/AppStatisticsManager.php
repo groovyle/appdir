@@ -279,6 +279,7 @@ class AppStatisticsManager {
 		}
 
 		$query->selectRaw('count(distinct if(ac.status in(?, ?), ac.id, null)) as `total_approved`', ['approved', 'committed']);
+		$query->selectRaw('count(distinct if(ac.status in(?), ac.id, null)) as `total_uncommitted`', ['approved']);
 		$query->selectRaw('count(distinct if(ac.status = ?, ac.id, null)) as `total_rejected`', ['rejected']);
 		$query->selectRaw('count(distinct if(ac.status = ?, ac.id, null)) as `total_pending`', ['pending']);
 
